@@ -14,14 +14,8 @@ import logging
 repository_root_dir = os.path.abspath(os.path.dirname(__file__) + "/../..")
 
 
-# clang-format locations
-clang_format_binaries = {
-    "Linux": "clang-format",
-    "Darwin": "tools/codeformat/bin/mac/clang-format.bin",
-    "Windows": "tools/codeformat/bin/win32/clang-format.exe"
-}
-clang_format_binary = clang_format_binaries[platform.system()]
-clang_format_binary = os.path.abspath(os.path.join(repository_root_dir, clang_format_binary))
+# TODO: implement for other OS
+clang_format_binary = 'clang-format'
 
 
 # Project sources
