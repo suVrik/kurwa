@@ -9,7 +9,7 @@ script:
   - cmake .. -DCMAKE_BUILD_TYPE=Release
   - cmake --build .
   - cd bin
-  - unittest
+  - ./unittest
 
 matrix:
   fast_finish: true

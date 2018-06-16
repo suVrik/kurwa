@@ -24,6 +24,6 @@ build:
   verbosity: normal
 
 after_build:
-  - cmd: cd bin
+  - cmd: cd bin/Release
   - cmd: dir
-  - cmd: unittest.exe
+  - cmd: ./unittest.exe
