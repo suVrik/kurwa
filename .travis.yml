@@ -20,12 +20,10 @@ matrix:
       addons:
         apt:
           packages:
-            - clang-6.0
-            - libllvm6.0
             - libstdc++6
-            - libclang-common-6.0-dev
-            - libclang1-6.0
+            - clang-6.0
           sources:
+            - sourceline: 'deb http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu trusty main'
             - sourceline: 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-6.0 main'
               key_url: 'http://apt.llvm.org/llvm-snapshot.gpg.key'
     - os: osx
