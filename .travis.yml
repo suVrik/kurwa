@@ -3,14 +3,12 @@ sudo: required
 
 language: c++
 
-before_script:
-    - export CC=clang-6.0
-    - export CXX=clang++-6.0
-
 script:
     - mkdir build
     - cd build
-    - cmake .. -DCMAKE_BUILD_TYPE=Release && cmake --build .
+    - cmake .. -DCMAKE_BUILD_TYPE=Release
+    - cmake --build .
+    - bin/unittest
 
 matrix:
   include:
@@ -24,5 +22,8 @@ matrix:
             - sourceline: 'deb http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu trusty main'
             - sourceline: 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-6.0 main'
               key_url: 'http://apt.llvm.org/llvm-snapshot.gpg.key'
+      before_script:
+          - export CC=clang-6.0
+          - export CXX=clang++-6.0
     - os: osx
       osx_image: xcode9.4
