@@ -1,0 +1,22 @@
+dist: trusty
+sudo: required
+
+language: cpp
+
+os: linux
+
+compiler: clang
+
+install:
+    - sudo apt-add-repository "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-6.0 main"
+    - sudo apt-get update -qq
+    - sudo apt-get install -qq clang++-6.0
+    - export CC=/usr/bin/clang-6.0
+    - export CXX=/usr/bin/clang++-6.0
+
+script:
+    - mkdir build
+    - cd build
+    - cmake .. -DCMAKE_BUILD_TYPE=Release
+    - cmake --build .
+    - ls -a
