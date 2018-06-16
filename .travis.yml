@@ -13,7 +13,6 @@ script:
 matrix:
   include:
     - os: linux
-      compiler: clang-6.0
       env:
         - CC=clang-6.0
         - CXX=clang++-6.0
@@ -27,6 +26,3 @@ matrix:
               key_url: 'http://apt.llvm.org/llvm-snapshot.gpg.key'
     - os: osx
       osx_image: xcode9.4
-      env:
-        - CC=clang
-        - CXX=clang++
