@@ -11,9 +11,15 @@
  *  See the License for the specific language governing permissions and limitations under the License.
  */
 
+#include <algorithm>
 #include <iostream>
 
-int main(int argc, char *argv[]) {
-    std::cout << "Hey, Universe!" << std::endl;
+int main(int argc, char* argv[]) {
+    // This is to test C++17
+    auto lambda = []() -> auto {
+        return std::make_pair(13, 37);
+    };
+    auto [a, b] = lambda();
+    std::cout << "unittest " << a << b << std::endl;
     return 0;
 }
