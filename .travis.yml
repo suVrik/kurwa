@@ -4,13 +4,14 @@ sudo: required
 language: c++
 
 script:
-    - mkdir build
-    - cd build
-    - cmake .. -DCMAKE_BUILD_TYPE=Release
-    - cmake --build .
-    - bin/unittest
+  - mkdir build
+  - cd build
+  - cmake .. -DCMAKE_BUILD_TYPE=Release
+  - cmake --build .
+  - bin/unittest
 
 matrix:
+  fast_finish: true
   include:
     - os: linux
       compiler: clang-6.0
