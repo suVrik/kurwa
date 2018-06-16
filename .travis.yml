@@ -3,6 +3,10 @@ sudo: required
 
 language: c++
 
+branches:
+  only:
+    - master
+
 script:
   - mkdir build
   - cd build
