@@ -23,3 +23,6 @@ build:
   project: build\all.sln
   parallel: true
   verbosity: normal
+
+after_build:
+  - cmd: dir
