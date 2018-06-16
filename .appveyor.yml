@@ -7,11 +7,15 @@ configuration: Release
 init:
   - git config --global core.autocrlf input
 
+branches:
+  only:
+  - master
+
 clone_folder: c:\work\kurwa
 shallow_clone: true
 
 matrix:
-  fast_finish: false
+  fast_finish: true
 
 before_build:
   - cmd: mkdir build
@@ -23,7 +27,6 @@ build:
   parallel: true
   verbosity: normal
 
-after_build:
+test_script:
   - cmd: cd bin/Release
-  - cmd: dir
   - cmd: unittest.exe
