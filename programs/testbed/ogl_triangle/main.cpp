@@ -135,6 +135,7 @@ void main_loop(
         statue_shader->use_program();
         glBindVertexArray(statue_pipeline_data->get_vertex_array_id());
         glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, nullptr);
+        glBindVertexArray(0);
 
         triangle_shader->use_program();
         float some_value = (float) sin(glfwGetTime()) / 2.0f + 0.5f;
@@ -150,6 +151,7 @@ void main_loop(
 
         glBindVertexArray(triangle_pipeline_data->get_vertex_array_id());
         glDrawArrays(GL_TRIANGLES, 0, 3);
+        glBindVertexArray(0);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
