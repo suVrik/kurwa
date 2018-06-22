@@ -22,7 +22,7 @@ int init_glfw_window(GLFWwindow** window) {
         glViewport(0, 0, width, height);
     });
 
-    auto version = gladLoadGL(glfwGetProcAddress);
+    int version = gladLoadGL(glfwGetProcAddress);
     if (version == 0) {
         std::cout << "Failed to initialize OpenGL context" << std::endl;
         return -1;
