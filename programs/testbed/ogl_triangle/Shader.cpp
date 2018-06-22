@@ -1,72 +1,52 @@
+#include <fstream>
+#include <gl.h>
+#include <iostream>
 #include "Shader.h"
+#include <sstream>
+#include <vector>
 
-Shader::Shader(const char *vertex_path, const char *fragment_path) {
-    std::string vertex_code;
-    std::string fragment_code;
-    std::ifstream vertex_shader_file;
-    std::ifstream fragment_shader_file;
+Shader::Shader(const std::string &shader_path, unsigned int shader_type) {
+    const std::string shader_code = load_shader_file(shader_path);
+    const auto *shader_code_char = shader_code.c_str();
+    init_shader(shader_code_char, shader_type);
+}
 
-    vertex_shader_file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    fragment_shader_file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+void Shader::init_shader(const GLchar *shader_code, const GLenum shader_type) {
+    shader_id = glCreateShader(shader_type);
+    glShaderSource(shader_id, 1, &shader_code, nullptr);
+    glCompileShader(shader_id);
+    check_shader_compilation_status(shader_id);
+}
 
+const std::string Shader::load_shader_file(const std::string &shader_path) const {
+    std::stringstream shader_stream;
     try {
-        vertex_shader_file.open(vertex_path);
-        fragment_shader_file.open(fragment_path);
-        std::stringstream vertex_shader_stream, fragment_shader_stream;
+        std::ifstream shader_file;
+        shader_file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 
-        vertex_shader_stream << vertex_shader_file.rdbuf();
-        fragment_shader_stream << fragment_shader_file.rdbuf();
+        shader_file.open(shader_path);
 
-        vertex_shader_file.close();
-        fragment_shader_file.close();
+        shader_stream << shader_file.rdbuf();
 
-        vertex_code = vertex_shader_stream.str();
-        fragment_code = fragment_shader_stream.str();
+        shader_file.close();
     } catch (std::ifstream::failure &e) {
-        std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ, " << e.what() << std::endl;
+        std::cout << "ERROR: Could not read shader file in path: " << shader_path << std::endl << e.what() << std::endl;
     }
-
-    const auto *vertex_shader_code = vertex_code.c_str();
-    const auto *fragment_shader_code = fragment_code.c_str();
-
-    unsigned int vertex_id, fragment_id;
-
-    vertex_id = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex_id, 1, &vertex_shader_code, nullptr);
-    glCompileShader(vertex_id);
-    check_errors(vertex_id, "VERTEX");
-
-    fragment_id = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment_id, 1, &fragment_shader_code, nullptr);
-    glCompileShader(fragment_id);
-    check_errors(fragment_id, "FRAGMENT");
-
-    program_id = glCreateProgram();
-    glAttachShader(program_id, vertex_id);
-    glAttachShader(program_id, fragment_id);
-    glLinkProgram(program_id);
-    check_errors(program_id, "SHADER");
-
-    glDeleteShader(vertex_id);
-    glDeleteShader(fragment_id);
+    return shader_stream.str();
 }
 
-void Shader::use_program() const {
-    glUseProgram(program_id);
+unsigned int Shader::get_shader_id() const {
+    return shader_id;
 }
 
-unsigned int Shader::get_program_id() const {
-    return program_id;
-}
-
-void Shader::check_errors(unsigned int id, const std::string &object_type) const {
-    int success;
-    glGetProgramiv(id, GL_LINK_STATUS, &success);
+void Shader::check_shader_compilation_status(unsigned int shader_id) const {
+    GLint success;
+    glGetShaderiv(shader_id, GL_COMPILE_STATUS, &success);
     if (success == 0) {
-        char info_log[512];
-        glGetProgramInfoLog(id, 512, nullptr, info_log);
-        std::cout << "ERROR::SHADER::" << object_type << "::LINKING_FAILED\n" << info_log << std::endl;
+        GLuint log_length;
+        glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, (GLint *) &log_length);
+        std::vector<char> log(log_length);
+        glGetShaderInfoLog(shader_id, log_length, nullptr, log.data());
+        std::cout << "ERROR: shader compilation failed!" << std::endl << log.data() << std::endl;
     }
 }
-
-

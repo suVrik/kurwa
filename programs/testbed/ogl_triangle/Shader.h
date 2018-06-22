@@ -1,20 +1,14 @@
-#ifndef OPENGL1_SHADER_H
-#define OPENGL1_SHADER_H
+#pragma once
 
-#include <fstream>
-#include <gl.h>
-#include <iostream>
-#include <sstream>
+#include <string>
 
 class Shader {
     public:
-        Shader(const GLchar* vertex_path, const GLchar* fragment_path);
-        ~Shader() = default;
-        void use_program() const;
-        unsigned int get_program_id() const;
+        Shader(const std::string &shader_path, unsigned int shader_type);
+        unsigned int get_shader_id() const;
     private:
-        void check_errors(unsigned int id, const std::string &object_type) const;
-        unsigned int program_id;
+        void init_shader(const char *shader_code, unsigned int shader_type);
+        const std::string load_shader_file(const std::string &shader_path) const;
+        void check_shader_compilation_status(unsigned int shader_id) const;
+        unsigned int shader_id;
 };
-
-#endif //OPENGL1_SHADER_H
