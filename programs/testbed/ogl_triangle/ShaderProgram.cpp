@@ -1,14 +1,17 @@
 #include <gl.h>
 #include <iostream>
 #include <vector>
-#include <bits/ios_base.h>
 #include <fstream>
 #include <sstream>
 #include "ShaderProgram.h"
-#include "Shader.h"
 
 ShaderProgram::ShaderProgram(const Shader& vertex_shader, const Shader& fragment_shader) {
     init_shader_program(vertex_shader, fragment_shader);
+}
+
+ShaderProgram::ShaderProgram(ShaderProgram&& that) noexcept {
+    m_program_id = that.m_program_id;
+    that.m_program_id = 0;
 }
 
 ShaderProgram::~ShaderProgram() {
@@ -27,7 +30,7 @@ void ShaderProgram::use_program() const {
     glUseProgram(m_program_id);
 }
 
-int ShaderProgram::get_uniform_id(const std::string &name) const {
+int ShaderProgram::get_uniform_id(const std::string& name) const {
     return glGetUniformLocation(m_program_id, name.c_str());
 }
 

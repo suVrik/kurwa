@@ -7,9 +7,7 @@
 #include "PipelineData.h"
 #include "Shader.h"
 #include "ShaderProgram.h"
-#include "stb_image/stb_image.h"
 #include "Texture.h"
-#include <vector>
 
 int init_glfw_window(GLFWwindow** window) {
     glfwInit();
@@ -38,14 +36,14 @@ int init_glfw_window(GLFWwindow** window) {
 
 PipelineData init_statue_pipeline_data() {
     std::vector<GLfloat> object_vertices = {
-            0.5f,  0.1f, 0.0f,   // top right
-            0.5f, -0.4f, 0.0f,   // bottom right
-            -0.5f, -0.4f, 0.0f,  // bottom left
-            -0.5f,  0.1f, 0.0f,  // top left
-            0.2f,  0.8f, 0.0f,   // top right
-            0.2f, -0.8f, 0.0f,   // bottom right
-            -0.2f, -0.8f, 0.0f,  // bottom left
-            -0.2f,  0.8f, 0.0f   // top left
+            0.5f, 0.1f, 0.0f,   // top right
+            0.5f, -0.4f, 0.0f,  // bottom right
+            -0.5f, -0.4f, 0.0f, // bottom left
+            -0.5f, 0.1f, 0.0f,  // top left
+            0.2f, 0.8f, 0.0f,   // top right
+            0.2f, -0.8f, 0.0f,  // bottom right
+            -0.2f, -0.8f, 0.0f, // bottom left
+            -0.2f, 0.8f, 0.0f   // top left
     };
 
     std::vector<GLuint> object_indices = {
@@ -73,10 +71,10 @@ PipelineData init_statue_pipeline_data() {
 
 PipelineData init_triangle_pipeline_data() {
     std::vector<GLfloat> triangle_data = {
-            //vertecis          //colors            //texture coords
-            0.0f, -0.9f, 0.0f,  1.0f, 0.0f,  0.0f,  0.0f, 0.0f,
-            0.9f, -0.9f, 0.0f,  0.0f, 1.0f,  0.0f,  1.0f, 0.0f,
-            0.45f, 0.1f, 0.0f,  0.0f, 0.0f,  1.0f,  0.5f, 1.0f
+            //vertecis         //colors          //texture coords
+            0.0f, -0.9f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+            0.9f, -0.9f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+            0.45f, 0.1f, 0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f
     };
 
     auto triangle_pipeline_data = PipelineData();
@@ -86,8 +84,8 @@ PipelineData init_triangle_pipeline_data() {
     glBindBuffer(GL_ARRAY_BUFFER, triangle_pipeline_data.get_vertex_buffer_id());
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), nullptr);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), reinterpret_cast<void *>(3 * sizeof(GLfloat)));
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), reinterpret_cast<void *>(6 * sizeof(GLfloat)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), reinterpret_cast<void*>(3 * sizeof(GLfloat)));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), reinterpret_cast<void*>(6 * sizeof(GLfloat)));
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
@@ -98,7 +96,7 @@ PipelineData init_triangle_pipeline_data() {
     return triangle_pipeline_data;
 }
 
-void handle_glfw_input(GLFWwindow *window, bool &is_polygon_mode_line) {
+void handle_glfw_input(GLFWwindow* window, bool& is_polygon_mode_line) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
@@ -115,8 +113,8 @@ void handle_glfw_input(GLFWwindow *window, bool &is_polygon_mode_line) {
 }
 
 void main_loop(
-        GLFWwindow *window, ShaderProgram &statue_shader, ShaderProgram &triangle_shader,
-        PipelineData &statue_pipeline_data, PipelineData &triangle_pipeline_data, Texture &triangle_texture
+        GLFWwindow* window, ShaderProgram& statue_shader, ShaderProgram& triangle_shader,
+        PipelineData& statue_pipeline_data, PipelineData& triangle_pipeline_data, Texture& triangle_texture
 ) {
     GLfloat scale_matrix[4][4] = {
             1.0f, 0.0f, 0.0f, 0.0f,
@@ -182,7 +180,8 @@ int main() {
 
     Texture triangle_texture("resources/wall_texture.jpg", triangle_pipeline_data.get_vertex_array_id());
 
-    main_loop(window, statue_shader_program, triangle_shader_program, statue_pipeline_data, triangle_pipeline_data, triangle_texture);
+    main_loop(window, statue_shader_program, triangle_shader_program,
+              statue_pipeline_data, triangle_pipeline_data, triangle_texture);
 
     glfwTerminate();
     return 0;

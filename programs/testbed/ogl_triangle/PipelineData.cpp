@@ -24,7 +24,8 @@ void PipelineData::initVertexArray() {
     glGenVertexArrays(1, &m_vertex_array_id);
 }
 
-void PipelineData::initVertexBuffer(std::vector<GLfloat> data) {
+void PipelineData::initVertexBuffer(std::vector<GLfloat>& data) {
+    assert(m_vertex_array_id != 0 && "Vertex array must be initialized first!");
     assert(m_vertex_buffer_id == 0 && "Vertex buffer must be initialized only once!");
     glGenBuffers(1, &m_vertex_buffer_id);
 
@@ -37,7 +38,8 @@ void PipelineData::initVertexBuffer(std::vector<GLfloat> data) {
     glBindVertexArray(0);
 }
 
-void PipelineData::initElementArray(std::vector<GLuint> data) {
+void PipelineData::initElementArray(std::vector<GLuint>& data) {
+    assert(m_vertex_array_id != 0 && "Vertex array must be initialized first!");
     assert(m_element_buffer_id == 0 && "Element array must be initialized only once!");
     glGenBuffers(1, &m_element_buffer_id);
 
@@ -49,9 +51,10 @@ void PipelineData::initElementArray(std::vector<GLuint> data) {
     glBindVertexArray(0);
 }
 
-const unsigned int PipelineData::get_vertex_array_id() const {
+unsigned int PipelineData::get_vertex_array_id() const {
     return m_vertex_array_id;
 }
-const unsigned int PipelineData::get_vertex_buffer_id() const {
+
+unsigned int PipelineData::get_vertex_buffer_id() const {
     return m_vertex_buffer_id;
 }

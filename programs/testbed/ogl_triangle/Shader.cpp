@@ -5,24 +5,29 @@
 #include <sstream>
 #include <vector>
 
-Shader::Shader(const std::string &shader_path, unsigned int shader_type) {
+Shader::Shader(const std::string& shader_path, unsigned int shader_type) {
     const std::string shader_code = load_shader_file(shader_path);
-    const auto *shader_code_char = shader_code.c_str();
+    const auto* shader_code_char = shader_code.c_str();
     init_shader(shader_code_char, shader_type);
+}
+
+Shader::Shader(Shader&& that) noexcept {
+    m_shader_id = that.m_shader_id;
+    that.m_shader_id = 0;
 }
 
 Shader::~Shader() {
     glDeleteShader(m_shader_id);
 }
 
-void Shader::init_shader(const GLchar *shader_code, const GLenum shader_type) {
+void Shader::init_shader(const GLchar* shader_code, const GLenum shader_type) {
     m_shader_id = glCreateShader(shader_type);
     glShaderSource(m_shader_id, 1, &shader_code, nullptr);
     glCompileShader(m_shader_id);
     check_shader_compilation_status(m_shader_id);
 }
 
-std::string Shader::load_shader_file(const std::string &shader_path) const {
+std::string Shader::load_shader_file(const std::string& shader_path) const {
     std::stringstream shader_stream;
     try {
         std::ifstream shader_file;
@@ -33,7 +38,7 @@ std::string Shader::load_shader_file(const std::string &shader_path) const {
         shader_stream << shader_file.rdbuf();
 
         shader_file.close();
-    } catch (std::ifstream::failure &e) {
+    } catch (std::ifstream::failure& e) {
         std::cout << "ERROR: Could not read shader file in path: " << shader_path << std::endl << e.what() << std::endl;
     }
     return shader_stream.str();
