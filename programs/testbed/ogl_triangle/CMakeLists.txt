@@ -16,7 +16,7 @@ find_package(glfw3 REQUIRED)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/glad)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/glad)
 
-# include glad
+# include stb_image
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/stb_image)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/stb_image)
 

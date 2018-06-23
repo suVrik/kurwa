@@ -11,14 +11,18 @@ Shader::Shader(const std::string &shader_path, unsigned int shader_type) {
     init_shader(shader_code_char, shader_type);
 }
 
-void Shader::init_shader(const GLchar *shader_code, const GLenum shader_type) {
-    shader_id = glCreateShader(shader_type);
-    glShaderSource(shader_id, 1, &shader_code, nullptr);
-    glCompileShader(shader_id);
-    check_shader_compilation_status(shader_id);
+Shader::~Shader() {
+    glDeleteShader(m_shader_id);
 }
 
-const std::string Shader::load_shader_file(const std::string &shader_path) const {
+void Shader::init_shader(const GLchar *shader_code, const GLenum shader_type) {
+    m_shader_id = glCreateShader(shader_type);
+    glShaderSource(m_shader_id, 1, &shader_code, nullptr);
+    glCompileShader(m_shader_id);
+    check_shader_compilation_status(m_shader_id);
+}
+
+std::string Shader::load_shader_file(const std::string &shader_path) const {
     std::stringstream shader_stream;
     try {
         std::ifstream shader_file;
@@ -36,16 +40,16 @@ const std::string Shader::load_shader_file(const std::string &shader_path) const
 }
 
 unsigned int Shader::get_shader_id() const {
-    return shader_id;
+    return m_shader_id;
 }
 
 void Shader::check_shader_compilation_status(unsigned int shader_id) const {
     GLint success;
     glGetShaderiv(shader_id, GL_COMPILE_STATUS, &success);
     if (success == 0) {
-        GLuint log_length;
-        glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, (GLint *) &log_length);
-        std::vector<char> log(log_length);
+        GLint log_length;
+        glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &log_length);
+        std::vector<char> log(static_cast<unsigned>(log_length));
         glGetShaderInfoLog(shader_id, log_length, nullptr, log.data());
         std::cout << "ERROR: shader compilation failed!" << std::endl << log.data() << std::endl;
     }

@@ -7,41 +7,38 @@
 #include "ShaderProgram.h"
 #include "Shader.h"
 
-ShaderProgram::ShaderProgram(unsigned int vertex_shader_id, unsigned int fragment_shader_id) {
-    init_shader_program(vertex_shader_id, fragment_shader_id);
+ShaderProgram::ShaderProgram(const Shader& vertex_shader, const Shader& fragment_shader) {
+    init_shader_program(vertex_shader, fragment_shader);
 }
 
 ShaderProgram::~ShaderProgram() {
-    glDeleteProgram(program_id);
+    glDeleteProgram(m_program_id);
 }
 
-void ShaderProgram::init_shader_program(unsigned int vertex_shader_id, unsigned int fragment_shader_id) {
-    program_id = glCreateProgram();
-    glAttachShader(program_id, vertex_shader_id);
-    glAttachShader(program_id, fragment_shader_id);
-    glLinkProgram(program_id);
+void ShaderProgram::init_shader_program(const Shader& vertex_shader, const Shader& fragment_shader) {
+    m_program_id = glCreateProgram();
+    glAttachShader(m_program_id, vertex_shader.get_shader_id());
+    glAttachShader(m_program_id, fragment_shader.get_shader_id());
+    glLinkProgram(m_program_id);
     check_shader_link_status();
-
-    glDeleteShader(vertex_shader_id);
-    glDeleteShader(fragment_shader_id);
 }
 
 void ShaderProgram::use_program() const {
-    glUseProgram(program_id);
+    glUseProgram(m_program_id);
 }
 
 int ShaderProgram::get_uniform_id(const std::string &name) const {
-    return glGetUniformLocation(program_id, name.data());
+    return glGetUniformLocation(m_program_id, name.c_str());
 }
 
 void ShaderProgram::check_shader_link_status() const {
     GLint success;
-    glGetProgramiv(program_id, GL_LINK_STATUS, &success);
+    glGetProgramiv(m_program_id, GL_LINK_STATUS, &success);
     if (success == 0) {
-        GLuint log_length;
-        glGetProgramiv(program_id, GL_INFO_LOG_LENGTH, (GLint *) &log_length);
-        std::vector<char> log(log_length);
-        glGetProgramInfoLog(program_id, log_length, nullptr, log.data());
+        GLint log_length;
+        glGetProgramiv(m_program_id, GL_INFO_LOG_LENGTH, &log_length);
+        std::vector<char> log(static_cast<unsigned>(log_length));
+        glGetProgramInfoLog(m_program_id, log_length, nullptr, log.data());
         throw std::runtime_error("ERROR: Shader linking failed!\n" + std::string(log.data()) + "\n");
     }
 }

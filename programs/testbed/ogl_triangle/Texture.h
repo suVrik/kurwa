@@ -4,10 +4,10 @@
 
 class Texture {
     public:
-        explicit Texture();
+        Texture(const std::string &texture_path, GLuint vertex_array_id);
         ~Texture();
-        void set_texture(const std::string &texture_path) const;
+        void bind_texture() const;
+        void unbind_texture() const;
     private:
-        unsigned int texture_id;
-
+        unsigned int m_texture_id;
 };

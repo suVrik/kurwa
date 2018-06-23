@@ -2,13 +2,14 @@
 #include <cmath>
 #include <gl.h>
 #include <GLFW/glfw3.h>
+#include <iostream>
+#include <memory>
+#include "PipelineData.h"
 #include "Shader.h"
+#include "ShaderProgram.h"
 #include "stb_image/stb_image.h"
 #include "Texture.h"
-#include "PipelineData.h"
-#include "ShaderProgram.h"
 #include <vector>
-#include <iostream>
 
 int init_glfw_window(GLFWwindow** window) {
     glfwInit();
@@ -35,7 +36,7 @@ int init_glfw_window(GLFWwindow** window) {
     return 0;
 }
 
-PipelineData *init_statue_pipeline_data() {
+PipelineData init_statue_pipeline_data() {
     std::vector<GLfloat> object_vertices = {
             0.5f,  0.1f, 0.0f,   // top right
             0.5f, -0.4f, 0.0f,   // bottom right
@@ -54,12 +55,12 @@ PipelineData *init_statue_pipeline_data() {
             5, 6, 7
     };
 
-    auto *statue_pipeline_data = new PipelineData();
-    statue_pipeline_data->initVertexArray();
-    statue_pipeline_data->initVertexBuffer(object_vertices);
-    statue_pipeline_data->initElementArray(object_indices);
-    glBindVertexArray(statue_pipeline_data->get_vertex_array_id());
-    glBindBuffer(GL_ARRAY_BUFFER, statue_pipeline_data->get_vertex_buffer_id());
+    PipelineData statue_pipeline_data;
+    statue_pipeline_data.initVertexArray();
+    statue_pipeline_data.initVertexBuffer(object_vertices);
+    statue_pipeline_data.initElementArray(object_indices);
+    glBindVertexArray(statue_pipeline_data.get_vertex_array_id());
+    glBindBuffer(GL_ARRAY_BUFFER, statue_pipeline_data.get_vertex_buffer_id());
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), nullptr);
     glEnableVertexAttribArray(0);
@@ -70,7 +71,7 @@ PipelineData *init_statue_pipeline_data() {
     return statue_pipeline_data;
 }
 
-PipelineData *init_triangle_pipeline_data() {
+PipelineData init_triangle_pipeline_data() {
     std::vector<GLfloat> triangle_data = {
             //vertecis          //colors            //texture coords
             0.0f, -0.9f, 0.0f,  1.0f, 0.0f,  0.0f,  0.0f, 0.0f,
@@ -78,11 +79,11 @@ PipelineData *init_triangle_pipeline_data() {
             0.45f, 0.1f, 0.0f,  0.0f, 0.0f,  1.0f,  0.5f, 1.0f
     };
 
-    auto *triangle_pipeline_data = new PipelineData();
-    triangle_pipeline_data->initVertexArray();
-    triangle_pipeline_data->initVertexBuffer(triangle_data);
-    glBindVertexArray(triangle_pipeline_data->get_vertex_array_id());
-    glBindBuffer(GL_ARRAY_BUFFER, triangle_pipeline_data->get_vertex_buffer_id());
+    auto triangle_pipeline_data = PipelineData();
+    triangle_pipeline_data.initVertexArray();
+    triangle_pipeline_data.initVertexBuffer(triangle_data);
+    glBindVertexArray(triangle_pipeline_data.get_vertex_array_id());
+    glBindBuffer(GL_ARRAY_BUFFER, triangle_pipeline_data.get_vertex_buffer_id());
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), nullptr);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), reinterpret_cast<void *>(3 * sizeof(GLfloat)));
@@ -114,8 +115,8 @@ void handle_glfw_input(GLFWwindow *window, bool &is_polygon_mode_line) {
 }
 
 void main_loop(
-        GLFWwindow *window, ShaderProgram *statue_shader, ShaderProgram *triangle_shader,
-        PipelineData *statue_pipeline_data, PipelineData *triangle_pipeline_data
+        GLFWwindow *window, ShaderProgram &statue_shader, ShaderProgram &triangle_shader,
+        PipelineData &statue_pipeline_data, PipelineData &triangle_pipeline_data, Texture &triangle_texture
 ) {
     GLfloat scale_matrix[4][4] = {
             1.0f, 0.0f, 0.0f, 0.0f,
@@ -132,25 +133,27 @@ void main_loop(
         glClearColor(0.1f, 0.4f, 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        statue_shader->use_program();
-        glBindVertexArray(statue_pipeline_data->get_vertex_array_id());
+        statue_shader.use_program();
+        glBindVertexArray(statue_pipeline_data.get_vertex_array_id());
         glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, nullptr);
         glBindVertexArray(0);
 
-        triangle_shader->use_program();
+        triangle_shader.use_program();
         float some_value = (float) sin(glfwGetTime()) / 2.0f + 0.5f;
-        int uniform_color_id = triangle_shader->get_uniform_id("uni_color");
+        int uniform_color_id = triangle_shader.get_uniform_id("uni_color");
         glUniform4f(uniform_color_id, 0.0f, some_value, 0.0f, 1.0f);
 
         scale_matrix[0][0] = sinf(some_value);
         scale_matrix[1][1] = sinf(some_value);
         scale_matrix[2][2] = sinf(some_value);
 
-        int uniform_scale_id = triangle_shader->get_uniform_id("scale");
+        int uniform_scale_id = triangle_shader.get_uniform_id("scale");
         glUniformMatrix4fv(uniform_scale_id, 1, GL_TRUE, &scale_matrix[0][0]);
 
-        glBindVertexArray(triangle_pipeline_data->get_vertex_array_id());
+        glBindVertexArray(triangle_pipeline_data.get_vertex_array_id());
+        triangle_texture.bind_texture();
         glDrawArrays(GL_TRIANGLES, 0, 3);
+        triangle_texture.unbind_texture();
         glBindVertexArray(0);
 
         glfwSwapBuffers(window);
@@ -166,33 +169,20 @@ int main() {
         return ret;
     }
 
-    PipelineData *statue_pipeline_data = init_statue_pipeline_data();
-    PipelineData *triangle_pipeline_data = init_triangle_pipeline_data();
+    PipelineData statue_pipeline_data = init_statue_pipeline_data();
+    PipelineData triangle_pipeline_data = init_triangle_pipeline_data();
 
-    auto *statue_vertex_shader = new Shader("resources/shaders/statue.vert", GL_VERTEX_SHADER);
-    auto *statue_fragment_shader = new Shader("resources/shaders/statue.frag", GL_FRAGMENT_SHADER);
-    auto *statue_shader_program =
-            new ShaderProgram(statue_vertex_shader->get_shader_id(), statue_fragment_shader->get_shader_id());
-    delete statue_vertex_shader;
-    delete statue_fragment_shader;
+    Shader statue_vertex_shader("resources/shaders/statue.vert", GL_VERTEX_SHADER);
+    Shader statue_fragment_shader("resources/shaders/statue.frag", GL_FRAGMENT_SHADER);
+    ShaderProgram statue_shader_program(statue_vertex_shader, statue_fragment_shader);
 
-    auto *triangle_vertex_shader = new Shader("resources/shaders/triangle.vert", GL_VERTEX_SHADER);
-    auto *triangle_fragment_shader = new Shader("resources/shaders/triangle.frag", GL_FRAGMENT_SHADER);
-    auto *triangle_shader_program =
-            new ShaderProgram(triangle_vertex_shader->get_shader_id(), triangle_fragment_shader->get_shader_id());
-    delete triangle_vertex_shader;
-    delete triangle_fragment_shader;
+    Shader triangle_vertex_shader("resources/shaders/triangle.vert", GL_VERTEX_SHADER);
+    Shader triangle_fragment_shader("resources/shaders/triangle.frag", GL_FRAGMENT_SHADER);
+    ShaderProgram triangle_shader_program(triangle_vertex_shader, triangle_fragment_shader);
 
-    auto *triangle_texture = new Texture();
-    triangle_texture->set_texture("resources/wall_texture.jpg");
+    Texture triangle_texture("resources/wall_texture.jpg", triangle_pipeline_data.get_vertex_array_id());
 
-    main_loop(window, statue_shader_program, triangle_shader_program, statue_pipeline_data, triangle_pipeline_data);
-
-    delete triangle_texture;
-    delete statue_shader_program;
-    delete triangle_shader_program;
-    delete statue_pipeline_data;
-    delete triangle_pipeline_data;
+    main_loop(window, statue_shader_program, triangle_shader_program, statue_pipeline_data, triangle_pipeline_data, triangle_texture);
 
     glfwTerminate();
     return 0;
