@@ -11,28 +11,19 @@
 
 cmake_minimum_required(VERSION 3.11)
 
-project(all)
+project(framework)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+
+file(GLOB_RECURSE FRAMEWORK_SOURCE "*.h" "*.cpp")
+add_library(framework STATIC ${FRAMEWORK_SOURCE})
+
+# For programs that include the framework
+target_include_directories(framework INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/include")
+
+# For some reason cmake cannot determine link language for framework without this
+set_target_properties(framework PROPERTIES LINKER_LANGUAGE CXX)
 
 # Libraries
-add_subdirectory(library/eastl)
-add_subdirectory(library/enet)
-add_subdirectory(library/fmt)
-add_subdirectory(library/glew)
-add_subdirectory(library/gmock)
-add_subdirectory(library/imgui)
-add_subdirectory(library/lz4)
-add_subdirectory(library/ogg)
-add_subdirectory(library/openal)
-add_subdirectory(library/png)
-add_subdirectory(library/sdl2)
-add_subdirectory(library/theora)
-add_subdirectory(library/tinyxml2)
-add_subdirectory(library/vorbis)
-add_subdirectory(library/zlib)
-
-# Framework
-add_subdirectory(framework)
-
-# Programs
-add_subdirectory(program/testbed)
-add_subdirectory(program/unittest)
+target_link_libraries(framework PUBLIC eastl)
