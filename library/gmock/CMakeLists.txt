@@ -14,8 +14,8 @@ cmake_minimum_required(VERSION 3.11)
 project(gmock)
 
 add_library(gmock INTERFACE IMPORTED GLOBAL)
-target_include_directories(gmock INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_SYSTEM_NAME}/include")
+target_include_directories(gmock INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_link_libraries(gmock INTERFACE
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Linux>:pthread;${CMAKE_CURRENT_SOURCE_DIR}/Linux/library/libgmock.a>"
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Darwin>:${CMAKE_CURRENT_SOURCE_DIR}/Darwin/library/libgmock.a>"
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Windows>:${CMAKE_CURRENT_SOURCE_DIR}/Windows/library/gmock.lib>")
+        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Linux>:pthread;${CMAKE_CURRENT_SOURCE_DIR}/library/Linux/libgmock.a>"
+        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Darwin>:${CMAKE_CURRENT_SOURCE_DIR}/library/Darwin/libgmock.a>"
+        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Windows>:${CMAKE_CURRENT_SOURCE_DIR}/library/Windows/gmock.lib>")
