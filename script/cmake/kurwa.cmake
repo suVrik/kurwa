@@ -127,14 +127,23 @@ endfunction()
 #     'Linux' and 'Windows' subdirectories with 'include' directory inside).
 function(target_include_directory target_name)
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/include")
-        target_include_directories("${target_name}" INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/include")
+        set(include_directory "${CMAKE_CURRENT_SOURCE_DIR}/include")
     else()
-        set(platform_folder "${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_SYSTEM_NAME}")
-        if (NOT EXISTS "${platform_folder}/include")
+        set(include_directory "${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_SYSTEM_NAME}/include")
+        if (NOT EXISTS "${include_directory}")
             message(FATAL_ERROR "Invalid project structure for target '${target_name}'!")
         endif()
-        target_include_directories("${target_name}" INTERFACE "${platform_folder}/include")
     endif()
+
+    # Get deploy files for this target. If none, set as an empty list
+    get_target_property(include_directories "${target_name}" "INTERFACE_INCLUDE_DIRECTORIES")
+    if (NOT include_directories)
+        set(include_directories "")
+    endif()
+
+    # Add the include directory to this target
+    list(APPEND include_directories "${include_directory}")
+    set_target_properties("${target_name}" PROPERTIES "INTERFACE_INCLUDE_DIRECTORIES" "${include_directories}")
 endfunction()
 
 # Usage: target_add_deploy_files(<target_name> [DARWIN|LINUX|WINDOWS] <file_name> [<file_name> ...])
