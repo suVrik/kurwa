@@ -13,9 +13,14 @@ cmake_minimum_required(VERSION 3.11)
 
 project(openal)
 
-add_library(openal INTERFACE IMPORTED GLOBAL)
-target_include_directories(openal INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_SYSTEM_NAME}/include")
-target_link_libraries(openal INTERFACE
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Linux>:${CMAKE_CURRENT_SOURCE_DIR}/Linux/library/libopenal.so.1.18.2>"
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Darwin>:${CMAKE_CURRENT_SOURCE_DIR}/Darwin/library/libopenal.so>"
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Windows>:${CMAKE_CURRENT_SOURCE_DIR}/Windows/library/openal.lib>")
+add_library(openal SHARED IMPORTED GLOBAL)
+
+target_include_directory(openal)
+
+target_link_library(openal DARWIN "libopenal.1.18.2.dylib")
+target_link_library(openal LINUX "libopenal.so.1.18.2")
+target_link_library(openal WINDOWS "OpenAL32.lib" DLL "OpenAL32.dll")
+
+target_add_deploy_files(openal DARWIN "Darwin/library/libopenal.1.18.2.dylib")
+target_add_deploy_files(openal LINUX "Linux/library/libopenal.so.1.18.2")
+target_add_deploy_files(openal WINDOWS "Windows/library/OpenAL32.dll")

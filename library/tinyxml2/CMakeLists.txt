@@ -14,8 +14,5 @@ cmake_minimum_required(VERSION 3.11)
 project(tinyxml2)
 
 add_library(tinyxml2 INTERFACE IMPORTED GLOBAL)
-target_include_directories(tinyxml2 INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_SYSTEM_NAME}/include")
-target_link_libraries(tinyxml2 INTERFACE
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Linux>:${CMAKE_CURRENT_SOURCE_DIR}/Linux/library/libtinyxml2.a>"
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Darwin>:${CMAKE_CURRENT_SOURCE_DIR}/Darwin/library/libtinyxml2.a>"
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Windows>:${CMAKE_CURRENT_SOURCE_DIR}/Windows/library/tinyxml2.lib>")
+target_include_directory(tinyxml2)
+target_link_library(tinyxml2 "libtinyxml2.*")

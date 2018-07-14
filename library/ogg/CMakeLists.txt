@@ -14,8 +14,5 @@ cmake_minimum_required(VERSION 3.11)
 project(ogg)
 
 add_library(ogg INTERFACE IMPORTED GLOBAL)
-target_include_directories(ogg INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_SYSTEM_NAME}/include")
-target_link_libraries(ogg INTERFACE
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Linux>:${CMAKE_CURRENT_SOURCE_DIR}/Linux/library/libogg.a>"
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Darwin>:${CMAKE_CURRENT_SOURCE_DIR}/Darwin/library/libogg.a>"
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Windows>:${CMAKE_CURRENT_SOURCE_DIR}/Windows/library/ogg.lib>")
+target_include_directory(ogg)
+target_link_library(ogg "libogg.*")

@@ -14,8 +14,5 @@ cmake_minimum_required(VERSION 3.11)
 project(zlib)
 
 add_library(zlib INTERFACE IMPORTED GLOBAL)
-target_include_directories(zlib INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_SYSTEM_NAME}/include")
-target_link_libraries(zlib INTERFACE
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Linux>:${CMAKE_CURRENT_SOURCE_DIR}/Linux/library/libz.a>"
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Darwin>:${CMAKE_CURRENT_SOURCE_DIR}/Darwin/library/libz.a>"
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Windows>:${CMAKE_CURRENT_SOURCE_DIR}/Windows/library/zlib.lib>")
+target_include_directory(zlib)
+target_link_library(zlib "libz.*")

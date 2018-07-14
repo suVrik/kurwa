@@ -13,9 +13,15 @@ cmake_minimum_required(VERSION 3.11)
 
 project(sdl2)
 
-add_library(sdl2 INTERFACE IMPORTED GLOBAL)
-target_include_directories(sdl2 INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_SYSTEM_NAME}/include")
-target_link_libraries(sdl2 INTERFACE
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Linux>:${CMAKE_CURRENT_SOURCE_DIR}/Linux/library/libSDL2main.a;${CMAKE_CURRENT_SOURCE_DIR}/Linux/library/libSDL2-2.0.so.0.8.0>"
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Darwin>:${CMAKE_CURRENT_SOURCE_DIR}/Darwin/library/libSDL2.so>"
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Windows>:${CMAKE_CURRENT_SOURCE_DIR}/Windows/library/SDL2.lib>")
+add_library(sdl2 SHARED IMPORTED GLOBAL)
+
+target_include_directories(sdl2 INTERFACE "${CMAKE_SYSTEM_NAME}/include")
+
+target_link_library(sdl2 "libSDL2main.*")
+target_link_library(sdl2 DARWIN "libSDL2.dylib")
+target_link_library(sdl2 LINUX "libSDL2-2.0.so.0.8.0")
+target_link_library(sdl2 WINDOWS "SDL2.lib" DLL "SDL2.dll")
+
+target_add_deploy_files(sdl2 DARWIN "Darwin/library/libSDL2.dylib")
+target_add_deploy_files(sdl2 LINUX "Linux/library/libSDL2-2.0.so.0.8.0")
+target_add_deploy_files(sdl2 WINDOWS "Windows/library/SDL2.dll")

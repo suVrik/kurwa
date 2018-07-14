@@ -13,26 +13,29 @@ cmake_minimum_required(VERSION 3.11)
 
 project(all)
 
+# Includes
+include("script/cmake/kurwa.cmake")
+
 # Libraries
-add_subdirectory(library/eastl)
-add_subdirectory(library/enet)
-add_subdirectory(library/fmt)
-add_subdirectory(library/glew)
-add_subdirectory(library/gmock)
-add_subdirectory(library/imgui)
-add_subdirectory(library/lz4)
-add_subdirectory(library/ogg)
-add_subdirectory(library/openal)
-add_subdirectory(library/png)
-add_subdirectory(library/sdl2)
-add_subdirectory(library/theora)
-add_subdirectory(library/tinyxml2)
-add_subdirectory(library/vorbis)
-add_subdirectory(library/zlib)
+add_subdirectory("library/eastl")
+add_subdirectory("library/enet")
+add_subdirectory("library/fmt")
+add_subdirectory("library/glew")
+add_subdirectory("library/gmock")
+add_subdirectory("library/imgui")
+add_subdirectory("library/lz4")
+add_subdirectory("library/ogg")
+add_subdirectory("library/openal")
+add_subdirectory("library/png")
+add_subdirectory("library/sdl2")
+add_subdirectory("library/theora")
+add_subdirectory("library/tinyxml2")
+add_subdirectory("library/vorbis")
+add_subdirectory("library/zlib")
 
 # Framework
 add_subdirectory(framework)
 
 # Programs
-add_subdirectory(program/testbed)
-add_subdirectory(program/unittest)
+add_subdirectory("program/testbed")
+add_subdirectory("program/unittest")

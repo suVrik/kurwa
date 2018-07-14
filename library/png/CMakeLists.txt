@@ -14,8 +14,5 @@ cmake_minimum_required(VERSION 3.11)
 project(png)
 
 add_library(png INTERFACE IMPORTED GLOBAL)
-target_include_directories(png INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_SYSTEM_NAME}/include")
-target_link_libraries(png INTERFACE
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Linux>:${CMAKE_CURRENT_SOURCE_DIR}/Linux/library/libpng16.a>"
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Darwin>:${CMAKE_CURRENT_SOURCE_DIR}/Darwin/library/libpng.a>"
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Windows>:${CMAKE_CURRENT_SOURCE_DIR}/Windows/library/png.lib>")
+target_include_directory(png)
+target_link_library(png "libpng16.*")

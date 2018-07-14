@@ -14,8 +14,5 @@ cmake_minimum_required(VERSION 3.11)
 project(lz4)
 
 add_library(lz4 INTERFACE IMPORTED GLOBAL)
-target_include_directories(lz4 INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_SYSTEM_NAME}/include")
-target_link_libraries(lz4 INTERFACE
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Linux>:${CMAKE_CURRENT_SOURCE_DIR}/Linux/library/liblz4.a>"
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Darwin>:${CMAKE_CURRENT_SOURCE_DIR}/Darwin/library/liblz4.a>"
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Windows>:${CMAKE_CURRENT_SOURCE_DIR}/Windows/library/lz4.lib>")
+target_include_directory(lz4)
+target_link_library(lz4 "liblz4.*")

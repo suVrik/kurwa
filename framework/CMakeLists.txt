@@ -13,17 +13,19 @@ cmake_minimum_required(VERSION 3.11)
 
 project(framework)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
-
+# Framework source files
 file(GLOB_RECURSE FRAMEWORK_SOURCE "*.h" "*.cpp")
-add_library(framework STATIC ${FRAMEWORK_SOURCE})
+add_library(framework STATIC "${FRAMEWORK_SOURCE}")
 
-# For programs that include the framework
-target_include_directories(framework INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/include")
+# Framework properties
+set_property(TARGET framework PROPERTY CXX_STANDARD "17")
+set_property(TARGET framework PROPERTY LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 
-# For some reason cmake cannot determine link language for framework without this
+# For programs that include framework
+target_include_directory(framework)
+
+# For some reason cmake cannot determine link language for the framework without this
 set_target_properties(framework PROPERTIES LINKER_LANGUAGE CXX)
 
-# Libraries
-target_link_libraries(framework PUBLIC eastl)
+# Framework libraries
+target_link_library(framework eastl)

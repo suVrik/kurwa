@@ -12,4 +12,4 @@ Run `scripts/codeformat/codeformat.py --checkstyle-all` to check style of the wh
 
 `--verbose` flag might be used to inspect errors.
 
-**These files were originally created by [Blitzteam](http://blitzteam.com/).**
+**These files were originally created by [BlitzTeam](http://blitzteam.com/).**

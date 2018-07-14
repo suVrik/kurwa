@@ -14,8 +14,5 @@ cmake_minimum_required(VERSION 3.11)
 project(theora)
 
 add_library(theora INTERFACE IMPORTED GLOBAL)
-target_include_directories(theora INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_SYSTEM_NAME}/include")
-target_link_libraries(theora INTERFACE
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Linux>:${CMAKE_CURRENT_SOURCE_DIR}/Linux/library/libtheora.a>"
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Darwin>:${CMAKE_CURRENT_SOURCE_DIR}/Darwin/library/libtheora.a>"
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Windows>:${CMAKE_CURRENT_SOURCE_DIR}/Windows/library/theora.lib>")
+target_include_directory(theora)
+target_link_library(theora "libtheora.*")

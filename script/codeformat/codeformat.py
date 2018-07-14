@@ -20,8 +20,8 @@ clang_format_binary = 'clang-format'
 
 # Project sources
 sources_list = [
-    "framework/",
-    "program/"
+    "framework",
+    "program"
 ]
 
 
@@ -30,7 +30,7 @@ ignore_list = []
 
 
 # Extensions to check, in lowercase
-sources_extensions = ["*.h", "*.hpp", "*.c", "*.cc", "*.cpp"]
+sources_extensions = ["*.h", "*.cpp"]
 
 
 def multiprocess_map(func, items):

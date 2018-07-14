@@ -13,12 +13,16 @@ cmake_minimum_required(VERSION 3.11)
 
 project(testbed)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+# Testbed sources
+file(GLOB_RECURSE TESTBED_SOURCE "source/*.h" "source/*.cpp")
+add_executable(testbed "${TESTBED_SOURCE}")
 
-# Executable
-file(GLOB_RECURSE TESTBED_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/source/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp")
-add_executable(testbed ${TESTBED_SOURCE})
+# Testbed properties
+set_property(TARGET testbed PROPERTY CXX_STANDARD "17")
+set_property(TARGET testbed PROPERTY RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
-# Libraries
+# Testbed libraries
 target_link_libraries(testbed PRIVATE framework)
+
+# Deploy everything and create a bundle file for OS X
+bundle_executable(testbed)

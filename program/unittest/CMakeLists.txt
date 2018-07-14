@@ -13,27 +13,34 @@ cmake_minimum_required(VERSION 3.11)
 
 project(unittest)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+# Unitest sources
+file(GLOB_RECURSE UNITTEST_SOURCE "source/*.h" "source/*.cpp")
+add_executable(unittest "${UNITTEST_SOURCE}")
 
-# Executable
-file(GLOB_RECURSE UNITTEST_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/source/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp")
-add_executable(unittest ${UNITTEST_SOURCE})
+# Unittest properties
+set_property(TARGET unittest PROPERTY CXX_STANDARD "17")
+set_property(TARGET unittest PROPERTY RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
-# Libraries
-target_link_libraries(unittest PRIVATE framework)
-target_link_libraries(unittest PRIVATE eastl)
-target_link_libraries(unittest PRIVATE enet)
-target_link_libraries(unittest PRIVATE fmt)
-target_link_libraries(unittest PRIVATE glew)
-target_link_libraries(unittest PRIVATE gmock)
-target_link_libraries(unittest PRIVATE imgui)
-target_link_libraries(unittest PRIVATE lz4)
-target_link_libraries(unittest PRIVATE ogg)
-target_link_libraries(unittest PRIVATE openal)
-target_link_libraries(unittest PRIVATE png)
-target_link_libraries(unittest PRIVATE sdl2)
-target_link_libraries(unittest PRIVATE theora)
-target_link_libraries(unittest PRIVATE tinyxml2)
-target_link_libraries(unittest PRIVATE vorbis)
-target_link_libraries(unittest PRIVATE zlib)
+# Unittest deploy files and folders
+target_add_deploy_files(unittest resource)
+
+# Unittest libraries
+target_link_library(unittest framework)
+target_link_library(unittest eastl)
+target_link_library(unittest enet)
+target_link_library(unittest fmt)
+target_link_library(unittest glew)
+target_link_library(unittest gmock)
+target_link_library(unittest imgui)
+target_link_library(unittest lz4)
+target_link_library(unittest ogg)
+target_link_library(unittest openal)
+target_link_library(unittest png)
+target_link_library(unittest sdl2)
+target_link_library(unittest theora)
+target_link_library(unittest tinyxml2)
+target_link_library(unittest vorbis)
+target_link_library(unittest zlib)
+
+# Deploy everything and create a bundle file for OS X
+bundle_executable(unittest)

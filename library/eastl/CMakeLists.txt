@@ -14,8 +14,5 @@ cmake_minimum_required(VERSION 3.11)
 project(eastl)
 
 add_library(eastl INTERFACE IMPORTED GLOBAL)
-target_include_directories(eastl INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_link_libraries(eastl INTERFACE
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Linux>:${CMAKE_CURRENT_SOURCE_DIR}/library/Linux/libEASTL.a>"
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Darwin>:${CMAKE_CURRENT_SOURCE_DIR}/library/Darwin/libEASTL.a>"
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Windows>:${CMAKE_CURRENT_SOURCE_DIR}/library/Windows/EASTL.lib>")
+target_include_directory(eastl)
+target_link_library(eastl "libEASTL.*")

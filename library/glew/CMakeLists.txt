@@ -14,8 +14,6 @@ cmake_minimum_required(VERSION 3.11)
 project(glew)
 
 add_library(glew INTERFACE IMPORTED GLOBAL)
-target_include_directories(glew INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_link_libraries(glew INTERFACE
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Linux>:GL;GLU;${CMAKE_CURRENT_SOURCE_DIR}/library/Linux/libGLEW.a>"
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Darwin>:${CMAKE_CURRENT_SOURCE_DIR}/library/Darwin/libGLEW.a>"
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Windows>:${CMAKE_CURRENT_SOURCE_DIR}/library/Windows/GLEW.lib>")
+target_include_directory(glew)
+target_link_library(glew "libGLEW.*")
+target_link_library(glew LINUX SYSTEM GL GLU)

@@ -14,8 +14,5 @@ cmake_minimum_required(VERSION 3.11)
 project(vorbis)
 
 add_library(vorbis INTERFACE IMPORTED GLOBAL)
-target_include_directories(vorbis INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_SYSTEM_NAME}/include")
-target_link_libraries(vorbis INTERFACE
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Linux>:${CMAKE_CURRENT_SOURCE_DIR}/Linux/library/libvorbis.a>"
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Darwin>:${CMAKE_CURRENT_SOURCE_DIR}/Darwin/library/libvorbis.a>"
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Windows>:${CMAKE_CURRENT_SOURCE_DIR}/Windows/library/vorbis.lib>")
+target_include_directory(vorbis)
+target_link_library(vorbis "libvorbis.*")

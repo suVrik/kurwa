@@ -14,8 +14,5 @@ cmake_minimum_required(VERSION 3.11)
 project(imgui)
 
 add_library(imgui INTERFACE IMPORTED GLOBAL)
-target_include_directories(imgui INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_link_libraries(imgui INTERFACE
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Linux>:${CMAKE_CURRENT_SOURCE_DIR}/library/Linux/libimgui.a>"
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Darwin>:${CMAKE_CURRENT_SOURCE_DIR}/library/Darwin/libimgui.a>"
-        "$<$<STREQUAL:${CMAKE_SYSTEM_NAME},Windows>:${CMAKE_CURRENT_SOURCE_DIR}/library/Windows/imgui.lib>")
+target_include_directory(imgui)
+target_link_library(imgui "libimgui.*")
