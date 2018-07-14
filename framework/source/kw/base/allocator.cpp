@@ -56,19 +56,25 @@ void allocator::set_name(const char* name) {
 }
 
 void* allocator::allocate(size_t n, int flags) {
+#if defined(_MSC_VER)
+    // See another allocate overload for commentary on this
+    return _aligned_malloc(n, 1);
+#else
     return std::malloc(n);
+#endif
 }
 
 void* allocator::allocate(size_t n, size_t alignment, size_t offset, int flags) {
-#if defined(_MSC_VER)
-    return std::aligned_alloc(n, alignment);
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
     // Apple standart library is retarted and does not have aligned_alloc yet
     void* result;
     if (posix_memalign(&result, alignment, n)) {
         return nullptr;
     }
     return result;
+#elif defined(_MSC_VER)
+    // The Windows standart library is completely retarded and they're not even planning to provide std::aligned_alloc
+    return _aligned_malloc(n, alignment);
 #else
     // The Linux standart library is a little bit retarded too,
     // and the aligned_alloc function is out of 'std' namespace
@@ -77,7 +83,11 @@ void* allocator::allocate(size_t n, size_t alignment, size_t offset, int flags) 
 }
 
 void allocator::deallocate(void* p, size_t n) {
+#if defined(_MSC_VER)
+    _aligned_free(p)
+#else
     std::free(p);
+#endif
 }
 
 bool operator==(const allocator& a, const allocator& b) {
