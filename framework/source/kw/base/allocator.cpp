@@ -84,7 +84,7 @@ void* allocator::allocate(size_t n, size_t alignment, size_t offset, int flags) 
 
 void allocator::deallocate(void* p, size_t n) {
 #if defined(_MSC_VER)
-    _aligned_free(p)
+    _aligned_free(p);
 #else
     std::free(p);
 #endif
