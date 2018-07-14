@@ -60,11 +60,20 @@ void* allocator::allocate(size_t n, int flags) {
 }
 
 void* allocator::allocate(size_t n, size_t alignment, size_t offset, int flags) {
+#ifndef __APPLE__
     return aligned_alloc(n, alignment);
+#else
+    // Apple standart library is retarted and does not have aligned_alloc yet
+    void* result;
+    if (posix_memalign(&result, alignment, n)) {
+        return nullptr;
+    }
+    return result;
+#endif
 }
 
 void allocator::deallocate(void* p, size_t n) {
-    std::free(p);
+    free(p);
 }
 
 bool operator==(const allocator& a, const allocator& b) {
