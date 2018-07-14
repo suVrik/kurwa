@@ -60,7 +60,7 @@ void* allocator::allocate(size_t n, int flags) {
 }
 
 void* allocator::allocate(size_t n, size_t alignment, size_t offset, int flags) {
-    return std::aligned_alloc(n, alignment);
+    return aligned_alloc(n, alignment);
 }
 
 void allocator::deallocate(void* p, size_t n) {
