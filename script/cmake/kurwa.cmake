@@ -13,17 +13,12 @@
 # 'DLL' parameter must be provided for shared libraries and used only on Windows platform.
 # It points to a .dll part of the shared library.
 function(target_link_library)
-    # Parsing arguments
     set(options LINUX DARWIN WINDOWS SYSTEM)
-    set(single_arguments DLL)
-    cmake_parse_arguments(TARGET_LINK_LIBRARY "${options}" "${single_arguments}" "" "${ARGN}")
-    if("${TARGET_LINK_LIBRARY_UNPARSED_ARGUMENTS}" STREQUAL "")
-        message(FATAL_ERROR "target_link_library requires 'target_name' and 'library_name'!")
-    endif()
+    cmake_parse_arguments(TARGET_LINK_LIBRARY "${options}" "DLL" "" "${ARGN}")
     list(GET TARGET_LINK_LIBRARY_UNPARSED_ARGUMENTS 0 target_name)
     list(REMOVE_AT TARGET_LINK_LIBRARY_UNPARSED_ARGUMENTS 0)
 
-    # Check operation system
+    # Exclude not matching platforms
     if(TARGET_LINK_LIBRARY_LINUX OR TARGET_LINK_LIBRARY_DARWIN OR TARGET_LINK_LIBRARY_WINDOWS)
         if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
             if(NOT TARGET_LINK_LIBRARY_LINUX)
@@ -40,7 +35,6 @@ function(target_link_library)
         endif()
     endif()
 
-    # Check different target properties
     get_target_property(target_is_imported "${target_name}" "IMPORTED")
     get_target_property(target_type "${target_name}" "TYPE")
 
@@ -52,20 +46,20 @@ function(target_link_library)
             string(REPLACE "*" "lib" full_library_name "${library_name}")
         endif()
 
-        if (NOT target_is_imported)
+        if(NOT target_is_imported)
             # No need to find library path, because for non-imported targets all the linked libraries
             # must be already added via add_library function
             target_link_libraries("${target_name}" "${full_library_name}")
 
             # Interface libraries can't hold deploy files
             get_target_property(library_type "${full_library_name}" "TYPE")
-            if (NOT library_type STREQUAL "INTERFACE_LIBRARY")
+            if(NOT library_type STREQUAL "INTERFACE_LIBRARY")
                 # Get deploy files for the given library
                 get_target_property(library_deploy_files "${full_library_name}" "DEPLOY_FILES")
-                if (library_deploy_files)
+                if(library_deploy_files)
                     # Get deploy files for this target. If none, set as an empty list
                     get_target_property(target_deploy_files "${target_name}" "DEPLOY_FILES")
-                    if (NOT target_deploy_files)
+                    if(NOT target_deploy_files)
                         set(target_deploy_files "")
                     endif()
 
@@ -77,11 +71,11 @@ function(target_link_library)
                     # The final list must not contain duplicates
                     list(REMOVE_DUPLICATES library_deploy_files)
                     set_target_properties("${target_name}" PROPERTIES "DEPLOY_FILES" "${target_deploy_files}")
-                endif ()
+                endif()
             endif()
         else()
             # Determine the directory structure
-            if (NOT TARGET_LINK_LIBRARY_SYSTEM)
+            if(NOT TARGET_LINK_LIBRARY_SYSTEM)
                 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/include")
                     set(library_folder "${CMAKE_CURRENT_SOURCE_DIR}/library/${CMAKE_SYSTEM_NAME}")
                     set(library_path "${library_folder}/${full_library_name}")
@@ -95,7 +89,7 @@ function(target_link_library)
             endif()
 
             # Link the library
-            if (target_type STREQUAL "SHARED_LIBRARY")
+            if(target_type STREQUAL "SHARED_LIBRARY")
                 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
                     # For Windows shared libraries DLL argument must be provided
                     set_target_properties("${target_name}" PROPERTIES
@@ -130,23 +124,21 @@ function(target_include_directory target_name)
         set(include_directory "${CMAKE_CURRENT_SOURCE_DIR}/include")
     else()
         set(include_directory "${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_SYSTEM_NAME}/include")
-        if (NOT EXISTS "${include_directory}")
+        if(NOT EXISTS "${include_directory}")
             message(FATAL_ERROR "Invalid project structure for target '${target_name}'!")
         endif()
     endif()
 
-    # Get deploy files for this target. If none, set as an empty list
     get_target_property(include_directories "${target_name}" "INTERFACE_INCLUDE_DIRECTORIES")
-    if (NOT include_directories)
+    if(NOT include_directories)
         set(include_directories "")
     endif()
 
-    # Add the include directory to this target
     list(APPEND include_directories "${include_directory}")
     set_target_properties("${target_name}" PROPERTIES "INTERFACE_INCLUDE_DIRECTORIES" "${include_directories}")
 endfunction()
 
-# Usage: target_add_deploy_files(<target_name> [DARWIN|LINUX|WINDOWS] <file_name> [<file_name> ...])
+# target_add_deploy_files(<target_name> [DARWIN|LINUX|WINDOWS] <file_name> [<file_name> ...])
 #
 # For executable targets puts the given files or directories into the folder containing the executable file.
 # For library targets forces saves the given files or directories into internal list, so executables that include
@@ -155,16 +147,12 @@ endfunction()
 # If none of 'LINUX', 'DARWIN' or 'WINDOWS' is provided, all the system are applied automatically.
 # It is possible to put multiple platforms at the same time.
 function(target_add_deploy_files)
-    # Parsing arguments
     set(options LINUX DARWIN WINDOWS)
-    cmake_parse_arguments(TARGET_ADD_DEPLOY_ITEM "${options}" "" "" ${ARGN})
-    if("${TARGET_ADD_DEPLOY_ITEM_UNPARSED_ARGUMENTS}" STREQUAL "")
-        message(FATAL_ERROR "TARGET_ADD_DEPLOY_ITEM requires 'target_name' and 'library_name'!")
-    endif()
+    cmake_parse_arguments(TARGET_ADD_DEPLOY_ITEM "${options}" "" "" "${ARGN}")
     list(GET TARGET_ADD_DEPLOY_ITEM_UNPARSED_ARGUMENTS 0 target_name)
     list(REMOVE_AT TARGET_ADD_DEPLOY_ITEM_UNPARSED_ARGUMENTS 0)
 
-    # Check operation system
+    # Exclude not matching platforms
     if(TARGET_ADD_DEPLOY_ITEM_LINUX OR TARGET_ADD_DEPLOY_ITEM_DARWIN OR TARGET_ADD_DEPLOY_ITEM_WINDOWS)
         if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
             if(NOT TARGET_ADD_DEPLOY_ITEM_LINUX)
@@ -181,9 +169,8 @@ function(target_add_deploy_files)
         endif()
     endif()
 
-    # Get deploy files for this target. If none, set as an empty list
     get_target_property(target_deploy_files "${target_name}" "DEPLOY_FILES")
-    if (NOT target_deploy_files)
+    if(NOT target_deploy_files)
         set(target_deploy_files "")
     endif()
 
@@ -192,7 +179,6 @@ function(target_add_deploy_files)
         list(APPEND target_deploy_files "${CMAKE_CURRENT_SOURCE_DIR}/${file_name}")
     endforeach()
 
-    # Add these deploy files to this target
     set_target_properties("${target_name}" PROPERTIES "DEPLOY_FILES" "${target_deploy_files}")
 endfunction()
 
@@ -218,6 +204,24 @@ function(bundle_executable target_name)
             endif()
         endforeach()
     endif()
+endfunction()
+
+# append_property(TARGET target PROPERTY property_name property_value)
+#
+# Appends the 'property_value' to the property with the 'property_name' of provided 'target'.
+function(append_property)
+    cmake_parse_arguments(APPEND_PROPERTY "" "TARGET" "PROPERTY" "${ARGN}")
+    list(GET APPEND_PROPERTY_PROPERTY 0 property_name)
+    list(GET APPEND_PROPERTY_PROPERTY 1 property_value)
+
+    get_target_property(property_list "${APPEND_PROPERTY_TARGET}" "${property_name}")
+    if(NOT property_list)
+        set(property_list "")
+    endif()
+
+    list(APPEND property_list "${property_value}")
+
+    set_target_properties("${APPEND_PROPERTY_TARGET}" PROPERTIES "DEPLOY_FILES" "${target_deploy_files}")
 endfunction()
 
 define_property(TARGET PROPERTY DEPLOY_FILES
