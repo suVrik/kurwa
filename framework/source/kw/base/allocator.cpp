@@ -60,20 +60,24 @@ void* allocator::allocate(size_t n, int flags) {
 }
 
 void* allocator::allocate(size_t n, size_t alignment, size_t offset, int flags) {
-#ifndef __APPLE__
-    return aligned_alloc(n, alignment);
-#else
+#if defined(_MSC_VER)
+    return std::aligned_alloc(n, alignment);
+#elif defined(__APPLE__)
     // Apple standart library is retarted and does not have aligned_alloc yet
     void* result;
     if (posix_memalign(&result, alignment, n)) {
         return nullptr;
     }
     return result;
+#else
+    // The Linux standart library is a little bit retarded too,
+    // and the aligned_alloc function is out of 'std' namespace
+    return aligned_alloc(n, alignment);
 #endif
 }
 
 void allocator::deallocate(void* p, size_t n) {
-    free(p);
+    std::free(p);
 }
 
 bool operator==(const allocator& a, const allocator& b) {
