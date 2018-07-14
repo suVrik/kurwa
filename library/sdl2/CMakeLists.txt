@@ -15,7 +15,7 @@ project(sdl2)
 
 add_library(sdl2 SHARED IMPORTED GLOBAL)
 
-target_include_directories(sdl2 INTERFACE "${CMAKE_SYSTEM_NAME}/include")
+target_include_directory(sdl2)
 
 target_link_library(sdl2 "libSDL2main.*")
 target_link_library(sdl2 DARWIN "libSDL2.dylib")
