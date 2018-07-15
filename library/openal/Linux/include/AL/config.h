@@ -11,9 +11,6 @@
 /* Define if HRTF data is embedded in the library */
 /* #undef ALSOFT_EMBED_HRTF_DATA */
 
-/* Define if we have the sysconf function */
-#define HAVE_SYSCONF
-
 /* Define if we have the C11 aligned_alloc function */
 #define HAVE_ALIGNED_ALLOC
 
@@ -22,12 +19,6 @@
 
 /* Define if we have the _aligned_malloc function */
 /* #undef HAVE__ALIGNED_MALLOC */
-
-/* Define if we have the proc_pidpath function */
-/* #undef HAVE_PROC_PIDPATH */
-
-/* Define if we have the getopt function */
-#define HAVE_GETOPT
 
 /* Define if we have SSE CPU extensions */
 #define HAVE_SSE
@@ -53,8 +44,8 @@
 /* Define if we have the QSA backend */
 /* #undef HAVE_QSA */
 
-/* Define if we have the WASAPI backend */
-/* #undef HAVE_WASAPI */
+/* Define if we have the MMDevApi backend */
+/* #undef HAVE_MMDEVAPI */
 
 /* Define if we have the DSound backend */
 /* #undef HAVE_DSOUND */
@@ -80,9 +71,6 @@
 /* Define if we have the Wave Writer backend */
 #define HAVE_WAVE
 
-/* Define if we have the SDL2 backend */
-#define HAVE_SDL2
-
 /* Define if we have the stat function */
 #define HAVE_STAT
 
@@ -94,9 +82,6 @@
 
 /* Define if we have the log2f function */
 #define HAVE_LOG2F
-
-/* Define if we have the cbrtf function */
-#define HAVE_CBRTF
 
 /* Define if we have the strtof function */
 #define HAVE_STRTOF
@@ -113,6 +98,9 @@
 /* Define to the size of a long long int type */
 #define SIZEOF_LONG_LONG 8
 
+/* Define if we have C99 variable-length array support */
+#define HAVE_C99_VLA
+
 /* Define if we have C99 _Bool support */
 #define HAVE_C99_BOOL
 
@@ -123,7 +111,7 @@
 #define HAVE_C11_ALIGNAS
 
 /* Define if we have C11 _Atomic support */
-#define HAVE_C11_ATOMIC
+/* #undef HAVE_C11_ATOMIC */
 
 /* Define if we have GCC's destructor attribute */
 #define HAVE_GCC_DESTRUCTOR
@@ -148,6 +136,9 @@
 
 /* Define if we have pthread_np.h */
 /* #undef HAVE_PTHREAD_NP_H */
+
+/* Define if we have alloca.h */
+/* #undef HAVE_ALLOCA_H */
 
 /* Define if we have malloc.h */
 #define HAVE_MALLOC_H
@@ -187,12 +178,6 @@
 
 /* Define if we have the __cpuid() intrinsic */
 /* #undef HAVE_CPUID_INTRINSIC */
-
-/* Define if we have the _BitScanForward64() intrinsic */
-/* #undef HAVE_BITSCANFORWARD64_INTRINSIC */
-
-/* Define if we have the _BitScanForward() intrinsic */
-/* #undef HAVE_BITSCANFORWARD_INTRINSIC */
 
 /* Define if we have _controlfp() */
 /* #undef HAVE__CONTROLFP */

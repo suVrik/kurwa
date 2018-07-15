@@ -18,10 +18,9 @@ file(GLOB_RECURSE UNITTEST_SOURCE "source/*.h" "source/*.cpp")
 add_executable(unittest "${UNITTEST_SOURCE}")
 
 # Unittest properties
-set_property(TARGET unittest PROPERTY CXX_STANDARD "17")
-set_property(TARGET unittest PROPERTY RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
-append_property(TARGET framework PROPERTY LINK_FLAGS "-stdlib=libc++")
-append_property(TARGET framework PROPERTY LINK_FLAGS "-lc++abi")
+set_target_properties(unittest PROPERTIES
+        CXX_STANDARD "17"
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
 # Unittest deploy files and folders
 target_add_deploy_files(unittest resource)

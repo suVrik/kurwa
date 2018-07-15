@@ -20,8 +20,6 @@ add_library(framework STATIC "${FRAMEWORK_SOURCE}")
 # Framework properties
 set_property(TARGET framework PROPERTY CXX_STANDARD "17")
 set_property(TARGET framework PROPERTY LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
-append_property(TARGET framework PROPERTY LINK_FLAGS "-stdlib=libc++")
-append_property(TARGET framework PROPERTY LINK_FLAGS "-lc++abi")
 
 # For programs that include framework
 target_include_directory(framework)

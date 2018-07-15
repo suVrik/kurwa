@@ -186,6 +186,18 @@ endfunction()
 #
 # Deploy everything and create a bundle file for OS X platform.
 function(bundle_executable target_name)
+    # Force Linux to search for shared libraries next to executable
+    if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+        get_target_property(linker_flags "${target_name}" "LINK_FLAGS")
+        if(NOT linker_flags)
+            set(linker_flags "")
+        endif()
+        list(APPEND linker_flags "-Wl,-rpath,\"$ORIGIN\"")
+        set_target_properties("${target_name}" PROPERTIES
+                SKIP_BUILD_RPATH "ON"
+                LINK_FLAGS "${linker_flags}")
+    endif()
+
     get_target_property(target_deploy_files "${target_name}" "DEPLOY_FILES")
     if(target_deploy_files)
         get_target_property(output_directory "${target_name}" "RUNTIME_OUTPUT_DIRECTORY")
@@ -204,24 +216,6 @@ function(bundle_executable target_name)
             endif()
         endforeach()
     endif()
-endfunction()
-
-# append_property(TARGET target PROPERTY property_name property_value)
-#
-# Appends the 'property_value' to the property with the 'property_name' of provided 'target'.
-function(append_property)
-    cmake_parse_arguments(APPEND_PROPERTY "" "TARGET" "PROPERTY" "${ARGN}")
-    list(GET APPEND_PROPERTY_PROPERTY 0 property_name)
-    list(GET APPEND_PROPERTY_PROPERTY 1 property_value)
-
-    get_target_property(property_list "${APPEND_PROPERTY_TARGET}" "${property_name}")
-    if(NOT property_list)
-        set(property_list "")
-    endif()
-
-    list(APPEND property_list "${property_value}")
-
-    set_target_properties("${APPEND_PROPERTY_TARGET}" PROPERTIES "DEPLOY_FILES" "${target_deploy_files}")
 endfunction()
 
 define_property(TARGET PROPERTY DEPLOY_FILES
