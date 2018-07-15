@@ -17,10 +17,10 @@ add_library(openal SHARED IMPORTED GLOBAL)
 
 target_include_directory(openal)
 
-target_link_library(openal DARWIN "libopenal.1.18.2.dylib")
+target_link_library(openal DARWIN "libopenal.1.dylib")
 target_link_library(openal LINUX "libopenal.so.1")
 target_link_library(openal WINDOWS "OpenAL32.lib" DLL "OpenAL32.dll")
 
-target_add_deploy_files(openal DARWIN "Darwin/library/libopenal.1.18.2.dylib")
+target_add_deploy_files(openal DARWIN "Darwin/library/libopenal.1.dylib")
 target_add_deploy_files(openal LINUX "Linux/library/libopenal.so.1")
 target_add_deploy_files(openal WINDOWS "Windows/library/OpenAL32.dll")

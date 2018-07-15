@@ -187,12 +187,16 @@ endfunction()
 # Deploy everything and create a bundle file for OS X platform.
 function(bundle_executable target_name)
     # Force Linux to search for shared libraries next to executable
-    if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+    if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux" OR "${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
         get_target_property(linker_flags "${target_name}" "LINK_FLAGS")
         if(NOT linker_flags)
             set(linker_flags "")
         endif()
-        list(APPEND linker_flags "-Wl,-rpath,\"$ORIGIN\"")
+        if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+            list(APPEND linker_flags "-Wl,-rpath,\"$ORIGIN\"")
+        else()
+            list(APPEND linker_flags "-Wl,-rpath,\"@executable_path\"")
+        endif()
         set_target_properties("${target_name}" PROPERTIES
                 SKIP_BUILD_RPATH "ON"
                 LINK_FLAGS "${linker_flags}")
