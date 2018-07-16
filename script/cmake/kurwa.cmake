@@ -62,29 +62,16 @@ function(target_link_library)
             set(library_folder "")
         endif()
 
-        # Produce platform-dependent library name
-        if(LINUX OR APPLE)
-            string(REPLACE "*" ".a" full_library_name "${library_name}")
-        elseif(WIN32)
-            # In Debug mode try debug version of the library and use it if it exists
-            if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-                string(REPLACE "*" "d.lib" full_library_name "${library_name}")
-            endif()
-            if("${CMAKE_BUILD_TYPE}" STREQUAL "Release" OR NOT EXISTS "${library_folder}/${full_library_name}")
-                string(REPLACE "*" ".lib" full_library_name "${library_name}")
-            endif()
-        endif()
-
         if(NOT target_is_imported)
             # No need to find library path, because for non-imported targets all the linked libraries
             # must be already added via add_library function
-            target_link_libraries("${target_name}" "${full_library_name}")
+            target_link_libraries("${target_name}" "${library_name}")
 
             # Interface libraries can't hold deploy files
-            get_target_property(library_type "${full_library_name}" "TYPE")
+            get_target_property(library_type "${library_name}" "TYPE")
             if(NOT library_type STREQUAL "INTERFACE_LIBRARY")
                 # We're about to copy all the resources and libraries from the library to our target
-                get_target_property(library_deploy_resources "${full_library_name}" "DEPLOY_RESOURCES")
+                get_target_property(library_deploy_resources "${library_name}" "DEPLOY_RESOURCES")
                 if(library_deploy_resources)
                     # Get deploy files for this target. If none, set as an empty list
                     get_target_property(target_deploy_resources "${target_name}" "DEPLOY_RESOURCES")
@@ -106,7 +93,7 @@ function(target_link_library)
                     set(target_deploy_libraries "")
                 endif()
 
-                get_target_property(library_deploy_libraries "${full_library_name}" "DEPLOY_LIBRARIES")
+                get_target_property(library_deploy_libraries "${library_name}" "DEPLOY_LIBRARIES")
                 if(library_deploy_libraries)
                     foreach(deploy_file ${library_deploy_libraries})
                         list(APPEND target_deploy_libraries "${deploy_file}")
@@ -114,7 +101,7 @@ function(target_link_library)
                 endif()
 
                 # Put the shared library into a target too
-                get_target_property(library_imported_location "${full_library_name}" "IMPORTED_LOCATION")
+                get_target_property(library_imported_location "${library_name}" "IMPORTED_LOCATION")
                 if(library_imported_location)
                     list(APPEND target_deploy_libraries "${library_imported_location}")
                 endif()
@@ -122,6 +109,19 @@ function(target_link_library)
                 set_target_properties("${target_name}" PROPERTIES "DEPLOY_LIBRARIES" "${target_deploy_libraries}")
             endif()
         else()
+            # Produce platform-dependent library name
+            if(LINUX OR APPLE)
+                string(REPLACE "*" ".a" full_library_name "${library_name}")
+            else()
+                # In Debug mode try debug version if exists
+                string(REPLACE "*" "d.lib" debug_library_name "${library_name}")
+                if(EXISTS "${library_folder}/${debug_library_name}")
+                    string(REPLACE "*" "$<$<CONFIG:Debug>:d>.lib" full_library_name "${library_name}")
+                else()
+                    string(REPLACE "*" ".lib" full_library_name "${library_name}")
+                endif()
+            endif()
+
             set(library_path "${library_folder}/${full_library_name}")
 
             if(target_type STREQUAL "SHARED_LIBRARY")
@@ -252,10 +252,31 @@ function(target_set_bundle_information)
     endif()
 endfunction()
 
-# bundle_executable(<target_name>)
+# finalize_executable(<target_name>)
 #
 # Deploy everything and create a bundle file for OS X platform.
-function(bundle_executable target_name)
+macro(finalize_executable target_name)
+    # Use static version of the run-time library
+    if(WIN32)
+        # Required for __cplusplus define to be other than 1997
+        set_target_properties("${target_name}" PROPERTIES
+                COMPILE_FLAGS "/Zc:__cplusplus")
+
+        get_target_property(myCOMPILE_FLAGS "${target_name}" "COMPILE_FLAGS")
+
+        set(compiler_flags
+                CMAKE_CXX_FLAGS
+                CMAKE_CXX_FLAGS_DEBUG
+                CMAKE_CXX_FLAGS_RELEASE
+                CMAKE_C_FLAGS
+                CMAKE_C_FLAGS_DEBUG
+                CMAKE_C_FLAGS_RELEASE)
+
+        foreach(compiler_flag ${compiler_flags})
+            string(REPLACE "/MD" "/MT" ${compiler_flag} "${${compiler_flag}}")
+        endforeach()
+    endif()
+
     # Force Linux to search for shared libraries next to executable
     if(LINUX OR APPLE)
         get_target_property(linker_flags "${target_name}" "LINK_FLAGS")
@@ -340,7 +361,7 @@ function(bundle_executable target_name)
             endforeach()
         endif()
     endif()
-endfunction()
+endmacro()
 
 # Define LINUX global variable, because there's no such variable by default
 if(UNIX AND NOT APPLE)

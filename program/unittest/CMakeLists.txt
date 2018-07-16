@@ -18,20 +18,7 @@ add_executable(unittest "${UNITTEST_SOURCE}")
 
 set_target_properties(unittest PROPERTIES
         CXX_STANDARD "17"
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-        COMPILE_FLAGS "/Zc:__cplusplus")
-
-set(CompilerFlags
-        CMAKE_CXX_FLAGS
-        CMAKE_CXX_FLAGS_DEBUG
-        CMAKE_CXX_FLAGS_RELEASE
-        CMAKE_C_FLAGS
-        CMAKE_C_FLAGS_DEBUG
-        CMAKE_C_FLAGS_RELEASE
-        )
-foreach(CompilerFlag ${CompilerFlags})
-    string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
-endforeach()
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
 set(UNITTEST_VERSION "0.0")
 target_set_bundle_information(unittest
@@ -64,4 +51,4 @@ target_link_library(unittest tinyxml2)
 target_link_library(unittest vorbis)
 target_link_library(unittest zlib)
 
-bundle_executable(unittest)
+finalize_executable(unittest)

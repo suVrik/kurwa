@@ -33,4 +33,4 @@ target_set_bundle_information(testbed
 
 target_link_libraries(testbed PRIVATE framework)
 
-bundle_executable(testbed)
+finalize_executable(testbed)
