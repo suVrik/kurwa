@@ -21,7 +21,3 @@ target_link_library(sdl2 "libSDL2main.*")
 target_link_library(sdl2 DARWIN "libSDL2.dylib")
 target_link_library(sdl2 LINUX "libSDL2-2.0.so.0")
 target_link_library(sdl2 WINDOWS "SDL2.lib" DLL "SDL2.dll")
-
-target_add_deploy_files(sdl2 DARWIN "Darwin/library/libSDL2.dylib")
-target_add_deploy_files(sdl2 LINUX "Linux/library/libSDL2-2.0.so.0")
-target_add_deploy_files(sdl2 WINDOWS "Windows/library/SDL2.dll")

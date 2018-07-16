@@ -13,16 +13,23 @@ cmake_minimum_required(VERSION 3.9)
 
 project(testbed)
 
-# Testbed sources
 file(GLOB_RECURSE TESTBED_SOURCE "source/*.h" "source/*.cpp")
 add_executable(testbed "${TESTBED_SOURCE}")
 
-# Testbed properties
 set_property(TARGET testbed PROPERTY CXX_STANDARD "17")
 set_property(TARGET testbed PROPERTY RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
-# Testbed libraries
+set(TESTBED_VERSION "0.0")
+target_set_bundle_information(testbed
+        BUNDLE_NAME "testbed"
+        BUNDLE_VERSION "${TESTBED_VERSION}"
+        COPYRIGHT "Copyright (c) 2018, 21DOGZ"
+        GUI_IDENTIFIER "com.21dogz.testbed"
+        ICON_FILE ""
+        INFO_STRING "testbed"
+        LONG_VERSION_STRING "${TESTBED_VERSION}"
+        SHORT_VERSION_STRING "${TESTBED_VERSION}")
+
 target_link_libraries(testbed PRIVATE framework)
 
-# Deploy everything and create a bundle file for OS X
 bundle_executable(testbed)

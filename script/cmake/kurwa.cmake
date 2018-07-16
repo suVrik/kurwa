@@ -1,6 +1,6 @@
 # target_link_library(<target_name> [LINUX|DARWIN|WINDOWS] [SYSTEM] <library_name> [<library_name> ...] [DLL dll])
 #
-# A mimic of 'target_link_libraries' function, but incapsulates mechanisms of dealing with deploy files and makes
+# A mimic of 'target_link_libraries' function, but incapsulates mechanisms of dealing with resources and makes
 # it easier to deal with crossplatform dependencies.
 #
 # If none of 'LINUX', 'DARWIN' or 'WINDOWS' is provided, all the system are applied automatically.
@@ -20,15 +20,15 @@ function(target_link_library)
 
     # Exclude not matching platforms
     if(TARGET_LINK_LIBRARY_LINUX OR TARGET_LINK_LIBRARY_DARWIN OR TARGET_LINK_LIBRARY_WINDOWS)
-        if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+        if(LINUX)
             if(NOT TARGET_LINK_LIBRARY_LINUX)
                 return()
             endif()
-        elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+        elseif(APPLE)
             if(NOT TARGET_LINK_LIBRARY_DARWIN)
                 return()
             endif()
-        elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+        elseif(WIN32)
             if(NOT TARGET_LINK_LIBRARY_WINDOWS)
                 return()
             endif()
@@ -40,9 +40,9 @@ function(target_link_library)
 
     foreach(library_name ${TARGET_LINK_LIBRARY_UNPARSED_ARGUMENTS})
         # Produce platform-dependent library name
-        if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux" OR "${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+        if(LINUX OR APPLE)
             string(REPLACE "*" "a" full_library_name "${library_name}")
-        elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+        elseif(WIN32)
             string(REPLACE "*" "lib" full_library_name "${library_name}")
         endif()
 
@@ -54,24 +54,43 @@ function(target_link_library)
             # Interface libraries can't hold deploy files
             get_target_property(library_type "${full_library_name}" "TYPE")
             if(NOT library_type STREQUAL "INTERFACE_LIBRARY")
-                # Get deploy files for the given library
-                get_target_property(library_deploy_files "${full_library_name}" "DEPLOY_FILES")
-                if(library_deploy_files)
+                # We're about to copy all the resources and libraries from the library to our target
+                get_target_property(library_deploy_resources "${full_library_name}" "DEPLOY_RESOURCES")
+                if(library_deploy_resources)
                     # Get deploy files for this target. If none, set as an empty list
-                    get_target_property(target_deploy_files "${target_name}" "DEPLOY_FILES")
-                    if(NOT target_deploy_files)
-                        set(target_deploy_files "")
+                    get_target_property(target_deploy_resources "${target_name}" "DEPLOY_RESOURCES")
+                    if(NOT target_deploy_resources)
+                        set(target_deploy_resources "")
                     endif()
 
-                    # Add all the deploy files from the library to target
-                    foreach(deploy_file ${library_deploy_files})
-                        list(APPEND target_deploy_files "${deploy_file}")
+                    # Add all the resources from the library to target
+                    foreach(deploy_file ${library_deploy_resources})
+                        list(APPEND target_deploy_resources "${deploy_file}")
                     endforeach()
 
-                    # The final list must not contain duplicates
-                    list(REMOVE_DUPLICATES library_deploy_files)
-                    set_target_properties("${target_name}" PROPERTIES "DEPLOY_FILES" "${target_deploy_files}")
+                    set_target_properties("${target_name}" PROPERTIES "DEPLOY_RESOURCES" "${target_deploy_resources}")
                 endif()
+
+                # We need target libraries to merge library's libraries and the library itself into it
+                get_target_property(target_deploy_libraries "${target_name}" "DEPLOY_LIBRARIES")
+                if(NOT target_deploy_libraries)
+                    set(target_deploy_libraries "")
+                endif()
+
+                get_target_property(library_deploy_libraries "${full_library_name}" "DEPLOY_LIBRARIES")
+                if(library_deploy_libraries)
+                    foreach(deploy_file ${library_deploy_libraries})
+                        list(APPEND target_deploy_libraries "${deploy_file}")
+                    endforeach()
+                endif()
+
+                # Put the shared library into a target too
+                get_target_property(library_imported_location "${full_library_name}" "IMPORTED_LOCATION")
+                if(library_imported_location)
+                    list(APPEND target_deploy_libraries "${library_imported_location}")
+                endif()
+
+                set_target_properties("${target_name}" PROPERTIES "DEPLOY_LIBRARIES" "${target_deploy_libraries}")
             endif()
         else()
             # Determine the directory structure
@@ -88,9 +107,8 @@ function(target_link_library)
                 set(library_path "${full_library_name}")
             endif()
 
-            # Link the library
             if(target_type STREQUAL "SHARED_LIBRARY")
-                if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+                if(WIN32)
                     # For Windows shared libraries DLL argument must be provided
                     set_target_properties("${target_name}" PROPERTIES
                         IMPORTED_IMPLIB "${library_path}"
@@ -138,15 +156,15 @@ function(target_include_directory target_name)
     set_target_properties("${target_name}" PROPERTIES "INTERFACE_INCLUDE_DIRECTORIES" "${include_directories}")
 endfunction()
 
-# target_add_deploy_files(<target_name> [DARWIN|LINUX|WINDOWS] <file_name> [<file_name> ...])
+# target_add_resources(<target_name> [DARWIN|LINUX|WINDOWS] <file_name> [<file_name> ...])
 #
-# For executable targets puts the given files or directories into the folder containing the executable file.
-# For library targets forces saves the given files or directories into internal list, so executables that include
-# this library can deploy these files or directories too.
+# For executable targets put the given files and directories into platform-dependent resources directory.
+# For library targets save the given files and directories into internal list. Later, executables, that link
+# these libraries, put these resources into their platform-dependent resource directory.
 #
 # If none of 'LINUX', 'DARWIN' or 'WINDOWS' is provided, all the system are applied automatically.
 # It is possible to put multiple platforms at the same time.
-function(target_add_deploy_files)
+function(target_add_resources)
     set(options LINUX DARWIN WINDOWS)
     cmake_parse_arguments(TARGET_ADD_DEPLOY_ITEM "${options}" "" "" "${ARGN}")
     list(GET TARGET_ADD_DEPLOY_ITEM_UNPARSED_ARGUMENTS 0 target_name)
@@ -154,32 +172,67 @@ function(target_add_deploy_files)
 
     # Exclude not matching platforms
     if(TARGET_ADD_DEPLOY_ITEM_LINUX OR TARGET_ADD_DEPLOY_ITEM_DARWIN OR TARGET_ADD_DEPLOY_ITEM_WINDOWS)
-        if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+        if(LINUX)
             if(NOT TARGET_ADD_DEPLOY_ITEM_LINUX)
                 return()
             endif()
-        elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+        elseif(APPLE)
             if(NOT TARGET_ADD_DEPLOY_ITEM_DARWIN)
                 return()
             endif()
-        elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+        elseif(WIN32)
             if(NOT TARGET_ADD_DEPLOY_ITEM_WINDOWS)
                 return()
             endif()
         endif()
     endif()
 
-    get_target_property(target_deploy_files "${target_name}" "DEPLOY_FILES")
-    if(NOT target_deploy_files)
-        set(target_deploy_files "")
+    get_target_property(target_deploy_resources "${target_name}" "DEPLOY_RESOURCES")
+    if(NOT target_deploy_resources)
+        set(target_deploy_resources "")
     endif()
 
     foreach(file_name ${TARGET_ADD_DEPLOY_ITEM_UNPARSED_ARGUMENTS})
-        # File names are expected to be relative to current source directory
-        list(APPEND target_deploy_files "${CMAKE_CURRENT_SOURCE_DIR}/${file_name}")
+        # Convert relative paths to absolute
+        get_filename_component(absolute_file_name "${file_name}"
+                REALPATH BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+        list(APPEND target_deploy_resources "${absolute_file_name}")
     endforeach()
 
-    set_target_properties("${target_name}" PROPERTIES "DEPLOY_FILES" "${target_deploy_files}")
+    set_target_properties("${target_name}" PROPERTIES "DEPLOY_RESOURCES" "${target_deploy_resources}")
+endfunction()
+
+# target_set_bundle_information(<target_name>
+#                               <BUNDLE_NAME bundle_name>
+#                               <BUNDLE_VERSION bundle_version>
+#                               <COPYRIGHT copyright>
+#                               <GUI_IDENTIFIER gui_identifier>
+#                               <ICON_FILE icon_file>
+#                               <INFO_STRING info_string>
+#                               <LONG_VERSION_STRING long_version_string>
+#                               <SHORT_VERSION_STRING short_version_string>)
+#
+# Specify information for OS X bundle. On all the other platforms currently ignored.
+#
+# TODO: use this information for windows executables.
+function(target_set_bundle_information)
+    if(APPLE)
+        set(single_arguments BUNDLE_NAME BUNDLE_VERSION COPYRIGHT GUI_IDENTIFIER ICON_FILE
+                INFO_STRING LONG_VERSION_STRING SHORT_VERSION_STRING)
+        cmake_parse_arguments(BUNDLE_INFORMATION "" "${single_arguments}" "" "${ARGN}")
+        list(GET BUNDLE_INFORMATION_UNPARSED_ARGUMENTS 0 target_name)
+
+        set_target_properties("${target_name}" PROPERTIES
+                MACOSX_BUNDLE "ON"
+                MACOSX_BUNDLE_BUNDLE_NAME "${BUNDLE_INFORMATION_BUNDLE_NAME}"
+                MACOSX_BUNDLE_BUNDLE_VERSION "${BUNDLE_INFORMATION_BUNDLE_VERSION}"
+                MACOSX_BUNDLE_COPYRIGHT "${BUNDLE_INFORMATION_COPYRIGHT}"
+                MACOSX_BUNDLE_GUI_IDENTIFIER "${BUNDLE_INFORMATION_GUI_IDENTIFIER}"
+                MACOSX_BUNDLE_ICON_FILE "${BUNDLE_INFORMATION_ICON_FILE}"
+                MACOSX_BUNDLE_INFO_STRING "${BUNDLE_INFORMATION_INFO_STRING}"
+                MACOSX_BUNDLE_LONG_VERSION_STRING "${BUNDLE_INFORMATION_LONG_VERSION_STRING}"
+                MACOSX_BUNDLE_SHORT_VERSION_STRING "${BUNDLE_INFORMATION_SHORT_VERSION_STRING}")
+    endif()
 endfunction()
 
 # bundle_executable(<target_name>)
@@ -187,42 +240,102 @@ endfunction()
 # Deploy everything and create a bundle file for OS X platform.
 function(bundle_executable target_name)
     # Force Linux to search for shared libraries next to executable
-    if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux" OR "${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+    if(LINUX OR APPLE)
         get_target_property(linker_flags "${target_name}" "LINK_FLAGS")
         if(NOT linker_flags)
             set(linker_flags "")
         endif()
-        if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+        if(LINUX)
             list(APPEND linker_flags "-Wl,-rpath,\"$ORIGIN\"")
         else()
-            list(APPEND linker_flags "-Wl,-rpath,\"@executable_path\"")
+            list(APPEND linker_flags "-Wl,-rpath,\"@executable_path/../Frameworks\"")
         endif()
         set_target_properties("${target_name}" PROPERTIES
                 SKIP_BUILD_RPATH "ON"
                 LINK_FLAGS "${linker_flags}")
     endif()
 
-    get_target_property(target_deploy_files "${target_name}" "DEPLOY_FILES")
-    if(target_deploy_files)
-        get_target_property(output_directory "${target_name}" "RUNTIME_OUTPUT_DIRECTORY")
-        foreach(file_name ${target_deploy_files})
-            if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
-                # \H — Copies files with hidden and system file attributes
-                # \Y — Suppresses prompting to confirm that you want to overwrite an existing file
-                # \C — Ignores errors
-                # \S — Copies directories and subdirectories, unless they are empty
+    get_target_property(output_directory "${target_name}" "RUNTIME_OUTPUT_DIRECTORY")
+
+    # For Windows and Linux simply put the resources into 'resources' folder, and libraries next to binary file
+    if(WINDOWS OR LINUX)
+        get_target_property(target_deploy_resources "${target_name}" "DEPLOY_RESOURCES")
+        if(target_deploy_resources)
+            list(REMOVE_DUPLICATES target_deploy_resources)
+
+            set(resources_directory "${output_directory}/resources")
+            add_custom_command(TARGET "${target_name}" POST_BUILD
+                    COMMAND ${CMAKE_COMMAND} -E make_directory "${resources_directory}")
+
+            foreach(file_name ${target_deploy_resources})
                 add_custom_command(TARGET "${target_name}" POST_BUILD
-                        COMMAND xcopy \"${file_name}\" \"${output_directory}\" /H /Y /C /S)
-            else()
-                # -rf — Copy files and directories recursive
+                        COMMAND ${CMAKE_COMMAND} -E copy "${file_name}" "${resources_directory}")
+            endforeach()
+        endif()
+
+        get_target_property(target_deploy_libraries "${target_name}" "DEPLOY_LIBRARIES")
+        if(target_deploy_libraries)
+            list(REMOVE_DUPLICATES target_deploy_libraries)
+
+            # TODO: libraries directory? in case it works on Windows
+
+            foreach(file_name ${target_deploy_libraries})
                 add_custom_command(TARGET "${target_name}" POST_BUILD
-                        COMMAND cp -rf \"${file_name}\" \"${output_directory}\")
-            endif()
-        endforeach()
+                        COMMAND ${CMAKE_COMMAND} -E copy "${file_name}" "${output_directory}")
+            endforeach()
+        endif()
+    else()
+        get_target_property(is_macos_bundle "${target_name}" "MACOSX_BUNDLE")
+        if(NOT is_macos_bundle)
+            message(FATAL_ERROR "'target_set_bundle_information' call for target '${target_name}' is required")
+        endif()
+
+        set(bundle_path "${output_directory}/${target_name}.app")
+
+        # For OS X put libraries into 'Frameworks' and resources into 'Resources'
+        get_target_property(target_deploy_resources "${target_name}" "DEPLOY_RESOURCES")
+        if(target_deploy_resources)
+            list(REMOVE_DUPLICATES target_deploy_resources)
+
+            # Unlike for libraries, Linux and Windows, for Mac OS resources there's a native CMake solution
+            target_sources("${target_name}" PRIVATE "${target_deploy_resources}")
+            set_target_properties("${target_name}" PROPERTIES
+                    RESOURCE "${target_deploy_resources}")
+        endif()
+
+        get_target_property(target_deploy_libraries "${target_name}" "DEPLOY_LIBRARIES")
+        if(target_deploy_libraries)
+            list(REMOVE_DUPLICATES target_deploy_libraries)
+
+            set(frameworks_path "${bundle_path}/Contents/Frameworks")
+
+            # Just in case, create all the needed folders. The unnecessary directories will be ignored
+            add_custom_command(TARGET "${target_name}" POST_BUILD
+                    COMMAND ${CMAKE_COMMAND} -E make_directory "${bundle_path}")
+            add_custom_command(TARGET "${target_name}" POST_BUILD
+                    COMMAND ${CMAKE_COMMAND} -E make_directory "${bundle_path}/Contents")
+            add_custom_command(TARGET "${target_name}" POST_BUILD
+                    COMMAND ${CMAKE_COMMAND} -E make_directory "${frameworks_path}")
+
+            foreach(file_name ${target_deploy_libraries})
+                add_custom_command(TARGET "${target_name}" POST_BUILD
+                        COMMAND ${CMAKE_COMMAND} -E copy "${file_name}" "${frameworks_path}")
+            endforeach()
+        endif()
     endif()
 endfunction()
 
-define_property(TARGET PROPERTY DEPLOY_FILES
-    BRIEF_DOCS "List of files to deploy"
-    FULL_DOCS "List of files to deploy"
+# Define LINUX global variable, because there's no such variable by default
+if(UNIX AND NOT APPLE)
+    set(LINUX TRUE CACHE INTERNAL "" FORCE)
+endif()
+
+define_property(TARGET PROPERTY DEPLOY_RESOURCES
+    BRIEF_DOCS "List of resources to deploy"
+    FULL_DOCS "List of resources to deploy"
+)
+
+define_property(TARGET PROPERTY DEPLOY_LIBRARIES
+    BRIEF_DOCS "List of libraries to deploy"
+    FULL_DOCS "List of libraries to deploy"
 )
