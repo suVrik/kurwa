@@ -7,10 +7,6 @@ branches:
   only:
     - master
 
-cache:
-  apt: true
-  ccache: true
-
 script:
   - mkdir build
   - cd build
@@ -18,9 +14,9 @@ script:
   - cmake --build .
   - cd bin
   - if [ `uname` = 'Darwin' ]; then
-      ./unittest.app/Contents/MacOS/unittest
+      ./unittest.app/Contents/MacOS/unittest;
     else
-      ./unittest
+      ./unittest;
     fi
 
 matrix:
