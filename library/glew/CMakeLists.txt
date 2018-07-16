@@ -15,5 +15,5 @@ project(glew)
 
 add_library(glew INTERFACE IMPORTED GLOBAL)
 target_include_directory(glew)
-target_link_library(glew "libGLEW.*")
+target_link_library(glew "libGLEW*")
 target_link_library(glew LINUX SYSTEM GL GLU)

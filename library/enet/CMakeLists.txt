@@ -15,4 +15,4 @@ project(enet)
 
 add_library(enet INTERFACE IMPORTED GLOBAL)
 target_include_directory(enet)
-target_link_library(enet "libenet.*")
+target_link_library(enet "libenet*")

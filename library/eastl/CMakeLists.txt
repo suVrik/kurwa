@@ -15,4 +15,4 @@ project(eastl)
 
 add_library(eastl INTERFACE IMPORTED GLOBAL)
 target_include_directory(eastl)
-target_link_library(eastl "libEASTL.*")
+target_link_library(eastl "libEASTL*")

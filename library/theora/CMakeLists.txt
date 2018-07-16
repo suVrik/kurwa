@@ -15,4 +15,4 @@ project(theora)
 
 add_library(theora INTERFACE IMPORTED GLOBAL)
 target_include_directory(theora)
-target_link_library(theora "libtheora.*")
+target_link_library(theora "libtheora*")

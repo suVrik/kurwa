@@ -15,5 +15,5 @@ project(gmock)
 
 add_library(gmock INTERFACE IMPORTED GLOBAL)
 target_include_directory(gmock)
-target_link_library(gmock "libgmock.*")
+target_link_library(gmock "libgmock*")
 target_link_library(gmock LINUX SYSTEM pthread)

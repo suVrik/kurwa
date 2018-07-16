@@ -15,4 +15,4 @@ project(ogg)
 
 add_library(ogg INTERFACE IMPORTED GLOBAL)
 target_include_directory(ogg)
-target_link_library(ogg "libogg.*")
+target_link_library(ogg "libogg*")

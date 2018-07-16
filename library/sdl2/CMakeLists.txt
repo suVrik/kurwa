@@ -17,7 +17,7 @@ add_library(sdl2 SHARED IMPORTED GLOBAL)
 
 target_include_directory(sdl2)
 
-target_link_library(sdl2 "libSDL2main.*")
+target_link_library(sdl2 "libSDL2main*")
 target_link_library(sdl2 DARWIN "libSDL2.dylib")
 target_link_library(sdl2 LINUX "libSDL2-2.0.so.0")
 target_link_library(sdl2 WINDOWS "SDL2.lib" DLL "SDL2.dll")

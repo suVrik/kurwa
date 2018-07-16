@@ -15,4 +15,4 @@ project(png)
 
 add_library(png INTERFACE IMPORTED GLOBAL)
 target_include_directory(png)
-target_link_library(png "libpng16.*")
+target_link_library(png "libpng16*")

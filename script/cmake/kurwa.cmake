@@ -1,3 +1,14 @@
+# Copyright (c) 2018, 21DOGZ.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+# except in compliance with the License. You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed under the License is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and limitations under the License.
+
 # target_link_library(<target_name> [LINUX|DARWIN|WINDOWS] [SYSTEM] <library_name> [<library_name> ...] [DLL dll])
 #
 # A mimic of 'target_link_libraries' function, but incapsulates mechanisms of dealing with resources and makes
@@ -39,11 +50,29 @@ function(target_link_library)
     get_target_property(target_type "${target_name}" "TYPE")
 
     foreach(library_name ${TARGET_LINK_LIBRARY_UNPARSED_ARGUMENTS})
+        # Determine the directory structure
+        if(NOT TARGET_LINK_LIBRARY_SYSTEM)
+            if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/include")
+                set(library_folder "${CMAKE_CURRENT_SOURCE_DIR}/library/${CMAKE_SYSTEM_NAME}")
+            else()
+                set(library_folder "${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_SYSTEM_NAME}/library")
+            endif()
+        else()
+            # Let the system find the library
+            set(library_folder "")
+        endif()
+
         # Produce platform-dependent library name
         if(LINUX OR APPLE)
-            string(REPLACE "*" "a" full_library_name "${library_name}")
+            string(REPLACE "*" ".a" full_library_name "${library_name}")
         elseif(WIN32)
-            string(REPLACE "*" "lib" full_library_name "${library_name}")
+            # In Debug mode try debug version of the library and use it if it exists
+            if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+                string(REPLACE "*" "d.lib" full_library_name "${library_name}")
+            endif()
+            if("${CMAKE_BUILD_TYPE}" STREQUAL "Release" OR NOT EXISTS "${library_folder}/${full_library_name}")
+                string(REPLACE "*" ".lib" full_library_name "${library_name}")
+            endif()
         endif()
 
         if(NOT target_is_imported)
@@ -93,19 +122,7 @@ function(target_link_library)
                 set_target_properties("${target_name}" PROPERTIES "DEPLOY_LIBRARIES" "${target_deploy_libraries}")
             endif()
         else()
-            # Determine the directory structure
-            if(NOT TARGET_LINK_LIBRARY_SYSTEM)
-                if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/include")
-                    set(library_folder "${CMAKE_CURRENT_SOURCE_DIR}/library/${CMAKE_SYSTEM_NAME}")
-                    set(library_path "${library_folder}/${full_library_name}")
-                else()
-                    set(library_folder "${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_SYSTEM_NAME}/library")
-                    set(library_path "${library_folder}/${full_library_name}")
-                endif()
-            else()
-                # Let the system find the library
-                set(library_path "${full_library_name}")
-            endif()
+            set(library_path "${library_folder}/${full_library_name}")
 
             if(target_type STREQUAL "SHARED_LIBRARY")
                 if(WIN32)
@@ -258,7 +275,7 @@ function(bundle_executable target_name)
     get_target_property(output_directory "${target_name}" "RUNTIME_OUTPUT_DIRECTORY")
 
     # For Windows and Linux simply put the resources into 'resources' folder, and libraries next to binary file
-    if(WINDOWS OR LINUX)
+    if(WIN32 OR LINUX)
         get_target_property(target_deploy_resources "${target_name}" "DEPLOY_RESOURCES")
         if(target_deploy_resources)
             list(REMOVE_DUPLICATES target_deploy_resources)

@@ -15,4 +15,4 @@ project(fmt)
 
 add_library(fmt INTERFACE IMPORTED GLOBAL)
 target_include_directory(fmt)
-target_link_library(fmt "libfmt.*")
+target_link_library(fmt "libfmt*")

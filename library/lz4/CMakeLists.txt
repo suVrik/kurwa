@@ -15,4 +15,4 @@ project(lz4)
 
 add_library(lz4 INTERFACE IMPORTED GLOBAL)
 target_include_directory(lz4)
-target_link_library(lz4 "liblz4.*")
+target_link_library(lz4 "liblz4*")

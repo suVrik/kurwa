@@ -15,4 +15,4 @@ project(vorbis)
 
 add_library(vorbis INTERFACE IMPORTED GLOBAL)
 target_include_directory(vorbis)
-target_link_library(vorbis "libvorbis.*")
+target_link_library(vorbis "libvorbis*")

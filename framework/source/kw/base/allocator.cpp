@@ -18,7 +18,7 @@
 namespace eastl {
 allocator::allocator(const char* name) {
 #if EASTL_NAME_ENABLED
-    mpName = pName ? pName : EASTL_ALLOCATOR_DEFAULT_NAME;
+    mpName = name ? name : EASTL_ALLOCATOR_DEFAULT_NAME;
 #endif
 }
 
@@ -30,7 +30,7 @@ allocator::allocator(const allocator& alloc) {
 
 allocator::allocator(const allocator& a, const char* name) {
 #if EASTL_NAME_ENABLED
-    mpName = pName ? pName : EASTL_ALLOCATOR_DEFAULT_NAME;
+    mpName = name ? name : EASTL_ALLOCATOR_DEFAULT_NAME;
 #endif
 }
 
@@ -51,7 +51,7 @@ const char* allocator::get_name() const {
 
 void allocator::set_name(const char* name) {
 #if EASTL_NAME_ENABLED
-    mpName = pName;
+    mpName = name;
 #endif
 }
 

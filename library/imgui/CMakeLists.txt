@@ -15,4 +15,4 @@ project(imgui)
 
 add_library(imgui INTERFACE IMPORTED GLOBAL)
 target_include_directory(imgui)
-target_link_library(imgui "libimgui.*")
+target_link_library(imgui "libimgui*")

@@ -15,4 +15,4 @@ project(zlib)
 
 add_library(zlib INTERFACE IMPORTED GLOBAL)
 target_include_directory(zlib)
-target_link_library(zlib "libz.*")
+target_link_library(zlib "libz*")

@@ -16,8 +16,9 @@ project(testbed)
 file(GLOB_RECURSE TESTBED_SOURCE "source/*.h" "source/*.cpp")
 add_executable(testbed "${TESTBED_SOURCE}")
 
-set_property(TARGET testbed PROPERTY CXX_STANDARD "17")
-set_property(TARGET testbed PROPERTY RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+set_target_properties(testbed PROPERTIES
+        CXX_STANDARD "17"
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
 set(TESTBED_VERSION "0.0")
 target_set_bundle_information(testbed

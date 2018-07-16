@@ -15,4 +15,4 @@ project(tinyxml2)
 
 add_library(tinyxml2 INTERFACE IMPORTED GLOBAL)
 target_include_directory(tinyxml2)
-target_link_library(tinyxml2 "libtinyxml2.*")
+target_link_library(tinyxml2 "libtinyxml2*")
