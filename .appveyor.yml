@@ -6,6 +6,7 @@ configuration: Release
 
 init:
   - git config --global core.autocrlf input
+  - git lfs install
 
 branches:
   only:
