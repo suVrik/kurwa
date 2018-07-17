@@ -9,7 +9,7 @@
 # distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
-# target_link_library(<target_name> [LINUX|DARWIN|WINDOWS] [SYSTEM] <library_name> [<library_name> ...] [DLL dll])
+# target_link_library(<target_name> [LINUX|DARWIN|WINDOWS] <library_name> [<library_name> ...] [DLL dll])
 #
 # A mimic of 'target_link_libraries' function, but incapsulates mechanisms of dealing with resources and makes
 # it easier to deal with crossplatform dependencies.
@@ -17,14 +17,18 @@
 # If none of 'LINUX', 'DARWIN' or 'WINDOWS' is provided, all the system are applied automatically.
 # It is possible to put multiple platforms at the same time.
 #
-# 'SYSTEM' parameter tells linker to search for this library in a system folder.
+# The function searches for libraries in:
+#  1) Shared library folder among all the systems (current source directory must contain 'library' subdirectory);
+#  2) Each platform has its own library folder (current source directory must contain 'Darwin',
+#     'Linux' and 'Windows' subdirectories with 'library' directory inside);
+#  3) Among system libraries (if first 2 options didn't work).
 #
 # Asterisk symbol '*' in 'library_name', will be replaced with system-dependent extension (.a or .lib).
 #
 # 'DLL' parameter must be provided for shared libraries and used only on Windows platform.
 # It points to a .dll part of the shared library.
 function(target_link_library)
-    set(options LINUX DARWIN WINDOWS SYSTEM)
+    set(options LINUX DARWIN WINDOWS)
     cmake_parse_arguments(TARGET_LINK_LIBRARY "${options}" "DLL" "" "${ARGN}")
     list(GET TARGET_LINK_LIBRARY_UNPARSED_ARGUMENTS 0 target_name)
     list(REMOVE_AT TARGET_LINK_LIBRARY_UNPARSED_ARGUMENTS 0)
@@ -50,18 +54,6 @@ function(target_link_library)
     get_target_property(target_type "${target_name}" "TYPE")
 
     foreach(library_name ${TARGET_LINK_LIBRARY_UNPARSED_ARGUMENTS})
-        # Determine the directory structure
-        if(NOT TARGET_LINK_LIBRARY_SYSTEM)
-            if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/include")
-                set(library_folder "${CMAKE_CURRENT_SOURCE_DIR}/library/${CMAKE_SYSTEM_NAME}")
-            else()
-                set(library_folder "${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_SYSTEM_NAME}/library")
-            endif()
-        else()
-            # Let the system find the library
-            set(library_folder "")
-        endif()
-
         if(NOT target_is_imported)
             # No need to find library path, because for non-imported targets all the linked libraries
             # must be already added via add_library function
@@ -113,16 +105,34 @@ function(target_link_library)
             if(LINUX OR APPLE)
                 string(REPLACE "*" ".a" full_library_name "${library_name}")
             else()
-                # In Debug mode try debug version if exists
+                string(REPLACE "*" ".lib" full_library_name "${library_name}")
+            endif()
+
+            # Determine the directory structure
+            if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/library")
+                set(library_folder "${CMAKE_CURRENT_SOURCE_DIR}/library/${CMAKE_SYSTEM_NAME}")
+            else()
+                set(library_folder "${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_SYSTEM_NAME}/library")
+            endif()
+
+            # If the given library does not exist in the determined directory, it is possibly a system library
+            if(NOT EXISTS "${library_folder}/${full_library_name}")
+                set(library_folder "")
+            endif()
+
+            # Try to use debug version of the library on Windows, if exists
+            if(WIN32)
                 string(REPLACE "*" "d.lib" debug_library_name "${library_name}")
                 if(EXISTS "${library_folder}/${debug_library_name}")
                     string(REPLACE "*" "$<$<CONFIG:Debug>:d>.lib" full_library_name "${library_name}")
-                else()
-                    string(REPLACE "*" ".lib" full_library_name "${library_name}")
                 endif()
             endif()
 
-            set(library_path "${library_folder}/${full_library_name}")
+            if(library_folder)
+                set(library_path "${library_folder}/${full_library_name}")
+            else()
+                set(library_path "${full_library_name}")
+            endif()
 
             if(target_type STREQUAL "SHARED_LIBRARY")
                 if(WIN32)
