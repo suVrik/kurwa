@@ -13,7 +13,11 @@ script:
   - cmake .. -DCMAKE_BUILD_TYPE=Release
   - cmake --build .
   - cd bin
-  - ./unittest
+  - if [ `uname` = 'Darwin' ]; then
+      ./unittest.app/Contents/MacOS/unittest;
+    else
+      ./unittest;
+    fi
 
 matrix:
   fast_finish: true

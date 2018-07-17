@@ -1,0 +1,3 @@
+#!/bin/sh
+
+python script/codeformat/codeformat.py --git-pre-commit
