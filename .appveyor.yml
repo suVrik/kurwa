@@ -18,6 +18,7 @@ matrix:
   fast_finish: true
 
 before_build:
+  - cmd: git lfs pull
   - cmd: mkdir build
   - cmd: cd build
   - cmd: cmake -G"Visual Studio 15 2017 Win64" ..
