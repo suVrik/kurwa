@@ -4,22 +4,17 @@ platform: x64
 
 configuration: Release
 
-init:
-  - git config --global core.autocrlf input
-  - git lfs install
-
 branches:
   only:
   - master
 
 clone_folder: c:\work\kurwa
-shallow_clone: true
+clone_depth: 10
 
 matrix:
   fast_finish: true
 
 before_build:
-  - cmd: git lfs pull
   - cmd: mkdir build
   - cmd: cd build
   - cmd: cmake -G"Visual Studio 15 2017 Win64" ..
