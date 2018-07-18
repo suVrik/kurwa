@@ -9,7 +9,6 @@ branches:
   - master
 
 clone_folder: c:\work\kurwa
-clone_depth: 10
 
 matrix:
   fast_finish: true
@@ -27,3 +26,4 @@ build:
 test_script:
   - cmd: cd bin/Release
   - cmd: unittest.exe
+
