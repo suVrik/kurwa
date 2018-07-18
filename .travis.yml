@@ -7,8 +7,10 @@ branches:
   only:
     - master
 
-script:
+before_script:
   - git lfs pull
+
+script:
   - mkdir build
   - cd build
   - cmake .. -DCMAKE_BUILD_TYPE=Release
@@ -38,3 +40,5 @@ matrix:
         - export CXX=clang++-6.0
     - os: osx
       osx_image: xcode9.4
+      before_script:
+        - brew install git-lfs
