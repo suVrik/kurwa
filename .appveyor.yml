@@ -4,15 +4,11 @@ platform: x64
 
 configuration: Release
 
-init:
-  - git config --global core.autocrlf input
-
 branches:
   only:
   - master
 
 clone_folder: c:\work\kurwa
-shallow_clone: true
 
 matrix:
   fast_finish: true
@@ -30,3 +26,4 @@ build:
 test_script:
   - cmd: cd bin/Release
   - cmd: unittest.exe
+
