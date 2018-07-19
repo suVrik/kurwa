@@ -19,4 +19,4 @@
 namespace kw {
 template <typename T>
 using Vector = eastl::vector<T>;
-}
+} // namespace kw

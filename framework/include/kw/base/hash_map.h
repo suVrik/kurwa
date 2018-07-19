@@ -19,4 +19,4 @@
 namespace kw {
 template <typename Key, typename T>
 using HashMap = eastl::hash_map<Key, T>;
-}
+} // namespace kw

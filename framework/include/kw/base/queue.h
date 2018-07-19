@@ -19,4 +19,4 @@
 namespace kw {
 template <typename T>
 using Queue = eastl::queue<T>;
-}
+} // namespace kw

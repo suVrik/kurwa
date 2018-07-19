@@ -18,4 +18,4 @@
 
 namespace kw {
 using String = eastl::string;
-}
+} // namespace kw

@@ -19,4 +19,4 @@
 namespace kw {
 template <typename Key, typename T>
 using Map = eastl::map<Key, T>;
-}
+} // namespace kw

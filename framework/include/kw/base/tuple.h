@@ -19,4 +19,4 @@
 namespace kw {
 template <typename... Ts>
 using Tuple = eastl::tuple<Ts...>;
-}
+} // namespace kw

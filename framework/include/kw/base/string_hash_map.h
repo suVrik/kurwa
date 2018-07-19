@@ -19,4 +19,4 @@
 namespace kw {
 template <typename T>
 using StringHashMap = eastl::string_hash_map<T>;
-}
+} // namespace kw

@@ -19,4 +19,4 @@
 namespace kw {
 template <typename T>
 using HashSet = eastl::hash_set<T>;
-}
+} // namespace kw

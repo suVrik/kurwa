@@ -19,4 +19,4 @@
 namespace kw {
 template <size_t N>
 using Bitset = eastl::bitset<N>;
-}
+} // namespace kw

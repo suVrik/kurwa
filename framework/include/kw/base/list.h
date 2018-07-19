@@ -19,4 +19,4 @@
 namespace kw {
 template <typename T>
 using List = eastl::list<T>;
-}
+} // namespace kw

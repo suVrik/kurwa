@@ -19,4 +19,4 @@
 namespace kw {
 template <class... Types>
 using Variant = eastl::variant<Types...>;
-}
+} // namespace kw

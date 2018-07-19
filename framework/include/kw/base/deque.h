@@ -19,4 +19,4 @@
 namespace kw {
 template <typename T>
 using Deque = eastl::deque<T>;
-}
+} // namespace kw

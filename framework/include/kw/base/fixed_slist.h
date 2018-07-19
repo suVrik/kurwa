@@ -19,4 +19,4 @@
 namespace kw {
 template <typename T, size_t N>
 using FixedSlist = eastl::fixed_slist<T, N>;
-}
+} // namespace kw

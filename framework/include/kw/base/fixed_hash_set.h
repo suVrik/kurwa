@@ -19,4 +19,4 @@
 namespace kw {
 template <typename T, size_t N>
 using FixedHashSet = eastl::fixed_hash_set<T, N>;
-}
+} // namespace kw

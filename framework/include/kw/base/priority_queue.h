@@ -19,4 +19,4 @@
 namespace kw {
 template <typename T>
 using PriorityQueue = eastl::priority_queue<T>;
-}
+} // namespace kw

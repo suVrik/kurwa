@@ -19,4 +19,4 @@
 namespace kw {
 template <typename T>
 using RingBuffer = eastl::ring_buffer<T>;
-}
+} // namespace kw

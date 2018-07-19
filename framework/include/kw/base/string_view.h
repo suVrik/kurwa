@@ -18,4 +18,4 @@
 
 namespace kw {
 using StringView = eastl::string_view;
-}
+} // namespace kw

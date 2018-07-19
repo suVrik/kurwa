@@ -19,4 +19,4 @@
 namespace kw {
 template <typename T, size_t N>
 using FixedVector = eastl::fixed_vector<T, N>;
-}
+} // namespace kw

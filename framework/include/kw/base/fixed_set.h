@@ -19,4 +19,4 @@
 namespace kw {
 template <typename T, size_t N>
 using FixedSet = eastl::fixed_set<T, N>;
-}
+} // namespace kw

@@ -18,4 +18,4 @@
 
 namespace kw {
 using FixedSubstring = eastl::fixed_substring<char>;
-}
+} // namespace kw

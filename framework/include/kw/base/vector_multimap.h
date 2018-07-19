@@ -19,4 +19,4 @@
 namespace kw {
 template <typename Key, typename T>
 using VectorMultimap = eastl::vector_multimap<Key, T>;
-}
+} // namespace kw

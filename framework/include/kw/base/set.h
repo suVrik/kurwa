@@ -19,4 +19,4 @@
 namespace kw {
 template <typename T>
 using Set = eastl::set<T>;
-}
+} // namespace kw

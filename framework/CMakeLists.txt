@@ -22,7 +22,7 @@ set_property(TARGET framework PROPERTY CXX_STANDARD "17")
 set_property(TARGET framework PROPERTY LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 
 # For programs that include framework
-target_include_directory(framework)
+target_include_directories(framework PUBLIC include)
 
 # For some reason cmake cannot determine link language for the framework without this
 set_target_properties(framework PROPERTIES LINKER_LANGUAGE CXX)

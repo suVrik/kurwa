@@ -18,4 +18,4 @@
 
 namespace kw {
 using Bitvector = eastl::bitvector<>;
-}
+} // namespace kw

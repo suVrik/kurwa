@@ -19,4 +19,4 @@
 namespace kw {
 template <typename T>
 using Optional = eastl::optional<T>;
-}
+} // namespace kw

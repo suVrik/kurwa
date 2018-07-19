@@ -19,4 +19,4 @@
 namespace kw {
 template <typename T, size_t N>
 using Array = eastl::array<T, N>;
-}
+} // namespace kw

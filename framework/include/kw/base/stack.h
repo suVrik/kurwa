@@ -19,4 +19,4 @@
 namespace kw {
 template <typename T>
 using Stack = eastl::stack<T>;
-}
+} // namespace kw

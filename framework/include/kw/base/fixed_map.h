@@ -19,4 +19,4 @@
 namespace kw {
 template <typename Key, typename T, size_t N>
 using FixedMap = eastl::fixed_map<Key, T, N>;
-}
+} // namespace kw

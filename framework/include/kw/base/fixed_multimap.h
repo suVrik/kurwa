@@ -19,4 +19,4 @@
 namespace kw {
 template <typename Key, typename T, size_t N>
 using FixedMultimap = eastl::fixed_multimap<Key, T, N>;
-}
+} // namespace kw

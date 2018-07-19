@@ -13,11 +13,9 @@
 
 #pragma guard
 
-#include <memory>
+#include <functional>
 
 namespace kw {
-template <typename T>
-using SharedPtr = std::shared_ptr<T>;
-
-using std::make_shared;
+template <typename Signature>
+using Function = std::function<Signature>;
 } // namespace kw

@@ -19,4 +19,4 @@
 namespace kw {
 template <typename T>
 using VectorMultiset = eastl::vector_multiset<T>;
-}
+} // namespace kw

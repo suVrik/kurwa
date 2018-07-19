@@ -19,4 +19,4 @@
 namespace kw {
 template <typename T>
 using VectorSet = eastl::vector_set<T>;
-}
+} // namespace kw
