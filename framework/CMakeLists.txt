@@ -21,6 +21,28 @@ add_library(framework STATIC "${FRAMEWORK_SOURCE}")
 set_property(TARGET framework PROPERTY CXX_STANDARD "17")
 set_property(TARGET framework PROPERTY LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 
+# Use static version of the run-time library
+if(WIN32)
+    # Required for __cplusplus define to be other than 1997
+    set_target_properties("framework" PROPERTIES
+            COMPILE_FLAGS "/Zc:__cplusplus")
+
+    get_target_property(myCOMPILE_FLAGS "framework" "COMPILE_FLAGS")
+
+    set(compiler_flags
+            CMAKE_CXX_FLAGS
+            CMAKE_CXX_FLAGS_DEBUG
+            CMAKE_CXX_FLAGS_RELEASE
+            CMAKE_C_FLAGS
+            CMAKE_C_FLAGS_DEBUG
+            CMAKE_C_FLAGS_RELEASE)
+
+    foreach(compiler_flag ${compiler_flags})
+        string(REPLACE "/MD" "/MT" ${compiler_flag} "${${compiler_flag}}")
+    endforeach()
+endif()
+
+
 # For programs that include framework
 target_include_directories(framework PUBLIC include)
 
@@ -28,4 +50,4 @@ target_include_directories(framework PUBLIC include)
 set_target_properties(framework PROPERTIES LINKER_LANGUAGE CXX)
 
 # Framework libraries
-target_link_library(framework eastl)
+target_link_libraries(framework PUBLIC eastl)

@@ -28,8 +28,8 @@ struct SignalTest {
 };
 
 TEST(signal, connect) {
-    kw::int32                           result = 0;
-    SignalTest                          test;
+    kw::int32 result = 0;
+    SignalTest test;
     kw::Signal<void(kw::int32 & value)> my_signal;
     my_signal.connect([&result](kw::int32& value) { result = 48; });
     my_signal.connect(&test, [](kw::int32& value) { value *= 18; });
@@ -37,18 +37,18 @@ TEST(signal, connect) {
     my_signal.connect(const_cast<const SignalTest*>(&test), &SignalTest::const_method);
     my_signal.emit(result);
 
-    EXPECT_TRUE(test.data == 1337);
+    EXPECT_EQ(result, 1337);
 }
 
 TEST(signal, void_callback_order) {
-    kw::int32          test = 1;
+    kw::int32 test = 1;
     kw::Signal<void()> my_signal;
     my_signal.connect([&test]() { test *= test + 5; });
     my_signal.connect([&test]() { test *= test + 10; });
     my_signal.connect([&test]() { test *= test + 20; });
     my_signal.emit();
 
-    EXPECT_TRUE(test == 11136);
+    EXPECT_EQ(test, 11136);
 }
 
 TEST(signal, non_void_callback_order) {
@@ -58,48 +58,48 @@ TEST(signal, non_void_callback_order) {
     my_signal.connect([]() { return 5; });
     kw::int32 test = my_signal.emit([](kw::int32 a, kw::int32 b) { return b << a; });
 
-    EXPECT_TRUE(test == 320);
+    EXPECT_EQ(test, 320);
 }
 
 TEST(signal, disconnect_by_token) {
-    kw::int32          test = 0;
+    kw::int32 test = 0;
     kw::Signal<void()> my_signal;
-    kw::uint32         token1 = my_signal.connect([&test]() { test += 1; });
-    kw::uint32         token2 = my_signal.connect([&test]() { test += 2; });
+    kw::uint32 token1 = my_signal.connect([&test]() { test += 1; });
+    kw::uint32 token2 = my_signal.connect([&test]() { test += 2; });
     my_signal.emit();
 
-    EXPECT_TRUE(test == 3);
+    EXPECT_EQ(test, 3);
 
     my_signal.disconnect(token1);
     my_signal.emit();
 
-    EXPECT_TRUE(test == 5);
+    EXPECT_EQ(test, 5);
 
     my_signal.disconnect(token2);
     my_signal.emit();
 
-    EXPECT_TRUE(test == 5);
+    EXPECT_EQ(test, 5);
 }
 
 TEST(signal, disconnect_by_object) {
-    kw::int32          test = 0;
-    kw::int32          object_a, object_b;
+    kw::int32 test = 0;
+    kw::int32 object_a, object_b;
     kw::Signal<void()> my_signal;
     my_signal.connect(&object_a, [&test]() { test += 1; });
     my_signal.connect(&object_b, [&test]() { test += 2; });
     my_signal.emit();
 
-    EXPECT_TRUE(test == 3);
+    EXPECT_EQ(test, 3);
 
     my_signal.disconnect(&object_a);
     my_signal.emit();
 
-    EXPECT_TRUE(test == 5);
+    EXPECT_EQ(test, 5);
 
     my_signal.disconnect(&object_b);
     my_signal.emit();
 
-    EXPECT_TRUE(test == 5);
+    EXPECT_EQ(test, 5);
 }
 
 // TODO: look at signal test in BZ

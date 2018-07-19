@@ -11,7 +11,7 @@
  *  See the License for the specific language governing permissions and limitations under the License.
  */
 
-#pragma guard
+#pragma once
 
 #include <kw/base/signal.h>
 
@@ -31,7 +31,8 @@ uint32 Signal<Result(Arguments...)>::connect(Object* object, Result (Object::*co
         (object->*callback)(std::forward<Arguments>(arguments)...);
     };
     data.object = object;
-    data.token  = signal_details::generate_unique_token();
+    data.token = signal_details::generate_unique_token();
+    callbacks.push_back(std::move(data));
     return data.token;
 }
 
@@ -43,7 +44,8 @@ uint32 Signal<Result(Arguments...)>::connect(const Object* object, Result (Objec
         (object->*callback)(std::forward<Arguments>(arguments)...);
     };
     data.object = object;
-    data.token  = signal_details::generate_unique_token();
+    data.token = signal_details::generate_unique_token();
+    callbacks.push_back(std::move(data));
     return data.token;
 }
 
@@ -52,8 +54,9 @@ template <typename Object, typename Callback>
 uint32 Signal<Result(Arguments...)>::connect(const Object* object, const Callback callback) {
     CallbackData data;
     data.callback = Function<Result(Arguments...)>(callback);
-    data.object   = object;
-    data.token    = signal_details::generate_unique_token();
+    data.object = object;
+    data.token = signal_details::generate_unique_token();
+    callbacks.push_back(std::move(data));
     return data.token;
 }
 
@@ -62,8 +65,9 @@ template <typename Callback>
 uint32 Signal<Result(Arguments...)>::connect(const Callback callback) {
     CallbackData data;
     data.callback = Function<Result(Arguments...)>(callback);
-    data.object   = nullptr;
-    data.token    = signal_details::generate_unique_token();
+    data.object = nullptr;
+    data.token = signal_details::generate_unique_token();
+    callbacks.push_back(std::move(data));
     return data.token;
 }
 
