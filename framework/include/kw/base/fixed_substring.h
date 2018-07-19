@@ -11,11 +11,11 @@
  *  See the License for the specific language governing permissions and limitations under the License.
  */
 
-#pragma guard
+#pragma once
 
 #define EASTL_USER_DEFINED_ALLOCATOR
 #include <EASTL/fixed_substring.h>
 
 namespace kw {
 using FixedSubstring = eastl::fixed_substring<char>;
-}
+} // namespace kw

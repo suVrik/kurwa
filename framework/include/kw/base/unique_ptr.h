@@ -11,7 +11,7 @@
  *  See the License for the specific language governing permissions and limitations under the License.
  */
 
-#pragma guard
+#pragma once
 
 #include <memory>
 
@@ -19,8 +19,5 @@ namespace kw {
 template <typename T>
 using UniquePtr = std::unique_ptr<T>;
 
-template <typename Type, typename... Args>
-inline UniquePtr<Type> make_unique(Args&&... args) {
-    return std::make_unique<Type>(std::forward<Args>(args)...);
-}
+using std::unique_ptr;
 } // namespace kw

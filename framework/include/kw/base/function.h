@@ -13,10 +13,9 @@
 
 #pragma once
 
-#define EASTL_USER_DEFINED_ALLOCATOR
-#include <EASTL/fixed_hash_map.h>
+#include <functional>
 
 namespace kw {
-template <typename Key, typename T, size_t N>
-using FixedHashMap = eastl::fixed_hash_map<Key, T, N>;
+template <typename Signature>
+using Function = std::function<Signature>;
 } // namespace kw

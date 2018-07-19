@@ -11,11 +11,11 @@
  *  See the License for the specific language governing permissions and limitations under the License.
  */
 
-#pragma guard
+#pragma once
 
 #define EASTL_USER_DEFINED_ALLOCATOR
 #include <EASTL/string_view.h>
 
 namespace kw {
 using StringView = eastl::string_view;
-}
+} // namespace kw

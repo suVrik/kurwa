@@ -11,7 +11,7 @@
  *  See the License for the specific language governing permissions and limitations under the License.
  */
 
-#pragma guard
+#pragma once
 
 #define EASTL_USER_DEFINED_ALLOCATOR
 #include <EASTL/utility.h>
@@ -19,4 +19,4 @@
 namespace kw {
 template <typename T1, typename T2>
 using Pair = eastl::pair<T1, T2>;
-}
+} // namespace kw

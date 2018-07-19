@@ -11,7 +11,7 @@
  *  See the License for the specific language governing permissions and limitations under the License.
  */
 
-#pragma guard
+#pragma once
 
 #include <memory>
 
@@ -19,8 +19,5 @@ namespace kw {
 template <typename T>
 using SharedPtr = std::shared_ptr<T>;
 
-template <typename Type, typename... Args>
-inline SharedPtr<Type> make_shared(Args&&... args) {
-    return std::make_shared<Type>(std::forward<Args>(args)...);
-}
+using std::make_shared;
 } // namespace kw

@@ -11,7 +11,7 @@
  *  See the License for the specific language governing permissions and limitations under the License.
  */
 
-#pragma guard
+#pragma once
 
 #define EASTL_USER_DEFINED_ALLOCATOR
 #include <EASTL/fixed_hash_set.h>
@@ -19,4 +19,4 @@
 namespace kw {
 template <typename T, size_t N>
 using FixedHashSet = eastl::fixed_hash_set<T, N>;
-}
+} // namespace kw
