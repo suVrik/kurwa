@@ -17,10 +17,7 @@
 
 namespace kw {
 namespace signal_details {
-uint32 generate_unique_token() {
-    static uint32 current_token = 0;
-    return ++current_token;
-}
+uint32 generate_unique_token();
 } // namespace signal_details
 
 template <typename Result, typename... Arguments>
@@ -38,7 +35,8 @@ uint32 Signal<Result(Arguments...)>::connect(Object* object, Result (Object::*co
 
 template <typename Result, typename... Arguments>
 template <typename Object>
-uint32 Signal<Result(Arguments...)>::connect(const Object* object, Result (Object::*const callback)(Arguments...) const) {
+uint32 Signal<Result(Arguments...)>::connect(const Object* object,
+                                             Result (Object::*const callback)(Arguments...) const) {
     CallbackData data;
     data.callback = [object, callback](Arguments&&... arguments) {
         (object->*callback)(std::forward<Arguments>(arguments)...);
@@ -51,7 +49,8 @@ uint32 Signal<Result(Arguments...)>::connect(const Object* object, Result (Objec
 
 template <typename Result, typename... Arguments>
 template <typename Object, typename Callback>
-uint32 Signal<Result(Arguments...)>::connect(const Object* object, const Callback callback) {
+eastl::enable_if_t<!eastl::is_member_function_pointer<Callback>::value, uint32>
+Signal<Result(Arguments...)>::connect(const Object* object, const Callback callback) {
     CallbackData data;
     data.callback = Function<Result(Arguments...)>(callback);
     data.object = object;

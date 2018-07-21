@@ -50,4 +50,6 @@ target_include_directories(framework PUBLIC include)
 set_target_properties(framework PROPERTIES LINKER_LANGUAGE CXX)
 
 # Framework libraries
-target_link_libraries(framework PUBLIC eastl)
+target_link_library(framework eastl)
+target_link_library(framework sdl2)
+target_link_library(framework fmt)

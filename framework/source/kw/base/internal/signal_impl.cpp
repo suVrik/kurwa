@@ -11,29 +11,13 @@
  *  See the License for the specific language governing permissions and limitations under the License.
  */
 
-#pragma once
-
-#define EASTL_USER_DEFINED_ALLOCATOR
-#include <EASTL/tuple.h>
+#include <kw/base/internal/signal_impl.h>
 
 namespace kw {
-template <typename... Ts>
-using Tuple = eastl::tuple<Ts...>;
-
-template <typename T, typename Tuple>
-struct has;
-
-template <typename T>
-struct has<T, Tuple<>> : eastl::false_type {};
-
-template <typename T, typename U, typename... Ts>
-struct has<T, Tuple<U, Ts...>> : has<T, eastl::tuple<Ts...>> {};
-
-template <typename T, typename... Ts>
-struct has<T, Tuple<T, Ts...>> : eastl::true_type {};
-
-template <typename T1, typename T2>
-using has_t = typename has<T1, T2>::type;
-
-using eastl::get;
+namespace signal_details {
+uint32 generate_unique_token() {
+    static uint32 current_token = 0;
+    return ++current_token;
+}
+} // namespace signal_details
 } // namespace kw

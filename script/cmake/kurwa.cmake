@@ -134,7 +134,7 @@ function(target_link_library)
                 set(library_path "${full_library_name}")
             endif()
 
-            if(target_type STREQUAL "SHARED_LIBRARY")
+            if(target_type STREQUAL "SHARED_LIBRARY" AND TARGET_LINK_LIBRARY_DLL)
                 if(WIN32)
                     # For Windows shared libraries DLL argument must be provided
                     set_target_properties("${target_name}" PROPERTIES
@@ -324,8 +324,6 @@ macro(finalize_executable target_name)
         get_target_property(target_deploy_libraries "${target_name}" "DEPLOY_LIBRARIES")
         if(target_deploy_libraries)
             list(REMOVE_DUPLICATES target_deploy_libraries)
-
-            # TODO: libraries directory? in case it works on Windows
 
             foreach(file_name ${target_deploy_libraries})
                 add_custom_command(TARGET "${target_name}" POST_BUILD

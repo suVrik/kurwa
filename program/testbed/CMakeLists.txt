@@ -31,6 +31,6 @@ target_set_bundle_information(testbed
         LONG_VERSION_STRING "${TESTBED_VERSION}"
         SHORT_VERSION_STRING "${TESTBED_VERSION}")
 
-target_link_libraries(testbed PRIVATE framework)
+target_link_library(testbed framework)
 
 finalize_executable(testbed)
