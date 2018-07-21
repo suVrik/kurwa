@@ -11,7 +11,17 @@
  *  See the License for the specific language governing permissions and limitations under the License.
  */
 
+#include <kw/core/game.h>
+#include <kw/core/window_module.h>
+
+#include <SDL2/SDL_main.h>
+
+class Game final : public kw::Game<kw::WindowModule> {
+    public:
+    private:
+};
+
 int main(int argc, char* argv[]) {
-    // TODO: implement testbed
-    return 0;
+    Game game;
+    return game.run();
 }

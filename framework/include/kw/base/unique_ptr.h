@@ -13,11 +13,12 @@
 
 #pragma once
 
-#include <memory>
+#define EASTL_USER_DEFINED_ALLOCATOR
+#include <EASTL/shared_ptr.h>
 
 namespace kw {
 template <typename T>
-using UniquePtr = std::unique_ptr<T>;
+using UniquePtr = eastl::unique_ptr<T>;
 
-using std::unique_ptr;
+using eastl::make_unique;
 } // namespace kw

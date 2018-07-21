@@ -84,7 +84,8 @@ public:
      * \endcode
      */
     template <typename Object, typename Callback>
-    uint32 connect(const Object* object, const Callback callback);
+    eastl::enable_if_t<!eastl::is_member_function_pointer<Callback>::value, uint32>
+    connect(const Object* object, const Callback callback);
 
     /**
      * Connect a callback to the signal and return an unique token, which can be used to disconnect a callback.
