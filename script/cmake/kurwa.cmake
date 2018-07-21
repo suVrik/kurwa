@@ -134,6 +134,14 @@ function(target_link_library)
                 set(library_path "${full_library_name}")
             endif()
 
+            # Even tho Linux and OS X don't require DLL flag, it needs to be defined properly
+            # to recognize shared libraries
+            if(LINUX OR APPLE)
+                if("${library_path}" MATCHES "^.*\\.(dylib|so).*$")
+                    set(TARGET_LINK_LIBRARY_DLL 1)
+                endif()
+            endif()
+
             if(target_type STREQUAL "SHARED_LIBRARY" AND TARGET_LINK_LIBRARY_DLL)
                 if(WIN32)
                     # For Windows shared libraries DLL argument must be provided

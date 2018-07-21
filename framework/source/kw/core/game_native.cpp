@@ -23,9 +23,9 @@ namespace kw {
 GameNative::GameNative() noexcept {
     is_initialized = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_HAPTIC | SDL_INIT_GAMECONTROLLER) == 0;
     if (!is_initialized) {
-//        TODO: recompile libfmt without std?
-//        message_box(fmt::format("Failed to initialize SDL2!\n"
-//                                "The error message: {}", SDL_GetError()));
+        //        TODO: recompile libfmt without std?
+        //        message_box(fmt::format("Failed to initialize SDL2!\n"
+        //                                "The error message: {}", SDL_GetError()));
         message_box("Failed to initialize SDL2!\n");
     }
 }
@@ -35,7 +35,7 @@ GameNative::~GameNative() noexcept {
 }
 
 int32 GameNative::run() noexcept {
-    constexpr int32 ERROR_CODE = -1;
+    constexpr int32 ERROR_CODE   = 1;
     constexpr int32 SUCCESS_CODE = 0;
 
     if (is_initialized) {
@@ -47,12 +47,10 @@ int32 GameNative::run() noexcept {
                 } else {
                     try {
                         on_event.emit(event);
-                    }
-                    catch (const std::runtime_error &error) {
+                    } catch (const std::runtime_error& error) {
                         message_box(error.what());
                         return ERROR_CODE;
-                    }
-                    catch (...) {
+                    } catch (...) {
                         message_box("Runtime error in anonymous 'on_event' callback!");
                         return ERROR_CODE;
                     }
@@ -60,12 +58,10 @@ int32 GameNative::run() noexcept {
             }
             try {
                 on_update.emit();
-            }
-            catch (const std::runtime_error &error) {
+            } catch (const std::runtime_error& error) {
                 message_box(error.what());
                 return ERROR_CODE;
-            }
-            catch (...) {
+            } catch (...) {
                 message_box("Runtime error in anonymous 'on_update' callback!");
                 return ERROR_CODE;
             }
