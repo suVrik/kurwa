@@ -13,6 +13,40 @@ cmake_minimum_required(VERSION 3.9)
 
 project(eastl)
 
-add_library(eastl INTERFACE IMPORTED GLOBAL)
-target_include_directory(eastl)
-target_link_library(eastl "libEASTL*")
+add_library(eastl STATIC
+        "${CMAKE_CURRENT_SOURCE_DIR}/source/allocator.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/source/allocator_eastl.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/source/assert.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/source/fixed_pool.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/source/hashtable.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/source/intrusive_list.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/source/numeric_limits.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/source/red_black_tree.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/source/string.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/source/thread_support.cpp"
+)
+
+target_include_directories(eastl PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+
+target_compile_definitions(eastl PUBLIC
+        _CHAR16T=1
+        _CRT_SECURE_NO_WARNINGS=1
+        _SCL_SECURE_NO_WARNINGS=1
+        EASTL_OPENSOURCE=1
+        EASTL_USER_DEFINED_ALLOCATOR=1
+        EASTL_NAME_ENABLED=0
+)
+
+if(WIN32)
+    set_target_properties(eastl PROPERTIES CXX_STANDARD "17")
+
+    set(compiler_flags
+            CMAKE_CXX_FLAGS
+            CMAKE_CXX_FLAGS_DEBUG
+            CMAKE_CXX_FLAGS_RELEASE
+    )
+
+    foreach(compiler_flag ${compiler_flags})
+        string(REPLACE "/MD" "/MT" ${compiler_flag} "${${compiler_flag}}")
+    endforeach()
+endif()

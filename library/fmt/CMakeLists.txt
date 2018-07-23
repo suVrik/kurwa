@@ -13,6 +13,25 @@ cmake_minimum_required(VERSION 3.9)
 
 project(fmt)
 
-add_library(fmt INTERFACE IMPORTED GLOBAL)
-target_include_directory(fmt)
-target_link_library(fmt "libfmt*")
+add_library(fmt STATIC
+        "${CMAKE_CURRENT_SOURCE_DIR}/source/format.cc"
+        "${CMAKE_CURRENT_SOURCE_DIR}/source/posix.cc"
+)
+
+target_include_directories(fmt PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+
+target_link_libraries(fmt PUBLIC eastl)
+
+if(WIN32)
+    set_target_properties(eastl PROPERTIES CXX_STANDARD "17")
+
+    set(compiler_flags
+            CMAKE_CXX_FLAGS
+            CMAKE_CXX_FLAGS_DEBUG
+            CMAKE_CXX_FLAGS_RELEASE
+    )
+
+    foreach(compiler_flag ${compiler_flags})
+        string(REPLACE "/MD" "/MT" ${compiler_flag} "${${compiler_flag}}")
+    endforeach()
+endif()

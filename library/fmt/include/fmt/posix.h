@@ -103,7 +103,7 @@ class basic_cstring_view {
     Constructs a string reference from an ``std::string`` object.
     \endrst
    */
-  basic_cstring_view(const std::basic_string<Char> &s) : data_(s.c_str()) {}
+  basic_cstring_view(const eastl::basic_string<Char> &s) : data_(s.c_str()) {}
 
   /** Returns the pointer to a C string. */
   const Char *c_str() const { return data_; }
@@ -212,12 +212,12 @@ public:
   // of MinGW that define fileno as a macro.
   FMT_API int (fileno)() const;
 
-  void vprint(string_view format_str, format_args args) {
+  void vprint(eastl::string_view format_str, format_args args) {
     fmt::vprint(file_, format_str, args);
   }
 
   template <typename... Args>
-  inline void print(string_view format_str, const Args & ... args) {
+  inline void print(eastl::string_view format_str, const Args & ... args) {
     vprint(format_str, make_format_args(args...));
   }
 };

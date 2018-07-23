@@ -70,7 +70,7 @@ class is_streamable {
  public:
   // std::string operator<< is not considered user-defined because we handle strings
   // specially.
-  static const bool value = result::value && !std::is_same<T, std::string>::value;
+  static const bool value = result::value && !std::is_same<T, eastl::string>::value;
 };
 
 // Disable conversion to int if T has an overloaded operator<< which is a free
@@ -117,21 +117,21 @@ struct format_enum<T,
 template <typename T, typename Char>
 struct formatter<T, Char,
     typename std::enable_if<internal::is_streamable<T, Char>::value>::type>
-    : formatter<basic_string_view<Char>, Char> {
+    : formatter<eastl::basic_string_view<Char>, Char> {
 
   template <typename Context>
   auto format(const T &value, Context &ctx) -> decltype(ctx.out()) {
     basic_memory_buffer<Char> buffer;
     internal::format_value(buffer, value);
-    basic_string_view<Char> str(buffer.data(), buffer.size());
-    formatter<basic_string_view<Char>, Char>::format(str, ctx);
+    eastl::basic_string_view<Char> str(buffer.data(), buffer.size());
+    formatter<eastl::basic_string_view<Char>, Char>::format(str, ctx);
     return ctx.out();
   }
 };
 
 template <typename Char>
 inline void vprint(std::basic_ostream<Char> &os,
-                   basic_string_view<Char> format_str,
+                   eastl::basic_string_view<Char> format_str,
                    basic_format_args<typename buffer_context<Char>::type> args) {
   basic_memory_buffer<Char> buffer;
   vformat_to(buffer, format_str, args);
@@ -147,16 +147,21 @@ inline void vprint(std::basic_ostream<Char> &os,
   \endrst
  */
 template <typename... Args>
-inline void print(std::ostream &os, string_view format_str,
+inline void print(std::ostream &os, eastl::string_view format_str,
                   const Args & ... args) {
   vprint<char>(os, format_str, make_format_args<format_context>(args...));
 }
 
 template <typename... Args>
-inline void print(std::wostream &os, wstring_view format_str,
+inline void print(std::wostream &os, eastl::wstring_view format_str,
                   const Args & ... args) {
   vprint<wchar_t>(os, format_str, make_format_args<wformat_context>(args...));
 }
 FMT_END_NAMESPACE
+
+static std::ostream &operator<<(std::ostream &os, const eastl::string &string) {
+  os << string.c_str();
+  return os;
+}
 
 #endif  // FMT_OSTREAM_H_

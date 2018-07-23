@@ -13,6 +13,23 @@ cmake_minimum_required(VERSION 3.9)
 
 project(imgui)
 
-add_library(imgui INTERFACE IMPORTED GLOBAL)
-target_include_directory(imgui)
-target_link_library(imgui "libimgui*")
+add_library(imgui STATIC
+        "${CMAKE_CURRENT_SOURCE_DIR}/source/imgui.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/source/imgui_demo.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/source/imgui_draw.cpp"
+)
+
+target_include_directories(imgui PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+target_include_directories(imgui PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include/imgui")
+
+if(WIN32)
+    set(compiler_flags
+            CMAKE_CXX_FLAGS
+            CMAKE_CXX_FLAGS_DEBUG
+            CMAKE_CXX_FLAGS_RELEASE
+            )
+
+    foreach(compiler_flag ${compiler_flags})
+        string(REPLACE "/MD" "/MT" ${compiler_flag} "${${compiler_flag}}")
+    endforeach()
+endif()

@@ -280,8 +280,6 @@ macro(finalize_executable target_name)
         set_target_properties("${target_name}" PROPERTIES
                 COMPILE_FLAGS "/Zc:__cplusplus")
 
-        get_target_property(myCOMPILE_FLAGS "${target_name}" "COMPILE_FLAGS")
-
         set(compiler_flags
                 CMAKE_CXX_FLAGS
                 CMAKE_CXX_FLAGS_DEBUG

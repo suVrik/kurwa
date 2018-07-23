@@ -13,7 +13,6 @@
 
 #pragma once
 
-#define EASTL_USER_DEFINED_ALLOCATOR
 #include <EASTL/string_hash_map.h>
 
 namespace kw {

@@ -23,10 +23,8 @@ namespace kw {
 GameNative::GameNative() noexcept {
     is_initialized = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_HAPTIC | SDL_INIT_GAMECONTROLLER) == 0;
     if (!is_initialized) {
-        //        TODO: recompile libfmt without std?
-        //        message_box(fmt::format("Failed to initialize SDL2!\n"
-        //                                "The error message: {}", SDL_GetError()));
-        message_box("Failed to initialize SDL2!\n");
+        message_box(fmt::format("Failed to initialize SDL2!\n"
+                                "The error message: {}", SDL_GetError()));
     }
 }
 

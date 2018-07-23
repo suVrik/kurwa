@@ -13,7 +13,28 @@ cmake_minimum_required(VERSION 3.9)
 
 project(gmock)
 
-add_library(gmock INTERFACE IMPORTED GLOBAL)
-target_include_directory(gmock)
-target_link_library(gmock "libgmock*")
-target_link_library(gmock LINUX pthread)
+add_library(gmock STATIC
+        "${CMAKE_CURRENT_SOURCE_DIR}/source/gtest-all.cc"
+        "${CMAKE_CURRENT_SOURCE_DIR}/source/gmock-all.cc"
+)
+
+target_include_directories(gmock PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+
+if(WIN32)
+    set_target_properties(gmock PROPERTIES
+            COMPILE_FLAGS "/Zc:__cplusplus"
+            CXX_STANDARD "17"
+    )
+
+    set(compiler_flags
+            CMAKE_CXX_FLAGS
+            CMAKE_CXX_FLAGS_DEBUG
+            CMAKE_CXX_FLAGS_RELEASE
+    )
+
+    foreach(compiler_flag ${compiler_flags})
+        string(REPLACE "/MD" "/MT" ${compiler_flag} "${${compiler_flag}}")
+    endforeach()
+elseif(UNIX AND NOT APPLE)
+    target_link_libraries(gmock PRIVATE pthread)
+endif()

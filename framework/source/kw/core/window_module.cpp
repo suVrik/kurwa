@@ -17,6 +17,8 @@
 #include <SDL2/SDL_video.h>
 #include <SDL2/SDL_events.h>
 
+#include <fmt/format.h>
+
 namespace kw {
 WindowModule::WindowModule(GameNative* game)
         : m_title("Game")
@@ -26,8 +28,8 @@ WindowModule::WindowModule(GameNative* game)
                                 m_width, m_height, SDL_WINDOW_SHOWN);
 
     if (m_window == nullptr) {
-        // TODO: better description with libfmt
-        throw std::runtime_error("Failed to initialize a window!");
+        throw std::runtime_error(fmt::format("Failed to initialize a window!\n"
+                                             "The error message: {}", SDL_GetError()).c_str());
     }
 
     // TODO: needs to be disconnected
