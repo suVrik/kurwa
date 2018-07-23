@@ -22,6 +22,8 @@ add_library(imgui STATIC
 target_include_directories(imgui PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_include_directories(imgui PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include/imgui")
 
+set_target_properties(imgui PROPERTIES CXX_STANDARD "17")
+
 if(WIN32)
     set(compiler_flags
             CMAKE_CXX_FLAGS

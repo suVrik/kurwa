@@ -16,3 +16,17 @@ project(glm)
 add_library(glm STATIC "${CMAKE_CURRENT_SOURCE_DIR}/source/glm.cpp")
 
 target_include_directories(glm "${CMAKE_CURRENT_SOURCE_DIR}/include")
+
+set_target_properties(glm PROPERTIES CXX_STANDARD "17")
+
+if(WIN32)
+    set(compiler_flags
+            CMAKE_CXX_FLAGS
+            CMAKE_CXX_FLAGS_DEBUG
+            CMAKE_CXX_FLAGS_RELEASE
+            )
+
+    foreach(compiler_flag ${compiler_flags})
+        string(REPLACE "/MD" "/MT" ${compiler_flag} "${${compiler_flag}}")
+    endforeach()
+endif()

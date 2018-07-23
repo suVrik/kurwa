@@ -20,6 +20,8 @@ add_library(gmock STATIC
 
 target_include_directories(gmock PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
+set_target_properties(gmock PROPERTIES CXX_STANDARD "17")
+
 if(WIN32)
     set_target_properties(gmock PROPERTIES
             COMPILE_FLAGS "/Zc:__cplusplus"

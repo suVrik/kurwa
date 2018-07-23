@@ -18,6 +18,8 @@ add_library(tinyxml2 STATIC "${CMAKE_CURRENT_SOURCE_DIR}/source/tinyxml2.cpp")
 target_include_directories(tinyxml2 PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_include_directories(tinyxml2 PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include/tinyxml2")
 
+set_target_properties(tinyxml2 PROPERTIES CXX_STANDARD "17")
+
 if(WIN32)
     set(compiler_flags
             CMAKE_CXX_FLAGS

@@ -22,9 +22,9 @@ target_include_directories(fmt PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 target_link_libraries(fmt PUBLIC eastl)
 
-if(WIN32)
-    set_target_properties(eastl PROPERTIES CXX_STANDARD "17")
+set_target_properties(fmt PROPERTIES CXX_STANDARD "17")
 
+if(WIN32)
     set(compiler_flags
             CMAKE_CXX_FLAGS
             CMAKE_CXX_FLAGS_DEBUG

@@ -37,9 +37,9 @@ target_compile_definitions(eastl PUBLIC
         EASTL_NAME_ENABLED=0
 )
 
-if(WIN32)
-    set_target_properties(eastl PROPERTIES CXX_STANDARD "17")
+set_target_properties(eastl PROPERTIES CXX_STANDARD "17")
 
+if(WIN32)
     set(compiler_flags
             CMAKE_CXX_FLAGS
             CMAKE_CXX_FLAGS_DEBUG
