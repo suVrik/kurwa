@@ -456,8 +456,8 @@ class format_error : public std::runtime_error {
   explicit format_error(const char *message)
   : std::runtime_error(message) {}
 
-  explicit format_error(const std::string &message)
-  : std::runtime_error(message) {}
+  explicit format_error(const eastl::string &message)
+  : std::runtime_error(message.c_str()) {}
 };
 
 namespace internal {
@@ -1045,7 +1045,7 @@ struct no_thousands_sep {
 template <typename Char>
 class add_thousands_sep {
  private:
-  basic_string_view<Char> sep_;
+  eastl::basic_string_view<Char> sep_;
 
   // Index of a decimal digit with the least significant digit having index 0.
   unsigned digit_index_;
@@ -1053,7 +1053,7 @@ class add_thousands_sep {
  public:
   typedef Char char_type;
 
-  explicit add_thousands_sep(basic_string_view<Char> sep)
+  explicit add_thousands_sep(eastl::basic_string_view<Char> sep)
     : sep_(sep), digit_index_(0) {}
 
   void operator()(Char *&buffer) {
@@ -1152,11 +1152,11 @@ class utf8_to_utf16 {
   wmemory_buffer buffer_;
 
  public:
-  FMT_API explicit utf8_to_utf16(string_view s);
-  operator wstring_view() const { return wstring_view(&buffer_[0], size()); }
+  FMT_API explicit utf8_to_utf16(eastl::string_view s);
+  operator eastl::wstring_view() const { return eastl::wstring_view(&buffer_[0], size()); }
   size_t size() const { return buffer_.size() - 1; }
   const wchar_t *c_str() const { return &buffer_[0]; }
-  std::wstring str() const { return std::wstring(&buffer_[0], size()); }
+  eastl::wstring str() const { return eastl::wstring(&buffer_[0], size()); }
 };
 
 // A converter from UTF-16 to UTF-8.
@@ -1167,20 +1167,20 @@ class utf16_to_utf8 {
 
  public:
   utf16_to_utf8() {}
-  FMT_API explicit utf16_to_utf8(wstring_view s);
-  operator string_view() const { return string_view(&buffer_[0], size()); }
+  FMT_API explicit utf16_to_utf8(eastl::wstring_view s);
+  operator eastl::string_view() const { return eastl::string_view(&buffer_[0], size()); }
   size_t size() const { return buffer_.size() - 1; }
   const char *c_str() const { return &buffer_[0]; }
-  std::string str() const { return std::string(&buffer_[0], size()); }
+  eastl::string str() const { return eastl::string(&buffer_[0], size()); }
 
   // Performs conversion returning a system error code instead of
   // throwing exception on conversion error. This method may still throw
   // in case of memory allocation error.
-  FMT_API int convert(wstring_view s);
+  FMT_API int convert(eastl::wstring_view s);
 };
 
 FMT_API void format_windows_error(fmt::internal::buffer &out, int error_code,
-                                  fmt::string_view message) FMT_NOEXCEPT;
+                                  eastl::string_view message) FMT_NOEXCEPT;
 #endif
 
 template <typename T = void>
@@ -1225,7 +1225,7 @@ FMT_CONSTEXPR typename internal::result_of<Visitor(int)>::type
   case internal::cstring_type:
     return vis(arg.value_.string.value);
   case internal::string_type:
-    return vis(basic_string_view<char_type>(
+    return vis(eastl::basic_string_view<char_type>(
                  arg.value_.string.value, arg.value_.string.size));
   case internal::pointer_type:
     return vis(arg.value_.pointer);
@@ -1528,14 +1528,14 @@ class arg_formatter_base {
   iterator out() { return writer_.out(); }
 
   void write(bool value) {
-    writer_.write_str(string_view(value ? "true" : "false"), specs_);
+    writer_.write_str(eastl::string_view(value ? "true" : "false"), specs_);
   }
 
   void write(const char_type *value) {
     if (!value)
       FMT_THROW(format_error("string pointer is null"));
     auto length = std::char_traits<char_type>::length(value);
-    writer_.write_str(basic_string_view<char_type>(value, length), specs_);
+    writer_.write_str(eastl::basic_string_view<char_type>(value, length), specs_);
   }
 
  public:
@@ -1599,7 +1599,7 @@ class arg_formatter_base {
     return out();
   }
 
-  iterator operator()(basic_string_view<char_type> value) {
+  iterator operator()(eastl::basic_string_view<char_type> value) {
     internal::check_string_type_spec(specs_.type_, internal::error_handler());
     writer_.write_str(value, specs_);
     return out();
@@ -1877,7 +1877,7 @@ struct arg_ref {
 
   FMT_CONSTEXPR arg_ref() : kind(NONE), index(0) {}
   FMT_CONSTEXPR explicit arg_ref(unsigned index) : kind(INDEX), index(index) {}
-  explicit arg_ref(basic_string_view<Char> name) : kind(NAME), name(name) {}
+  explicit arg_ref(eastl::basic_string_view<Char> name) : kind(NAME), name(name) {}
 
   FMT_CONSTEXPR arg_ref &operator=(unsigned idx) {
     kind = INDEX;
@@ -1888,7 +1888,7 @@ struct arg_ref {
   Kind kind;
   FMT_UNION {
     unsigned index;
-    basic_string_view<Char> name;
+    eastl::basic_string_view<Char> name;
   };
 };
 
@@ -1973,7 +1973,7 @@ FMT_CONSTEXPR Iterator parse_arg_id(Iterator it, IDHandler &&handler) {
   do {
     c = *++it;
   } while (is_name_start(c) || ('0' <= c && c <= '9'));
-  handler(basic_string_view<char_type>(pointer_from(start), to_unsigned(it - start)));
+  handler(eastl::basic_string_view<char_type>(pointer_from(start), to_unsigned(it - start)));
   return it;
 }
 
@@ -1984,7 +1984,7 @@ struct width_adapter {
 
   FMT_CONSTEXPR void operator()() { handler.on_dynamic_width(auto_id()); }
   FMT_CONSTEXPR void operator()(unsigned id) { handler.on_dynamic_width(id); }
-  FMT_CONSTEXPR void operator()(basic_string_view<Char> id) {
+  FMT_CONSTEXPR void operator()(eastl::basic_string_view<Char> id) {
     handler.on_dynamic_width(id);
   }
 
@@ -2004,7 +2004,7 @@ struct precision_adapter {
   FMT_CONSTEXPR void operator()(unsigned id) {
     handler.on_dynamic_precision(id);
   }
-  FMT_CONSTEXPR void operator()(basic_string_view<Char> id) {
+  FMT_CONSTEXPR void operator()(eastl::basic_string_view<Char> id) {
     handler.on_dynamic_precision(id);
   }
 
@@ -2127,7 +2127,7 @@ struct id_adapter {
 
   FMT_CONSTEXPR void operator()() { handler.on_arg_id(); }
   FMT_CONSTEXPR void operator()(unsigned id) { handler.on_arg_id(id); }
-  FMT_CONSTEXPR void operator()(basic_string_view<Char> id) {
+  FMT_CONSTEXPR void operator()(eastl::basic_string_view<Char> id) {
     handler.on_arg_id(id);
   }
 
@@ -2188,7 +2188,7 @@ template <typename Char, typename ErrorHandler, typename... Args>
 class format_string_checker {
  public:
   explicit FMT_CONSTEXPR format_string_checker(
-      basic_string_view<Char> format_str, ErrorHandler eh)
+      eastl::basic_string_view<Char> format_str, ErrorHandler eh)
     : arg_id_(-1), context_(format_str, eh),
       parse_funcs_{&parse_format_specs<Args, parse_context_type>...} {}
 
@@ -2203,7 +2203,7 @@ class format_string_checker {
     context_.check_arg_id(id);
     check_arg_id();
   }
-  FMT_CONSTEXPR void on_arg_id(basic_string_view<Char>) {}
+  FMT_CONSTEXPR void on_arg_id(eastl::basic_string_view<Char>) {}
 
   FMT_CONSTEXPR void on_replacement_field(const Char *) {}
 
@@ -2236,17 +2236,17 @@ class format_string_checker {
 
 template <typename Char, typename ErrorHandler, typename... Args>
 FMT_CONSTEXPR bool check_format_string(
-    basic_string_view<Char> s, ErrorHandler eh = ErrorHandler()) {
+    eastl::basic_string_view<Char> s, ErrorHandler eh = ErrorHandler()) {
   format_string_checker<Char, ErrorHandler, Args...> checker(s, eh);
   parse_format_string(s.begin(), checker);
   return true;
 }
 
-template <typename... Args, typename String>
-void check_format_string(String format_str) {
+template <typename... Args, typename string>
+void check_format_string(string format_str) {
   FMT_CONSTEXPR_DECL bool invalid_format =
       internal::check_format_string<char, internal::error_handler, Args...>(
-        string_view(format_str.data(), format_str.size()));
+        eastl::string_view(format_str.data(), format_str.size()));
   (void)invalid_format;
 }
 
@@ -2323,7 +2323,7 @@ class arg_formatter:
 */
 class system_error : public std::runtime_error {
  private:
-  FMT_API void init(int err_code, string_view format_str, format_args args);
+  FMT_API void init(int err_code, eastl::string_view format_str, format_args args);
 
  protected:
   int error_code_;
@@ -2350,7 +2350,7 @@ class system_error : public std::runtime_error {
    \endrst
   */
   template <typename... Args>
-  system_error(int error_code, string_view message, const Args & ... args)
+  system_error(int error_code, eastl::string_view message, const Args & ... args)
     : std::runtime_error("") {
     init(error_code, message, make_format_args(args...));
   }
@@ -2375,7 +2375,7 @@ class system_error : public std::runtime_error {
   \endrst
  */
 FMT_API void format_system_error(internal::buffer &out, int error_code,
-                                 fmt::string_view message) FMT_NOEXCEPT;
+                                 eastl::string_view message) FMT_NOEXCEPT;
 
 /**
   This template provides operations for formatting and writing data into a
@@ -2412,7 +2412,7 @@ class basic_writer {
 
   template <typename F>
   struct padded_int_writer {
-    string_view prefix;
+    eastl::string_view prefix;
     char_type fill;
     std::size_t padding;
     F f;
@@ -2430,7 +2430,7 @@ class basic_writer {
   //   <left-padding><prefix><numeric-padding><digits><right-padding>
   // where <digits> are written by f(it).
   template <typename Spec, typename F>
-  void write_int(unsigned num_digits, string_view prefix,
+  void write_int(unsigned num_digits, eastl::string_view prefix,
                  const Spec &spec, F f) {
     std::size_t size = prefix.size() + num_digits;
     char_type fill = static_cast<char_type>(spec.fill());
@@ -2477,7 +2477,7 @@ class basic_writer {
     char prefix[4];
     unsigned prefix_size;
 
-    string_view get_prefix() const { return string_view(prefix, prefix_size); }
+    eastl::string_view get_prefix() const { return eastl::string_view(prefix, prefix_size); }
 
     // Counts the number of digits in abs_value. BITS = log2(radix).
     template <unsigned BITS>
@@ -2582,7 +2582,7 @@ class basic_writer {
 
       template <typename It>
       void operator()(It &&it) const {
-        basic_string_view<char_type> s(&sep, SEP_SIZE);
+        eastl::basic_string_view<char_type> s(&sep, SEP_SIZE);
         it = format_decimal(it, abs_value, size,
                             internal::add_thousands_sep<char_type>(s));
       }
@@ -2662,7 +2662,7 @@ class basic_writer {
   }
 
   template <typename Char>
-  void write_str(basic_string_view<Char> str, const format_specs &spec);
+  void write_str(eastl::basic_string_view<Char> str, const format_specs &spec);
 
   // Appends floating-point length specifier to the format string.
   // The second argument is only used for overload resolution.
@@ -2730,19 +2730,19 @@ class basic_writer {
     Writes *value* to the buffer.
     \endrst
    */
-  void write(string_view value) {
+  void write(eastl::string_view value) {
     auto &&it = reserve(value.size());
     it = std::copy(value.begin(), value.end(), it);
   }
 
-  void write(wstring_view value) {
+  void write(eastl::wstring_view value) {
     internal::require_wchar<char_type>();
     auto &&it = reserve(value.size());
     it = std::uninitialized_copy(value.begin(), value.end(), it);
   }
 
   template <typename... FormatSpecs>
-  void write(basic_string_view<char_type> str, FormatSpecs... specs) {
+  void write(eastl::basic_string_view<char_type> str, FormatSpecs... specs) {
     write_str(str, format_specs(specs...));
   }
 
@@ -2782,7 +2782,7 @@ void basic_writer<Range>::write_padded(
 template <typename Range>
 template <typename Char>
 void basic_writer<Range>::write_str(
-    basic_string_view<Char> s, const format_specs &spec) {
+    eastl::basic_string_view<Char> s, const format_specs &spec) {
   const Char *data = s.data();
   std::size_t size = s.size();
   std::size_t precision = static_cast<std::size_t>(spec.precision_);
@@ -2966,14 +2966,14 @@ void basic_writer<Range>::write_double_sprintf(
 // Reports a system error without throwing an exception.
 // Can be used to report errors from destructors.
 FMT_API void report_system_error(int error_code,
-                                 string_view message) FMT_NOEXCEPT;
+                                 eastl::string_view message) FMT_NOEXCEPT;
 
 #if FMT_USE_WINDOWS_H
 
 /** A Windows error. */
 class windows_error : public system_error {
  private:
-  FMT_API void init(int error_code, string_view format_str, format_args args);
+  FMT_API void init(int error_code, eastl::string_view format_str, format_args args);
 
  public:
   /**
@@ -3005,7 +3005,7 @@ class windows_error : public system_error {
    \endrst
   */
   template <typename... Args>
-  windows_error(int error_code, string_view message, const Args & ... args) {
+  windows_error(int error_code, eastl::string_view message, const Args & ... args) {
     init(error_code, message, make_format_args(args...));
   }
 };
@@ -3013,7 +3013,7 @@ class windows_error : public system_error {
 // Reports a Windows error without throwing an exception.
 // Can be used to report errors from destructors.
 FMT_API void report_windows_error(int error_code,
-                                  string_view message) FMT_NOEXCEPT;
+                                  eastl::string_view message) FMT_NOEXCEPT;
 
 #endif
 
@@ -3091,7 +3091,7 @@ class format_int {
     Returns the content of the output buffer as an ``std::string``.
     \endrst
    */
-  std::string str() const { return std::string(str_, size()); }
+  eastl::string str() const { return eastl::string(str_, size()); }
 };
 
 // Formats a decimal integer value writing into buffer and returns
@@ -3280,7 +3280,7 @@ class dynamic_formatter {
 
 template <typename Range, typename Char>
 typename basic_format_context<Range, Char>::format_arg
-  basic_format_context<Range, Char>::get_arg(basic_string_view<char_type> name) {
+  basic_format_context<Range, Char>::get_arg(eastl::basic_string_view<char_type> name) {
   map_.init(this->args());
   format_arg arg = map_.find(name);
   if (arg.type() == internal::none_type)
@@ -3293,7 +3293,7 @@ struct format_handler : internal::error_handler {
   typedef internal::null_terminating_iterator<Char> iterator;
   typedef typename ArgFormatter::range range;
 
-  format_handler(range r, basic_string_view<Char> str,
+  format_handler(range r, eastl::basic_string_view<Char> str,
                  basic_format_args<Context> format_args)
     : context(r.begin(), str, format_args) {}
 
@@ -3310,7 +3310,7 @@ struct format_handler : internal::error_handler {
     context.parse_context().check_arg_id(id);
     arg = context.get_arg(id);
   }
-  void on_arg_id(basic_string_view<Char> id) {
+  void on_arg_id(eastl::basic_string_view<Char> id) {
     arg = context.get_arg(id);
   }
 
@@ -3346,7 +3346,7 @@ struct format_handler : internal::error_handler {
 /** Formats arguments and writes the output to the range. */
 template <typename ArgFormatter, typename Char, typename Context>
 typename Context::iterator vformat_to(typename ArgFormatter::range out,
-                                      basic_string_view<Char> format_str,
+                                      eastl::basic_string_view<Char> format_str,
                                       basic_format_args<Context> args) {
   typedef internal::null_terminating_iterator<Char> iterator;
   format_handler<ArgFormatter, Char, Context> h(out, format_str, args);
@@ -3364,9 +3364,9 @@ template <typename It, typename Char>
 struct arg_join {
   It begin;
   It end;
-  basic_string_view<Char> sep;
+  eastl::basic_string_view<Char> sep;
 
-  arg_join(It begin, It end, basic_string_view<Char> sep)
+  arg_join(It begin, It end, eastl::basic_string_view<Char> sep)
     : begin(begin), end(end), sep(sep) {}
 };
 
@@ -3392,25 +3392,25 @@ struct formatter<arg_join<It, Char>, Char>:
 };
 
 template <typename It>
-arg_join<It, char> join(It begin, It end, string_view sep) {
+arg_join<It, char> join(It begin, It end, eastl::string_view sep) {
   return arg_join<It, char>(begin, end, sep);
 }
 
 template <typename It>
-arg_join<It, wchar_t> join(It begin, It end, wstring_view sep) {
+arg_join<It, wchar_t> join(It begin, It end, eastl::wstring_view sep) {
   return arg_join<It, wchar_t>(begin, end, sep);
 }
 
 // The following causes ICE in gcc 4.4.
 #if FMT_USE_TRAILING_RETURN && (!FMT_GCC_VERSION || FMT_GCC_VERSION >= 405)
 template <typename Range>
-auto join(const Range &range, string_view sep)
+auto join(const Range &range, eastl::string_view sep)
     -> arg_join<decltype(internal::begin(range)), char> {
   return join(internal::begin(range), internal::end(range), sep);
 }
 
 template <typename Range>
-auto join(const Range &range, wstring_view sep)
+auto join(const Range &range, eastl::wstring_view sep)
     -> arg_join<decltype(internal::begin(range)), wchar_t> {
   return join(internal::begin(range), internal::end(range), sep);
 }
@@ -3428,9 +3428,9 @@ auto join(const Range &range, wstring_view sep)
   \endrst
  */
 template <typename T>
-std::string to_string(const T &value) {
-  std::string str;
-  internal::container_buffer<std::string> buf(str);
+eastl::string to_string(const T &value) {
+  eastl::string str;
+  internal::container_buffer<eastl::string> buf(str);
   writer(buf).write(value);
   return str;
 }
@@ -3439,40 +3439,40 @@ std::string to_string(const T &value) {
   Converts *value* to ``std::wstring`` using the default format for type *T*.
  */
 template <typename T>
-std::wstring to_wstring(const T &value) {
-  std::wstring str;
-  internal::container_buffer<std::wstring> buf(str);
+eastl::wstring to_wstring(const T &value) {
+  eastl::wstring str;
+  internal::container_buffer<eastl::wstring> buf(str);
   wwriter(buf).write(value);
   return str;
 }
 
 template <typename Char, std::size_t SIZE>
-std::basic_string<Char> to_string(const basic_memory_buffer<Char, SIZE> &buf) {
-  return std::basic_string<Char>(buf.data(), buf.size());
+eastl::basic_string<Char> to_string(const basic_memory_buffer<Char, SIZE> &buf) {
+  return eastl::basic_string<Char>(buf.data(), buf.size());
 }
 
 inline format_context::iterator vformat_to(
-    internal::buffer &buf, string_view format_str, format_args args) {
+    internal::buffer &buf, eastl::string_view format_str, format_args args) {
   typedef back_insert_range<internal::buffer> range;
   return vformat_to<arg_formatter<range>>(buf, format_str, args);
 }
 
 inline wformat_context::iterator vformat_to(
-    internal::wbuffer &buf, wstring_view format_str, wformat_args args) {
+    internal::wbuffer &buf, eastl::wstring_view format_str, wformat_args args) {
   typedef back_insert_range<internal::wbuffer> range;
   return vformat_to<arg_formatter<range>>(buf, format_str, args);
 }
 
 template <typename... Args, std::size_t SIZE = inline_buffer_size>
 inline format_context::iterator format_to(
-    basic_memory_buffer<char, SIZE> &buf, string_view format_str,
+    basic_memory_buffer<char, SIZE> &buf, eastl::string_view format_str,
     const Args & ... args) {
   return vformat_to(buf, format_str, make_format_args(args...));
 }
 
 template <typename... Args, std::size_t SIZE = inline_buffer_size>
 inline wformat_context::iterator format_to(
-    basic_memory_buffer<wchar_t, SIZE> &buf, wstring_view format_str,
+    basic_memory_buffer<wchar_t, SIZE> &buf, eastl::wstring_view format_str,
     const Args & ... args) {
   return vformat_to(buf, format_str, make_format_args<wformat_context>(args...));
 }
@@ -3489,14 +3489,14 @@ struct format_args_t {
 };
 
 template <typename OutputIt, typename... Args>
-inline OutputIt vformat_to(OutputIt out, string_view format_str,
+inline OutputIt vformat_to(OutputIt out, eastl::string_view format_str,
                            typename format_args_t<OutputIt>::type args) {
   typedef output_range<OutputIt, char> range;
   return vformat_to<arg_formatter<range>>(range(out), format_str, args);
 }
 template <typename OutputIt, typename... Args>
 inline OutputIt vformat_to(
-    OutputIt out, wstring_view format_str,
+    OutputIt out, eastl::wstring_view format_str,
     typename format_args_t<OutputIt, wchar_t>::type args) {
   typedef output_range<OutputIt, wchar_t> range;
   return vformat_to<arg_formatter<range>>(range(out), format_str, args);
@@ -3514,7 +3514,7 @@ inline OutputIt vformat_to(
  \endrst
  */
 template <typename OutputIt, typename... Args>
-inline OutputIt format_to(OutputIt out, string_view format_str,
+inline OutputIt format_to(OutputIt out, eastl::string_view format_str,
                           const Args & ... args) {
   return vformat_to(out, format_str,
       make_format_args<typename format_context_t<OutputIt>::type>(args...));
@@ -3524,7 +3524,7 @@ template <typename Container, typename... Args>
 inline typename std::enable_if<
   is_contiguous<Container>::value, std::back_insert_iterator<Container>>::type
     format_to(std::back_insert_iterator<Container> out,
-              string_view format_str, const Args & ... args) {
+              eastl::string_view format_str, const Args & ... args) {
   return vformat_to(out, format_str, make_format_args<format_context>(args...));
 }
 
@@ -3532,7 +3532,7 @@ template <typename Container, typename... Args>
 inline typename std::enable_if<
   is_contiguous<Container>::value, std::back_insert_iterator<Container>>::type
     format_to(std::back_insert_iterator<Container> out,
-              wstring_view format_str, const Args & ... args) {
+              eastl::wstring_view format_str, const Args & ... args) {
   return vformat_to(out, format_str, make_format_args<wformat_context>(args...));
 }
 
@@ -3559,7 +3559,7 @@ inline format_arg_store<format_to_n_context<OutputIt>, Args...>
 
 template <typename OutputIt, typename... Args>
 inline format_to_n_result<OutputIt> vformat_to_n(
-    OutputIt out, std::size_t n, string_view format_str,
+    OutputIt out, std::size_t n, eastl::string_view format_str,
     format_to_n_args<OutputIt> args) {
   typedef internal::truncating_iterator<OutputIt> It;
   auto it = vformat_to(It(out, n), format_str, args);
@@ -3575,42 +3575,42 @@ inline format_to_n_result<OutputIt> vformat_to_n(
  */
 template <typename OutputIt, typename... Args>
 inline format_to_n_result<OutputIt> format_to_n(
-    OutputIt out, std::size_t n, string_view format_str, const Args &... args) {
+    OutputIt out, std::size_t n, eastl::string_view format_str, const Args &... args) {
   return vformat_to_n<OutputIt>(
     out, n, format_str, make_format_to_n_args<OutputIt>(args...));
 }
 template <typename OutputIt, typename... Args>
 inline format_to_n_result<OutputIt> format_to_n(
-    OutputIt out, std::size_t n, wstring_view format_str, const Args &... args) {
+    OutputIt out, std::size_t n, eastl::wstring_view format_str, const Args &... args) {
   typedef internal::truncating_iterator<OutputIt> It;
   auto it = vformat_to(It(out, n), format_str,
       make_format_args<typename format_context_t<It, wchar_t>::type>(args...));
   return {it.base(), it.count()};
 }
 
-inline std::string vformat(string_view format_str, format_args args) {
+inline eastl::string vformat(eastl::string_view format_str, format_args args) {
   memory_buffer buffer;
   vformat_to(buffer, format_str, args);
   return fmt::to_string(buffer);
 }
 
-inline std::wstring vformat(wstring_view format_str, wformat_args args) {
+inline eastl::wstring vformat(eastl::wstring_view format_str, wformat_args args) {
   wmemory_buffer buffer;
   vformat_to(buffer, format_str, args);
   return to_string(buffer);
 }
 
-template <typename String, typename... Args>
+template <typename string, typename... Args>
 inline typename std::enable_if<
-  internal::is_format_string<String>::value, std::string>::type
-    format(String format_str, const Args & ... args) {
+  internal::is_format_string<string>::value, eastl::string>::type
+    format(string format_str, const Args & ... args) {
   internal::check_format_string<Args...>(format_str);
   return vformat(format_str.data(), make_format_args(args...));
 }
 
-template <typename String, typename... Args>
-inline typename std::enable_if<internal::is_format_string<String>::value>::type
-    print(String format_str, const Args & ... args) {
+template <typename string, typename... Args>
+inline typename std::enable_if<internal::is_format_string<string>::value>::type
+    print(string format_str, const Args & ... args) {
   internal::check_format_string<Args...>(format_str);
   return vprint(format_str.data(), make_format_args(args...));
 }
@@ -3620,7 +3620,7 @@ inline typename std::enable_if<internal::is_format_string<String>::value>::type
   ``format(format_str, args...)``.
  */
 template <typename... Args>
-inline std::size_t formatted_size(string_view format_str,
+inline std::size_t formatted_size(eastl::string_view format_str,
                                   const Args & ... args) {
   auto it = format_to(internal::counting_iterator<char>(), format_str, args...);
   return it.count();
@@ -3789,8 +3789,8 @@ struct rgb {
   uint8_t b;
 };
 
-void vprint_rgb(rgb fd, string_view format, format_args args);
-void vprint_rgb(rgb fd, rgb bg, string_view format, format_args args);
+void vprint_rgb(rgb fd, eastl::string_view format, format_args args);
+void vprint_rgb(rgb fd, rgb bg, eastl::string_view format, format_args args);
 
 /**
   Formats a string and prints it to stdout using ANSI escape sequences to
@@ -3799,7 +3799,7 @@ void vprint_rgb(rgb fd, rgb bg, string_view format, format_args args);
     fmt::print(fmt::color::red, "Elapsed time: {0:.2f} seconds", 1.23);
  */
 template <typename... Args>
-inline void print(rgb fd, string_view format_str, const Args & ... args) {
+inline void print(rgb fd, eastl::string_view format_str, const Args & ... args) {
   vprint_rgb(fd, format_str, make_format_args(args...));
 }
 
@@ -3810,7 +3810,7 @@ inline void print(rgb fd, string_view format_str, const Args & ... args) {
     fmt::print(fmt::color::red, fmt::color::black, "Elapsed time: {0:.2f} seconds", 1.23);
  */
 template <typename... Args>
-inline void print(rgb fd, rgb bg, string_view format_str, const Args & ... args) {
+inline void print(rgb fd, rgb bg, eastl::string_view format_str, const Args & ... args) {
   vprint_rgb(fd, bg, format_str, make_format_args(args...));
 }
 #endif  // FMT_EXTENDED_COLORS
@@ -3823,11 +3823,11 @@ template <typename Char, Char... CHARS>
 class udl_formatter {
  public:
   template <typename... Args>
-  std::basic_string<Char> operator()(const Args &... args) const {
+  eastl::basic_string<Char> operator()(const Args &... args) const {
     FMT_CONSTEXPR_DECL Char s[] = {CHARS..., '\0'};
     FMT_CONSTEXPR_DECL bool invalid_format =
         check_format_string<Char, error_handler, Args...>(
-          basic_string_view<Char>(s, sizeof...(CHARS)));
+          eastl::basic_string_view<Char>(s, sizeof...(CHARS)));
     (void)invalid_format;
     return format(s, args...);
   }

@@ -86,7 +86,7 @@ inline int fmt_snprintf(char *buffer, size_t size, const char *format, ...) {
 # define FMT_SWPRINTF swprintf
 #endif // defined(_WIN32) && defined(__MINGW32__) && !defined(__NO_ISOCEXT)
 
-typedef void (*FormatFunc)(internal::buffer &, int, string_view);
+typedef void (*FormatFunc)(internal::buffer &, int, eastl::string_view);
 
 // Portable thread-safe version of strerror.
 // Sets buffer to point to a string describing the error code.
@@ -156,7 +156,7 @@ int safe_strerror(
 }
 
 void format_error_code(internal::buffer &out, int error_code,
-                       string_view message) FMT_NOEXCEPT {
+                       eastl::string_view message) FMT_NOEXCEPT {
   // Report error code making sure that the output fits into
   // inline_buffer_size to avoid dynamic memory allocation and potential
   // bad_alloc.
@@ -183,7 +183,7 @@ void format_error_code(internal::buffer &out, int error_code,
 }
 
 void report_error(FormatFunc func, int error_code,
-                  string_view message) FMT_NOEXCEPT {
+                  eastl::string_view message) FMT_NOEXCEPT {
   memory_buffer full_message;
   func(full_message, error_code, message);
   // Use Writer::data instead of Writer::c_str to avoid potential memory
@@ -209,12 +209,12 @@ FMT_FUNC Char internal::thousands_sep(locale_provider *lp) {
 }
 
 FMT_FUNC void system_error::init(
-    int err_code, string_view format_str, format_args args) {
+    int err_code, eastl::string_view format_str, format_args args) {
   error_code_ = err_code;
   memory_buffer buffer;
   format_system_error(buffer, err_code, vformat(format_str, args));
   std::runtime_error &base = *this;
-  base = std::runtime_error(to_string(buffer));
+  base = std::runtime_error(to_string(buffer).c_str());
 }
 
 namespace internal {
@@ -339,7 +339,7 @@ FMT_FUNC fp get_cached_power(int min_exponent, int &pow10_exponent) {
 
 #if FMT_USE_WINDOWS_H
 
-FMT_FUNC internal::utf8_to_utf16::utf8_to_utf16(string_view s) {
+FMT_FUNC internal::utf8_to_utf16::utf8_to_utf16(eastl::string_view s) {
   static const char ERROR_MSG[] = "cannot convert string from UTF-8 to UTF-16";
   if (s.size() > INT_MAX)
     FMT_THROW(windows_error(ERROR_INVALID_PARAMETER, ERROR_MSG));
@@ -363,14 +363,14 @@ FMT_FUNC internal::utf8_to_utf16::utf8_to_utf16(string_view s) {
   buffer_[length] = 0;
 }
 
-FMT_FUNC internal::utf16_to_utf8::utf16_to_utf8(wstring_view s) {
+FMT_FUNC internal::utf16_to_utf8::utf16_to_utf8(eastl::wstring_view s) {
   if (int error_code = convert(s)) {
     FMT_THROW(windows_error(error_code,
         "cannot convert string from UTF-16 to UTF-8"));
   }
 }
 
-FMT_FUNC int internal::utf16_to_utf8::convert(wstring_view s) {
+FMT_FUNC int internal::utf16_to_utf8::convert(eastl::wstring_view s) {
   if (s.size() > INT_MAX)
     return ERROR_INVALID_PARAMETER;
   int s_size = static_cast<int>(s.size());
@@ -395,16 +395,16 @@ FMT_FUNC int internal::utf16_to_utf8::convert(wstring_view s) {
 }
 
 FMT_FUNC void windows_error::init(
-    int err_code, string_view format_str, format_args args) {
+    int err_code, eastl::string_view format_str, format_args args) {
   error_code_ = err_code;
   memory_buffer buffer;
   internal::format_windows_error(buffer, err_code, vformat(format_str, args));
   std::runtime_error &base = *this;
-  base = std::runtime_error(to_string(buffer));
+  base = std::runtime_error(to_string(buffer).c_str());
 }
 
 FMT_FUNC void internal::format_windows_error(
-    internal::buffer &out, int error_code, string_view message) FMT_NOEXCEPT {
+    internal::buffer &out, int error_code, eastl::string_view message) FMT_NOEXCEPT {
   FMT_TRY {
     wmemory_buffer buf;
     buf.resize(inline_buffer_size);
@@ -436,7 +436,7 @@ FMT_FUNC void internal::format_windows_error(
 #endif  // FMT_USE_WINDOWS_H
 
 FMT_FUNC void format_system_error(
-    internal::buffer &out, int error_code, string_view message) FMT_NOEXCEPT {
+    internal::buffer &out, int error_code, eastl::string_view message) FMT_NOEXCEPT {
   FMT_TRY {
     memory_buffer buf;
     buf.resize(inline_buffer_size);
@@ -468,39 +468,39 @@ FMT_FUNC void internal::error_handler::on_error(const char *message) {
 }
 
 FMT_FUNC void report_system_error(
-    int error_code, fmt::string_view message) FMT_NOEXCEPT {
+    int error_code, eastl::string_view message) FMT_NOEXCEPT {
   report_error(format_system_error, error_code, message);
 }
 
 #if FMT_USE_WINDOWS_H
 FMT_FUNC void report_windows_error(
-    int error_code, fmt::string_view message) FMT_NOEXCEPT {
+    int error_code, eastl::string_view message) FMT_NOEXCEPT {
   report_error(internal::format_windows_error, error_code, message);
 }
 #endif
 
-FMT_FUNC void vprint(std::FILE *f, string_view format_str, format_args args) {
+FMT_FUNC void vprint(std::FILE *f, eastl::string_view format_str, format_args args) {
   memory_buffer buffer;
   vformat_to(buffer, format_str, args);
   std::fwrite(buffer.data(), 1, buffer.size(), f);
 }
 
-FMT_FUNC void vprint(std::FILE *f, wstring_view format_str, wformat_args args) {
+FMT_FUNC void vprint(std::FILE *f, eastl::wstring_view format_str, wformat_args args) {
   wmemory_buffer buffer;
   vformat_to(buffer, format_str, args);
   std::fwrite(buffer.data(), sizeof(wchar_t), buffer.size(), f);
 }
 
-FMT_FUNC void vprint(string_view format_str, format_args args) {
+FMT_FUNC void vprint(eastl::string_view format_str, format_args args) {
   vprint(stdout, format_str, args);
 }
 
-FMT_FUNC void vprint(wstring_view format_str, wformat_args args) {
+FMT_FUNC void vprint(eastl::wstring_view format_str, wformat_args args) {
   vprint(stdout, format_str, args);
 }
 
 #ifndef FMT_EXTENDED_COLORS
-FMT_FUNC void vprint_colored(color c, string_view format, format_args args) {
+FMT_FUNC void vprint_colored(color c, eastl::string_view format, format_args args) {
   char escape[] = "\x1b[30m";
   escape[3] = static_cast<char>('0' + c);
   std::fputs(escape, stdout);
@@ -508,7 +508,7 @@ FMT_FUNC void vprint_colored(color c, string_view format, format_args args) {
   std::fputs(internal::data::RESET_COLOR, stdout);
 }
 
-FMT_FUNC void vprint_colored(color c, wstring_view format, wformat_args args) {
+FMT_FUNC void vprint_colored(color c, eastl::wstring_view format, wformat_args args) {
   wchar_t escape[] = L"\x1b[30m";
   escape[3] = static_cast<wchar_t>('0' + c);
   std::fputws(escape, stdout);
@@ -524,7 +524,7 @@ FMT_CONSTEXPR void to_esc(uint8_t c, char out[], int offset) {
 }
 } // namespace internal
 
-FMT_FUNC void vprint_rgb(rgb fd, string_view format, format_args args) {
+FMT_FUNC void vprint_rgb(rgb fd, eastl::string_view format, format_args args) {
   char escape_fd[] = "\x1b[38;2;000;000;000m";
   internal::to_esc(fd.r, escape_fd, 7);
   internal::to_esc(fd.g, escape_fd, 11);
@@ -535,7 +535,7 @@ FMT_FUNC void vprint_rgb(rgb fd, string_view format, format_args args) {
   std::fputs(internal::data::RESET_COLOR, stdout);
 }
 
-FMT_FUNC void vprint_rgb(rgb fd, rgb bg, string_view format, format_args args) {
+FMT_FUNC void vprint_rgb(rgb fd, rgb bg, eastl::string_view format, format_args args) {
   char escape_fd[] = "\x1b[38;2;000;000;000m"; // foreground color
   char escape_bg[] = "\x1b[48;2;000;000;000m"; // background color
   internal::to_esc(fd.r, escape_fd, 7);

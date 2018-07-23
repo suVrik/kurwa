@@ -13,6 +13,21 @@ cmake_minimum_required(VERSION 3.9)
 
 project(tinyxml2)
 
-add_library(tinyxml2 INTERFACE IMPORTED GLOBAL)
-target_include_directory(tinyxml2)
-target_link_library(tinyxml2 "libtinyxml2*")
+add_library(tinyxml2 STATIC "${CMAKE_CURRENT_SOURCE_DIR}/source/tinyxml2.cpp")
+
+target_include_directories(tinyxml2 PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+target_include_directories(tinyxml2 PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include/tinyxml2")
+
+set_target_properties(tinyxml2 PROPERTIES CXX_STANDARD "17")
+
+if(WIN32)
+    set(compiler_flags
+            CMAKE_CXX_FLAGS
+            CMAKE_CXX_FLAGS_DEBUG
+            CMAKE_CXX_FLAGS_RELEASE
+    )
+
+    foreach(compiler_flag ${compiler_flags})
+        string(REPLACE "/MD" "/MT" ${compiler_flag} "${${compiler_flag}}")
+    endforeach()
+endif()

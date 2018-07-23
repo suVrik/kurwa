@@ -302,7 +302,7 @@ class printf_arg_formatter:
     return this->out();
   }
 
-  iterator operator()(basic_string_view<char_type> value) {
+  iterator operator()(eastl::basic_string_view<char_type> value) {
     return base::operator()(value);
   }
 
@@ -375,7 +375,7 @@ class basic_printf_context :
    appropriate lifetimes.
    \endrst
    */
-  basic_printf_context(OutputIt out, basic_string_view<char_type> format_str,
+  basic_printf_context(OutputIt out, eastl::basic_string_view<char_type> format_str,
                        basic_format_args<basic_printf_context> args)
     : base(out, format_str, args) {}
 
@@ -567,7 +567,7 @@ void basic_printf_context<OutputIt, Char, AF>::format() {
 }
 
 template <typename Char, typename Context>
-void printf(internal::basic_buffer<Char> &buf, basic_string_view<Char> format,
+void printf(internal::basic_buffer<Char> &buf, eastl::basic_string_view<Char> format,
             basic_format_args<Context> args) {
   Context(std::back_inserter(buf), format, args).format();
 }
@@ -587,7 +587,7 @@ inline format_arg_store<printf_context<internal::buffer>::type, Args...>
 typedef basic_format_args<printf_context<internal::buffer>::type> printf_args;
 typedef basic_format_args<printf_context<internal::wbuffer>::type> wprintf_args;
 
-inline std::string vsprintf(string_view format, printf_args args) {
+inline eastl::string vsprintf(eastl::string_view format, printf_args args) {
   memory_buffer buffer;
   printf(buffer, format, args);
   return to_string(buffer);
@@ -603,25 +603,25 @@ inline std::string vsprintf(string_view format, printf_args args) {
   \endrst
 */
 template <typename... Args>
-inline std::string sprintf(string_view format_str, const Args & ... args) {
+inline eastl::string sprintf(eastl::string_view format_str, const Args & ... args) {
   return vsprintf(format_str,
     make_format_args<typename printf_context<internal::buffer>::type>(args...));
 }
 
-inline std::wstring vsprintf(wstring_view format, wprintf_args args) {
+inline eastl::wstring vsprintf(eastl::wstring_view format, wprintf_args args) {
   wmemory_buffer buffer;
   printf(buffer, format, args);
   return to_string(buffer);
 }
 
 template <typename... Args>
-inline std::wstring sprintf(wstring_view format_str, const Args & ... args) {
+inline eastl::wstring sprintf(eastl::wstring_view format_str, const Args & ... args) {
   return vsprintf(format_str,
     make_format_args<typename printf_context<internal::wbuffer>::type>(args...));
 }
 
 template <typename Char>
-inline int vfprintf(std::FILE *f, basic_string_view<Char> format,
+inline int vfprintf(std::FILE *f, eastl::basic_string_view<Char> format,
                     basic_format_args<typename printf_context<
                       internal::basic_buffer<Char>>::type> args) {
   basic_memory_buffer<Char> buffer;
@@ -641,24 +641,24 @@ inline int vfprintf(std::FILE *f, basic_string_view<Char> format,
   \endrst
  */
 template <typename... Args>
-inline int fprintf(std::FILE *f, string_view format_str, const Args & ... args) {
+inline int fprintf(std::FILE *f, eastl::string_view format_str, const Args & ... args) {
   auto vargs = make_format_args<
     typename printf_context<internal::buffer>::type>(args...);
   return vfprintf<char>(f, format_str, vargs);
 }
 
 template <typename... Args>
-inline int fprintf(std::FILE *f, wstring_view format_str,
+inline int fprintf(std::FILE *f, eastl::wstring_view format_str,
                    const Args & ... args) {
   return vfprintf(f, format_str,
     make_format_args<typename printf_context<internal::wbuffer>::type>(args...));
 }
 
-inline int vprintf(string_view format, printf_args args) {
+inline int vprintf(eastl::string_view format, printf_args args) {
   return vfprintf(stdout, format, args);
 }
 
-inline int vprintf(wstring_view format, wprintf_args args) {
+inline int vprintf(eastl::wstring_view format, wprintf_args args) {
   return vfprintf(stdout, format, args);
 }
 
@@ -672,18 +672,18 @@ inline int vprintf(wstring_view format, wprintf_args args) {
   \endrst
  */
 template <typename... Args>
-inline int printf(string_view format_str, const Args & ... args) {
+inline int printf(eastl::string_view format_str, const Args & ... args) {
   return vprintf(format_str,
     make_format_args<typename printf_context<internal::buffer>::type>(args...));
 }
 
 template <typename... Args>
-inline int printf(wstring_view format_str, const Args & ... args) {
+inline int printf(eastl::wstring_view format_str, const Args & ... args) {
   return vprintf(format_str,
     make_format_args<typename printf_context<internal::wbuffer>::type>(args...));
 }
 
-inline int vfprintf(std::ostream &os, string_view format_str,
+inline int vfprintf(std::ostream &os, eastl::string_view format_str,
                     printf_args args) {
   memory_buffer buffer;
   printf(buffer, format_str, args);
@@ -691,7 +691,7 @@ inline int vfprintf(std::ostream &os, string_view format_str,
   return static_cast<int>(buffer.size());
 }
 
-inline int vfprintf(std::wostream &os, wstring_view format_str,
+inline int vfprintf(std::wostream &os, eastl::wstring_view format_str,
                     wprintf_args args) {
   wmemory_buffer buffer;
   printf(buffer, format_str, args);
@@ -709,7 +709,7 @@ inline int vfprintf(std::wostream &os, wstring_view format_str,
   \endrst
  */
 template <typename... Args>
-inline int fprintf(std::ostream &os, string_view format_str,
+inline int fprintf(std::ostream &os, eastl::string_view format_str,
                    const Args & ... args) {
   auto vargs = make_format_args<
     typename printf_context<internal::buffer>::type>(args...);
@@ -717,7 +717,7 @@ inline int fprintf(std::ostream &os, string_view format_str,
 }
 
 template <typename... Args>
-inline int fprintf(std::wostream &os, wstring_view format_str,
+inline int fprintf(std::wostream &os, eastl::wstring_view format_str,
                    const Args & ... args) {
   auto vargs = make_format_args<
     typename printf_context<internal::buffer>::type>(args...);
