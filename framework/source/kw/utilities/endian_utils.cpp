@@ -15,6 +15,13 @@
 
 #include <SDL2/SDL_endian.h>
 
+#undef ntohs
+#undef ntohl
+#undef ntohll
+#undef htons
+#undef htonl
+#undef htonll
+
 namespace kw {
 uint16 EndianUtils::ntohs(uint16 value) noexcept {
     return static_cast<uint16>(SDL_SwapLE16(static_cast<Uint16>(value)));
