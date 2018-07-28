@@ -797,6 +797,19 @@ namespace eastl
 	#pragma warning(pop)
 #endif
 
+#include <utility>
+
+namespace std {
+template <typename T1, typename T2>
+class tuple_size<eastl::pair<T1, T2>> : public std::integral_constant<size_t, 2>
+{
+};
+
+template <typename T1, typename T2>
+class tuple_size<const eastl::pair<T1, T2>> : public std::integral_constant<size_t, 2>
+{
+};
+} // namespace std
 
 #endif // Header include guard
 

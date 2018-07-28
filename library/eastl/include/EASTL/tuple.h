@@ -891,6 +891,20 @@ EA_CONSTEXPR decltype(auto) apply(F&& f, Tuple&& t)
 
 }  // namespace eastl
 
+#include <utility>
+
+namespace std {
+template <typename... Ts>
+class tuple_size<eastl::tuple<Ts...> > : public std::integral_constant<size_t, sizeof...(Ts)>
+{
+};
+
+template <typename... Ts>
+class tuple_size<const eastl::tuple<Ts...> > : public std::integral_constant<size_t, sizeof...(Ts)>
+{
+};
+} // namespace std
+
 #endif  // EASTL_TUPLE_ENABLED
 EA_RESTORE_VC_WARNING()
 EA_RESTORE_VC_WARNING()
