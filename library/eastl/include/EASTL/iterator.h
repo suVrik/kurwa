@@ -668,19 +668,16 @@ namespace eastl
 		typedef typename Container::const_reference const_reference;
 
 	protected:
-		Container& container;
+		Container* container;
 
 	public:
 		//back_insert_iterator(); // Not valid. Must construct with a Container.
 
-		//back_insert_iterator(const this_type& x) // Compiler-implemented
-		//    : container(x.container) { }
-
 		explicit back_insert_iterator(Container& x)
-			: container(x) { }
+			: container(&x) { }
 
 		back_insert_iterator& operator=(const_reference value)
-			{ container.push_back(value); return *this; }
+			{ container->push_back(value); return *this; }
 
 		back_insert_iterator& operator*()
 			{ return *this; }
@@ -691,8 +688,6 @@ namespace eastl
 		back_insert_iterator operator++(int)
 			{ return *this; } // This is by design.
 
-	protected:
-		void operator=(const this_type&){} // Declared to avoid compiler warnings about inability to generate this function.
 	};
 
 

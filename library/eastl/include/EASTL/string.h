@@ -223,6 +223,9 @@ EA_RESTORE_ALL_VC_WARNINGS()
 
 namespace eastl
 {
+	// Kurwa. Forward declaration of vector. I don't want to include it here, so the user must do it himself.
+	template <typename T, typename Allocator>
+	class vector;
 
 	/// EASTL_BASIC_STRING_DEFAULT_NAME
 	///
@@ -738,6 +741,26 @@ namespace eastl
 		bool validate() const EA_NOEXCEPT;
 		int  validate_iterator(const_iterator i) const EA_NOEXCEPT;
 
+		/// <Kurwa Declarations> ///////////////////////////////////////////////////////////////////////////////////////
+
+		// Supported types are: all integral, floating-point types and bool.
+		template<typename U>
+		static basic_string<T, Allocator> from(U value) EA_NOEXCEPT;
+
+		// Doesn't support E-notation for floating-point types yet.
+		// In case of error terminates with debug output, pass only valid strings to it.
+		// Supported types are: all signed and unsigned decimal types, floating-point types and bool.
+		template<typename U>
+		U to() EA_NOEXCEPT;
+
+		// These are hidden in .cpp, so supported T's are: char, wchar_t, char8_t, char16_t, char32_t
+		vector<basic_string_view<T>, Allocator> split(T value) EA_NOEXCEPT;
+		vector<basic_string_view<T>, Allocator> split(const T* value) EA_NOEXCEPT;
+		vector<basic_string_view<T>, Allocator> split(const basic_string<T>& value) EA_NOEXCEPT;
+		vector<basic_string_view<T>, Allocator> split(const basic_string_view<T>& value) EA_NOEXCEPT;
+		vector<basic_string_view<T>, Allocator> split(const T* str, size_t size) EA_NOEXCEPT;
+
+		/// </Kurwa Declarations> //////////////////////////////////////////////////////////////////////////////////////
 
 	protected:
 		// Helper functions for initialization/insertion operations.
@@ -3148,6 +3171,53 @@ namespace eastl
 		return comparei(internalLayout().BeginPtr(), internalLayout().EndPtr(), p, p + CharStrlen(p));
 	}
 
+	/// <Kurwa definitions> ////////////////////////////////////////////////////////////////////////////////////////////
+
+	namespace string_details {
+		template <typename T, typename Allocator>
+		basic_string<T, Allocator> string_from(bool value) {
+			return value ? "true" : "false";
+		}
+
+		template <typename T, typename Allocator, typename U>
+		basic_string<T, Allocator> string_from(U value) {
+			return eastl::to_string(value);
+		}
+	} // namespace string_details
+
+	template <typename T, typename Allocator>
+	template<typename U>
+	basic_string<T, Allocator> basic_string<T, Allocator>::from(U value) EA_NOEXCEPT {
+		return string_details::string_from<T, Allocator>(value);
+	}
+
+	template <typename T, typename Allocator>
+	template<typename U>
+	U basic_string<T, Allocator>::to() EA_NOEXCEPT {
+		return string_details::from_string<T, U>(data(), size());
+	}
+
+	template <typename T, typename Allocator>
+	vector<basic_string_view<T>, Allocator> basic_string<T, Allocator>::split(T str) EA_NOEXCEPT {
+		return split(&str, 1);
+	}
+
+	template <typename T, typename Allocator>
+	vector<basic_string_view<T>, Allocator> basic_string<T, Allocator>::split(const T* str) EA_NOEXCEPT {
+		return split(str, CharStrlen(str));
+	}
+
+	template <typename T, typename Allocator>
+	vector<basic_string_view<T>, Allocator> basic_string<T, Allocator>::split(const basic_string<T>& str) EA_NOEXCEPT {
+		return split(str.data(), str.size());
+	}
+
+	template <typename T, typename Allocator>
+	vector<basic_string_view<T>, Allocator> basic_string<T, Allocator>::split(const basic_string_view<T>& str) EA_NOEXCEPT {
+		return split(str.data(), str.size());
+	}
+
+	/// </Kurwa definitions> ///////////////////////////////////////////////////////////////////////////////////////////
 
 	template <typename T, typename Allocator>
 	typename basic_string<T, Allocator>::iterator

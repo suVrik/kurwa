@@ -24,6 +24,8 @@ add_library(eastl STATIC
         "${CMAKE_CURRENT_SOURCE_DIR}/source/red_black_tree.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/source/string.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/source/thread_support.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/source/EAMemory.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/source/EASprintf.cpp"
 )
 
 target_include_directories(eastl PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")

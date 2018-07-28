@@ -11,7 +11,7 @@
  *  See the License for the specific language governing permissions and limitations under the License.
  */
 
-#include <kw/core/game_native.h>
+#include <kw/core/i_game.h>
 
 #include <SDL2/SDL.h>
 
@@ -20,19 +20,20 @@
 #include <stdexcept>
 
 namespace kw {
-GameNative::GameNative() noexcept {
+IGame::IGame() noexcept {
     is_initialized = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_HAPTIC | SDL_INIT_GAMECONTROLLER) == 0;
     if (!is_initialized) {
         message_box(fmt::format("Failed to initialize SDL2!\n"
-                                "The error message: {}", SDL_GetError()));
+                                "The error message: {}",
+                                SDL_GetError()));
     }
 }
 
-GameNative::~GameNative() noexcept {
+IGame::~IGame() noexcept {
     SDL_Quit();
 }
 
-int32 GameNative::run() noexcept {
+int32 IGame::run() noexcept {
     constexpr int32 ERROR_CODE   = 1;
     constexpr int32 SUCCESS_CODE = 0;
 
@@ -69,14 +70,14 @@ int32 GameNative::run() noexcept {
     return ERROR_CODE;
 }
 
-void GameNative::exit() noexcept {
+void IGame::exit() noexcept {
     SDL_Event event;
     event.type = SDL_QUIT;
     // This one might fail, but we hope it will not.
     SDL_PushEvent(&event);
 }
 
-void GameNative::message_box(const String& message) const noexcept {
+void IGame::message_box(const String& message) const noexcept {
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Runtime error", message.c_str(), nullptr);
 }
 } // namespace kw

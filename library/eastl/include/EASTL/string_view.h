@@ -24,6 +24,10 @@ EA_DISABLE_VC_WARNING(4814)
 
 namespace eastl
 {
+	// Kurwa. Forward declaration of vector. I don't want to include it here, so the user must do it himself.
+	template <typename T, typename Allocator>
+	class vector;
+
 	template <typename T>
 	class basic_string_view
 	{
@@ -438,6 +442,22 @@ namespace eastl
 		{
 			return ends_with(basic_string_view(s));
 		}
+
+		/// <Kurwa Declarations> ///////////////////////////////////////////////////////////////////////////////////////
+
+		// Doesn't support E-notation for floating-point types yet.
+		// In case of error terminates with debug output, pass only valid strings to it.
+		// Supported types are: all signed and unsigned decimal types, floating-point types and bool.
+		template<typename U>
+		U to() EA_NOEXCEPT;
+
+		// These are hidden in .cpp, so supported T's are: char, wchar_t, char8_t, char16_t, char32_t
+		vector<basic_string_view<T>, eastl::allocator> split(T value) EA_NOEXCEPT;
+		vector<basic_string_view<T>, eastl::allocator> split(const T* str) EA_NOEXCEPT;
+		vector<basic_string_view<T>, eastl::allocator> split(const basic_string_view<T>& str) EA_NOEXCEPT;
+		vector<basic_string_view<T>, eastl::allocator> split(const T* str, size_t size) EA_NOEXCEPT;
+
+		/// </Kurwa Declarations> //////////////////////////////////////////////////////////////////////////////////////
 	};
 
 
@@ -477,6 +497,225 @@ namespace eastl
 	{
 		return !(lhs < rhs);
 	}
+
+
+	/// <Kurwa definitions> ////////////////////////////////////////////////////////////////////////////////////////////
+
+	namespace string_details {
+		template<typename T, typename U>
+		eastl::enable_if_t<eastl::is_same_v<U, bool>, bool> from_string(const T* str, size_t size) {
+			static const T TRUE[] = { static_cast<T>(116), static_cast<T>(114),
+									  static_cast<T>(117), static_cast<T>(101),
+									  static_cast<T>(0) }; // "true"
+			const T* true_ptr = TRUE;
+			for (size_t i = 0; i < size; i++) {
+				if (str[i] != *true_ptr++) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		template<typename T, typename U>
+		eastl::enable_if_t<!is_floating_point<U>::value && eastl::is_unsigned<U>::value, U> from_string(const T* str, size_t size) {
+			constexpr T PLUS = 43;
+			constexpr T ZERO = 48;
+			constexpr T NINE = 57;
+
+#if EASTL_ASSERT_ENABLED
+			if (EASTL_UNLIKELY(str == nullptr || size == 0)) {
+				EASTL_FAIL_MSG("Invalid string!");
+			}
+#endif
+
+            size_t i = 0;
+
+			if (size > 0 && str[0] == PLUS) {
+                i++;
+#if EASTL_ASSERT_ENABLED
+				if (EASTL_UNLIKELY(size <= 1)) {
+					EASTL_FAIL_MSG("Invalid unsigned integer string!");
+				}
+#endif
+			}
+
+			U val = 0;
+			for (; i < size; i++) {
+				const T ch = str[i];
+				const U next_val = val * 10 + (ch - ZERO);
+
+#if EASTL_ASSERT_ENABLED
+				if (EASTL_UNLIKELY(ch < ZERO || ch > NINE)) {
+					EASTL_FAIL_MSG("Invalid unsigned integer string!");
+				}
+				if (EASTL_UNLIKELY(next_val < val)) {
+					EASTL_FAIL_MSG("Unsigned integer overflow!");
+				}
+#endif
+
+				val = next_val;
+			}
+
+			return val;
+		}
+
+		template<typename T, typename U>
+		eastl::enable_if_t<!eastl::is_same_v<U, bool> && !is_floating_point<U>::value && !eastl::is_unsigned<U>::value, U> from_string(const T* str, size_t size) {
+			constexpr T PLUS = 43;
+			constexpr T MINUS = 45;
+			constexpr T ZERO = 48;
+			constexpr T NINE = 57;
+
+#if EASTL_ASSERT_ENABLED
+			if (EASTL_UNLIKELY(str == nullptr || size == 0)) {
+				EASTL_FAIL_MSG("Invalid string!");
+			}
+#endif
+
+            size_t i = 0;
+
+			bool is_negative = false;
+			if (size > 0) {
+				if (str[0] == MINUS) {
+					is_negative = true;
+					i++;
+#if EASTL_ASSERT_ENABLED
+					if (EASTL_UNLIKELY(size <= 1)) {
+						EASTL_FAIL_MSG("Invalid signed integer string!");
+					}
+#endif
+				} else if (str[0] == PLUS) {
+					i++;
+#if EASTL_ASSERT_ENABLED
+					if (EASTL_UNLIKELY(size <= 1)) {
+						EASTL_FAIL_MSG("Invalid signed integer string!");
+					}
+#endif
+				}
+			}
+
+			U val = 0;
+			for (; i < size; i++) {
+				const T ch = str[i];
+				const U next_val = val * 10 + (ch - ZERO);
+
+#if EASTL_ASSERT_ENABLED
+				if (EASTL_UNLIKELY(ch < ZERO || ch > NINE)) {
+					EASTL_FAIL_MSG("Invalid signed integer string!");
+				}
+				if (EASTL_UNLIKELY(next_val < val)) {
+					EASTL_FAIL_MSG("Signed integer overflow!");
+				}
+#endif
+
+				val = next_val;
+			}
+
+			if (is_negative) {
+				val = -val;
+			}
+
+			return val;
+		}
+
+		template<typename T, typename U>
+		eastl::enable_if_t<is_floating_point<U>::value, U> from_string(const T* str, size_t size) {
+			constexpr T PLUS = 43;
+			constexpr T MINUS = 45;
+			constexpr T ZERO = 48;
+			constexpr T NINE = 57;
+			constexpr T DECIMAL_POINT = 46;
+
+#if EASTL_ASSERT_ENABLED
+			if (EASTL_UNLIKELY(str == nullptr || size == 0)) {
+				EASTL_FAIL_MSG("Invalid string!");
+			}
+#endif
+
+            size_t i = 0;
+			U fraction_part = 0;
+			U divisor_for_fraction = static_cast<U>(1);
+			U integer_part = 0;
+			bool is_negative = false;
+			bool in_fraction = false;
+
+			if (size > 0) {
+				if (str[0] == MINUS) {
+					is_negative = true;
+					i++;
+#if EASTL_ASSERT_ENABLED
+					if (EASTL_UNLIKELY(size <= 1)) {
+						EASTL_FAIL_MSG("Invalid signed integer string!");
+					}
+#endif
+				} else if (str[0] == PLUS) {
+					i++;
+#if EASTL_ASSERT_ENABLED
+					if (EASTL_UNLIKELY(size <= 1)) {
+						EASTL_FAIL_MSG("Invalid signed integer string!");
+					}
+#endif
+				}
+			}
+
+			for (; i < size; i++) {
+				const T ch = str[i];
+
+				if (ch == DECIMAL_POINT) {
+#if EASTL_ASSERT_ENABLED
+					if (EASTL_UNLIKELY(in_fraction)) {
+						EASTL_FAIL_MSG("Invalid floating-point string!");
+					}
+#endif
+					in_fraction = true;
+				} else {
+#if EASTL_ASSERT_ENABLED
+					if (EASTL_UNLIKELY(ch < ZERO || ch > NINE)) {
+						EASTL_FAIL_MSG("Invalid signed integer string!");
+					}
+#endif
+
+					if (in_fraction) {
+						fraction_part = fraction_part * 10 + (ch - ZERO);
+						divisor_for_fraction *= 10;
+					} else {
+						integer_part = integer_part * 10 + (ch - ZERO);
+					}
+				}
+			}
+
+			U result = integer_part + fraction_part / divisor_for_fraction;
+
+			if (is_negative) {
+				result = -result;
+			}
+
+			return result;
+		}
+	} // namespace string_details
+
+	template <typename T>
+	template<typename U>
+	U basic_string_view<T>::to() EA_NOEXCEPT {
+		return string_details::from_string<T, U>(data(), size());
+	}
+
+	template <typename T>
+	vector<basic_string_view<T>, EASTLAllocatorType> basic_string_view<T>::split(T value) EA_NOEXCEPT {
+		return split(&value, 1);
+	}
+
+	template <typename T>
+	vector<basic_string_view<T>, EASTLAllocatorType> basic_string_view<T>::split(const T* str) EA_NOEXCEPT {
+		return split(str, CharStrlen(str));
+	}
+
+	template <typename T>
+	vector<basic_string_view<T>, EASTLAllocatorType> basic_string_view<T>::split(const basic_string_view<T>& str) EA_NOEXCEPT {
+		return split(data(), size());
+	}
+
+	/// </Kurwa definitions> ///////////////////////////////////////////////////////////////////////////////////////////
 
 	// string_view / wstring_view 
 	typedef basic_string_view<char> string_view;
