@@ -19,6 +19,7 @@
 #include <fmt/format.h>
 
 #include <stdexcept>
+#include <utility>
 
 namespace kw {
 /**
@@ -55,7 +56,7 @@ public:
     /**
      * Return error message or an empty string, if error message is not provided.
      */
-    const char* what() const override;
+    const char* what() const noexcept(noexcept(std::declval<std::exception>().what())) override;
 
 private:
 #if defined(KW_DEBUG)

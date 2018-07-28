@@ -36,7 +36,7 @@ RuntimeError::RuntimeError(const StringView& message) noexcept
 #endif
 }
 
-const char* RuntimeError::what() const {
+const char* RuntimeError::what() const noexcept(noexcept(std::declval<std::exception>().what())) {
     return m_message.c_str();
 }
 
