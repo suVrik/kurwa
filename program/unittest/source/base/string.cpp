@@ -29,9 +29,9 @@ TEST(string, convert_to) {
     EXPECT_EQ(kw::String("-1234567890").to<kw::int32>(), -1234567890);
     EXPECT_EQ(kw::String("-1234567890987654321").to<kw::int64>(), -1234567890987654321);
 
-    EXPECT_EQ(kw::String("-12345.67890").to<float>(), -12345.67890f);
-    EXPECT_EQ(kw::String("-1234567890.1234567890").to<double>(), -1234567890.1234567890);
-    EXPECT_EQ(kw::String("-1234567890.1234567890").to<long double>(), -1234567890.1234567890);
+    EXPECT_FLOAT_EQ(kw::String("-12345.67890").to<float>(), -12345.67890f);
+    EXPECT_FLOAT_EQ(kw::String("-1234567890.1234567890").to<double>(), -1234567890.1234567890);
+    EXPECT_FLOAT_EQ(kw::String("-1234567890.1234567890").to<long double>(), -1234567890.1234567890);
 
     EXPECT_EQ(kw::String("true").to<bool>(), true);
     EXPECT_EQ(kw::String("false").to<bool>(), false);
