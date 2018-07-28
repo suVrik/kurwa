@@ -14,8 +14,6 @@
 #include <kw/debug/runtime_error.h>
 #include <kw/debug/stacktrace.h>
 
-#if defined(KW_DEBUG)
-
 namespace kw {
 RuntimeError::RuntimeError(const char* message) noexcept
     : m_message(message) {
@@ -42,10 +40,12 @@ const char* RuntimeError::what() const {
     return m_message.c_str();
 }
 
+#if defined(KW_DEBUG)
+
 void RuntimeError::append_stacktrace() noexcept {
     // Skip 'RuntimeError::append_stacktrace' and 'RuntimeError' constructor.
     m_message += "\n\nStacktrace:\n" + Stacktrace::get_stacktrace(2);
 }
-} // namespace kw
 
 #endif
+} // namespace kw

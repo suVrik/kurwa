@@ -3171,54 +3171,6 @@ namespace eastl
 		return comparei(internalLayout().BeginPtr(), internalLayout().EndPtr(), p, p + CharStrlen(p));
 	}
 
-	/// <Kurwa definitions> ////////////////////////////////////////////////////////////////////////////////////////////
-
-	namespace string_details {
-		template <typename T, typename Allocator>
-		basic_string<T, Allocator> string_from(bool value) {
-			return value ? "true" : "false";
-		}
-
-		template <typename T, typename Allocator, typename U>
-		basic_string<T, Allocator> string_from(U value) {
-			return eastl::to_string(value);
-		}
-	} // namespace string_details
-
-	template <typename T, typename Allocator>
-	template<typename U>
-	basic_string<T, Allocator> basic_string<T, Allocator>::from(U value) EA_NOEXCEPT {
-		return string_details::string_from<T, Allocator>(value);
-	}
-
-	template <typename T, typename Allocator>
-	template<typename U>
-	U basic_string<T, Allocator>::to() EA_NOEXCEPT {
-		return string_details::from_string<T, U>(data(), size());
-	}
-
-	template <typename T, typename Allocator>
-	vector<basic_string_view<T>, Allocator> basic_string<T, Allocator>::split(T str) EA_NOEXCEPT {
-		return split(&str, 1);
-	}
-
-	template <typename T, typename Allocator>
-	vector<basic_string_view<T>, Allocator> basic_string<T, Allocator>::split(const T* str) EA_NOEXCEPT {
-		return split(str, CharStrlen(str));
-	}
-
-	template <typename T, typename Allocator>
-	vector<basic_string_view<T>, Allocator> basic_string<T, Allocator>::split(const basic_string<T>& str) EA_NOEXCEPT {
-		return split(str.data(), str.size());
-	}
-
-	template <typename T, typename Allocator>
-	vector<basic_string_view<T>, Allocator> basic_string<T, Allocator>::split(const basic_string_view<T>& str) EA_NOEXCEPT {
-		return split(str.data(), str.size());
-	}
-
-	/// </Kurwa definitions> ///////////////////////////////////////////////////////////////////////////////////////////
-
 	template <typename T, typename Allocator>
 	typename basic_string<T, Allocator>::iterator
 	basic_string<T, Allocator>::InsertInternal(const_iterator p, value_type c)
@@ -4045,6 +3997,54 @@ namespace eastl
 	inline wstring to_wstring(long double value)
 		{ return wstring(wstring::CtorSprintf(), L"%Lf", value); }
 
+
+	/// <Kurwa definitions> ////////////////////////////////////////////////////////////////////////////////////////////
+
+	namespace string_details {
+		template <typename T, typename Allocator>
+		basic_string<T, Allocator> string_from(bool value) {
+			return value ? "true" : "false";
+		}
+
+		template <typename T, typename Allocator, typename U>
+		basic_string<T, Allocator> string_from(U value) {
+			return eastl::to_string(value);
+		}
+	} // namespace string_details
+
+	template <typename T, typename Allocator>
+	template<typename U>
+	basic_string<T, Allocator> basic_string<T, Allocator>::from(U value) EA_NOEXCEPT {
+		return string_details::string_from<T, Allocator>(value);
+	}
+
+	template <typename T, typename Allocator>
+	template<typename U>
+	U basic_string<T, Allocator>::to() EA_NOEXCEPT {
+		return string_details::from_string<T, U>(data(), size());
+	}
+
+	template <typename T, typename Allocator>
+	vector<basic_string_view<T>, Allocator> basic_string<T, Allocator>::split(T str) EA_NOEXCEPT {
+		return split(&str, 1);
+	}
+
+	template <typename T, typename Allocator>
+	vector<basic_string_view<T>, Allocator> basic_string<T, Allocator>::split(const T* str) EA_NOEXCEPT {
+		return split(str, CharStrlen(str));
+	}
+
+	template <typename T, typename Allocator>
+	vector<basic_string_view<T>, Allocator> basic_string<T, Allocator>::split(const basic_string<T>& str) EA_NOEXCEPT {
+		return split(str.data(), str.size());
+	}
+
+	template <typename T, typename Allocator>
+	vector<basic_string_view<T>, Allocator> basic_string<T, Allocator>::split(const basic_string_view<T>& str) EA_NOEXCEPT {
+		return split(str.data(), str.size());
+	}
+
+	/// </Kurwa definitions> ///////////////////////////////////////////////////////////////////////////////////////////
 
 	/// user defined literals
 	///
