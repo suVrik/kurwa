@@ -456,7 +456,6 @@ namespace eastl
 
     template vector<basic_string_view<char>> basic_string<char>::split(const char* value, size_t size) EA_NOEXCEPT;
     template vector<basic_string_view<wchar_t>> basic_string<wchar_t>::split(const wchar_t* value, size_t size) EA_NOEXCEPT;
-    template vector<basic_string_view<char8_t>> basic_string<char8_t>::split(const char8_t* value, size_t size) EA_NOEXCEPT;
     template vector<basic_string_view<char16_t>> basic_string<char16_t>::split(const char16_t* value, size_t size) EA_NOEXCEPT;
     template vector<basic_string_view<char32_t>> basic_string<char32_t>::split(const char32_t* value, size_t size) EA_NOEXCEPT;
 
@@ -467,7 +466,6 @@ namespace eastl
 
     template vector<basic_string_view<char>> basic_string_view<char>::split(const char* value, size_t size) EA_NOEXCEPT;
     template vector<basic_string_view<wchar_t>> basic_string_view<wchar_t>::split(const wchar_t* value, size_t size) EA_NOEXCEPT;
-    template vector<basic_string_view<char8_t>> basic_string<char8_t>::split(const char8_t* value, size_t size) EA_NOEXCEPT;
     template vector<basic_string_view<char16_t>> basic_string_view<char16_t>::split(const char16_t* value, size_t size) EA_NOEXCEPT;
     template vector<basic_string_view<char32_t>> basic_string_view<char32_t>::split(const char32_t* value, size_t size) EA_NOEXCEPT;
 
