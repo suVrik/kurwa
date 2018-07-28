@@ -16,9 +16,12 @@
 
 #include <fmt/format.h>
 
-#if defined(KW_WINDOWS)
-#include <DbgHelp.h>
+#if defined(KW_DEBUG) && defined(KW_WINDOWS)
+
 #include <windows.h>
+// DbgHelp.h must be included after windows.h
+#include <DbgHelp.h>
+
 #endif
 
 namespace kw {

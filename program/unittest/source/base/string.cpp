@@ -16,8 +16,6 @@
 #include <kw/base/types.h>
 #include <kw/base/vector.h>
 
-#include <kw/utilities/trace.h>
-
 #include <gmock/gmock.h>
 
 TEST(string, convert_to) {

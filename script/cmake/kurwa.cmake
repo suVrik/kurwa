@@ -57,7 +57,7 @@ function(target_link_library)
         if(NOT target_is_imported)
             # No need to find library path, because for non-imported targets all the linked libraries
             # must be already added via add_library function
-            target_link_libraries("${target_name}" "${library_name}")
+            target_link_libraries("${target_name}" PUBLIC "${library_name}")
 
             # Interface libraries can't hold deploy files
             get_target_property(library_type "${library_name}" "TYPE")

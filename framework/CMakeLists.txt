@@ -57,7 +57,7 @@ target_link_library(framework utf8)
 
 # Required by 'kw/debug/stacktrace'
 if(WIN32)
-    target_link_libraries(framework Dbghelp)
+    target_link_libraries(framework PRIVATE $<$<CONFIG:Debug>:Dbghelp>)
 endif()
 
 # KW_DEBUG must be defined on debug configuration.
