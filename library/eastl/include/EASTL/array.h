@@ -483,12 +483,14 @@ namespace eastl
 } // namespace eastl
 
 
-// Required for Structured binding declaration
-namespace std {
-template <class _Tuple> struct tuple_size;
-template <size_t Index, typename Tuple> struct tuple_element;
-template <typename T, size_t N> struct tuple_size<eastl::array<T, N>> : eastl::integral_constant<size_t, N> {};
-template <size_t Index, typename T, size_t N> struct tuple_element<Index, eastl::array<T, N>> { typedef T type; };
-} // namespace std
-
 #endif // Header include guard
+
+
+
+
+
+
+
+
+
+
