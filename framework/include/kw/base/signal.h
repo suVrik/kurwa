@@ -18,7 +18,7 @@
 #include <kw/base/types.h>
 #include <kw/debug/assert.h>
 
-#include <eastl/type_traits.h>
+#include <EASTL/type_traits.h>
 
 namespace kw {
 /**
