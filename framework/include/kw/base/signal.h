@@ -16,11 +16,48 @@
 #include <kw/base/function.h>
 #include <kw/base/list.h>
 #include <kw/base/types.h>
+#include <kw/debug/assert.h>
+
+#include <EASTL/type_traits.h>
 
 namespace kw {
+/**
+ * Template-free base class for Signal.
+ * Used in SignalListener.
+ */
+class ISignal {
+public:
+    /**
+     * Disconnect all the callbacks tied with the given 'object'.
+     */
+    virtual void disconnect(const void* object) noexcept = 0;
+
+protected:
+    ISignal() = default;
+};
+
 // Forward-declaration for Function-like syntax
 template <typename Signature>
 class Signal;
+
+/**
+ * Signal listener is an inheritance-only class for other classes that connect to some signals and don't want to hustle
+ * with disconnect (which would require saving a signal reference somewhere and writing some code in destructor).
+ * What it does it basically remembers all the connections and disconnects in destructor.
+ */
+class SignalListener {
+public:
+    ~SignalListener() noexcept;
+
+protected:
+    SignalListener() = default;
+
+private:
+    List<ISignal*> m_signals;
+
+    template <typename Signature>
+    friend class Signal;
+};
 
 /**
  * Signal is a list of functions (called callbacks) with the same signature:
@@ -32,14 +69,14 @@ class Signal;
  * So overall this is a convenient way of listening to and emitting events.
  */
 template <typename Result, typename... Arguments>
-class Signal<Result(Arguments...)> {
+class Signal<Result(Arguments...)> final : public ISignal {
 public:
     /**
      * Construct a signal.
      */
-    Signal() = default;
-
+    Signal()              = default;
     Signal(const Signal&) = delete;
+    ~Signal() noexcept;
     Signal& operator=(const Signal&) = delete;
 
     /**
@@ -55,7 +92,22 @@ public:
      * \endcode
      */
     template <typename Object>
-    uint32 connect(Object* object, Result (Object::*const callback)(Arguments...));
+    uint32 connect(Object* object, Result (Object::*const callback)(Arguments...)) noexcept;
+
+    /**
+     * Connect a callback to the signal and return an unique token, which can be used to disconnect a callback.
+     * The 'object', just like a token, can be used to disconnect the callback.
+     *
+     * \code
+     * struct MyStruct {
+     *     void update() noexcept;
+     * };
+     * MyStruct my_struct;
+     * update.connect(&my_struct, &MyStruct::update);
+     * \endcode
+     */
+    template <typename Object>
+    uint32 connect(Object* object, Result (Object::*const callback)(Arguments...) noexcept) noexcept;
 
     /**
      * Connect a callback to the signal and return an unique token, which can be used to disconnect a callback.
@@ -70,7 +122,22 @@ public:
      * \endcode
      */
     template <typename Object>
-    uint32 connect(const Object* object, Result (Object::*const callback)(Arguments...) const);
+    uint32 connect(const Object* object, Result (Object::*const callback)(Arguments...) const) noexcept;
+
+    /**
+     * Connect a callback to the signal and return an unique token, which can be used to disconnect a callback.
+     * The 'object', just like a token, can be used to disconnect the callback.
+     *
+     * \code
+     * struct MyStruct {
+     *     void update() const noexcept;
+     * };
+     * const MyStruct my_struct;
+     * update.connect(&my_struct, &MyStruct::update);
+     * \endcode
+     */
+    template <typename Object>
+    uint32 connect(const Object* object, Result (Object::*const callback)(Arguments...) const noexcept) noexcept;
 
     /**
      * Connect a callback to the signal and return an unique token, which can be used to disconnect a callback.
@@ -84,8 +151,21 @@ public:
      * \endcode
      */
     template <typename Object, typename Callback>
-    eastl::enable_if_t<!eastl::is_member_function_pointer<Callback>::value, uint32>
-    connect(const Object* object, const Callback callback);
+    eastl::enable_if_t<!eastl::is_member_function_pointer<Callback>::value, uint32> connect(Object* object, const Callback callback) noexcept;
+
+    /**
+     * Connect a callback to the signal and return an unique token, which can be used to disconnect a callback.
+     * The 'object', just like a token, can be used to disconnect the callback.
+     *
+     * \code
+     * update.connect(this, [] {
+     *     printf("Update is called!");
+     * });
+     * update.emit(); // Update is called!
+     * \endcode
+     */
+    template <typename Object, typename Callback>
+    eastl::enable_if_t<!eastl::is_member_function_pointer<Callback>::value, uint32> connect(const Object* object, const Callback callback) noexcept;
 
     /**
      * Connect a callback to the signal and return an unique token, which can be used to disconnect a callback.
@@ -98,17 +178,17 @@ public:
      * \endcode
      */
     template <typename Callback>
-    uint32 connect(const Callback callback);
+    uint32 connect(const Callback callback) noexcept;
 
     /**
      * Disconnect all the callbacks tied with the given 'object'.
      */
-    void disconnect(const void* object);
+    void disconnect(const void* object) noexcept override;
 
     /**
      * Disconnect a callback with the given 'token'.
      */
-    void disconnect(uint32 token);
+    void disconnect(uint32 token) noexcept;
 
     /**
      * Call all the connected callbacks with the given 'arguments' in order from the first to the last
@@ -142,11 +222,18 @@ public:
 private:
     struct CallbackData {
         Function<Result(Arguments...)> callback;
-        const void*                    object;
-        uint32                         token;
+        const void* object;
+        uint32 token;
+        bool is_signal_listener;
     };
 
-    List<CallbackData> callbacks;
+    template <typename Object>
+    eastl::enable_if_t<eastl::is_base_of<SignalListener, Object>::value, void> handle_signal_listener(CallbackData& callback_data, Object* object) noexcept;
+
+    template <typename Object>
+    eastl::enable_if_t<!eastl::is_base_of<SignalListener, Object>::value, void> handle_signal_listener(CallbackData& callback_data, Object* object) noexcept;
+
+    List<CallbackData> m_callbacks;
 };
 } // namespace kw
 

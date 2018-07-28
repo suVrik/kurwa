@@ -16,34 +16,35 @@
 #include <kw/core/game.h>
 
 namespace kw {
-template<typename... Modules>
+template <typename... Modules>
 Game<Modules...>::Game() noexcept {
     // If SDL failed to initialize, we can omit initializing modules.
     if (is_initialized) {
         try {
-            Tuple<UniquePtr<Modules>...> modules{make_unique<Modules>(this)...};
+            Tuple<UniquePtr<Modules>...> modules{ make_unique<Modules>(this)... };
             m_modules = std::move(modules);
-        }
-        catch (const std::runtime_error &error) {
+        } catch (const RuntimeError& error) {
+            // 'fprintf' is for developer. It's easier to examine info in console, rather than in a message box.
+            fprintf(stderr, "%s\n", error.what());
             message_box(error.what());
             is_initialized = false;
-        }
-        catch (...) {
+        } catch (...) {
+            fprintf(stderr, "Runtime error in anonymous Module constructor!\n");
             message_box("Runtime error in anonymous Module constructor!");
             is_initialized = false;
         }
     }
 }
 
-template<typename... Modules>
-template<typename Module>
+template <typename... Modules>
+template <typename Module>
 Module& Game<Modules...>::get() noexcept {
-    return *kw::get<Module*>(m_modules);
+    return *kw::get<UniquePtr<Module>>(m_modules);
 }
 
-template<typename... Modules>
-template<typename Module>
+template <typename... Modules>
+template <typename Module>
 const Module& Game<Modules...>::get() const noexcept {
-    return *kw::get<Module*>(m_modules);
+    return *kw::get<UniquePtr<Module>>(m_modules);
 }
-}
+} // namespace kw

@@ -13,16 +13,19 @@
 
 #pragma once
 
-#include <kw/base/types.h>
-#include <kw/base/tuple.h>
 #include <kw/base/string.h>
+#include <kw/base/tuple.h>
+#include <kw/base/types.h>
 #include <kw/base/unique_ptr.h>
-#include <kw/core/game_native.h>
+#include <kw/core/i_game.h>
+#include <kw/debug/runtime_error.h>
+
+#include <cstdio>
 
 namespace kw {
 /**
  * Game is a class that manages modules: initializes them in a straight order and destroys them in reverse order.
- * By being a child of class GameNative, it also handles native related stuff such as initializing video subsystems,
+ * By being a child of class IGame, it also handles native related stuff such as initializing video subsystems,
  * terminating the application, running the frame loop and more (take a look at it, really).
  *
  * \code
@@ -38,37 +41,36 @@ namespace kw {
  * If module is failed to initialize, it's allowed to throw a std::runtime_error which will be handled in IGame class.
  * Nevertheless, possible exceptions in destructor are not handled and lead to undefined behaviour.
  */
-template<typename... Modules>
-class Game : public GameNative {
-    public:
-        /**
-         * Defined as std::true_type if the given 'Module' is present, otherwise defined as false.
-         */
-        template<typename Module>
-        using has_t = kw::has_t<Module, Tuple<Modules...>>;
+template <typename... Modules>
+class Game : public IGame {
+public:
+    /**
+     * Defined as std::true_type if the given 'Module' is present, otherwise defined as false.
+     */
+    template <typename Module>
+    using has_t = kw::has_t<Module, Tuple<Modules...>>;
 
-        /**
-         * Initialize SDL subsystems and construct all the modules.
-         * In case either some SDL subsystem or some module is failed to initialize,
-         * the 'run' method will return non-zero exit code without entering a frame loop.
-         */
-        Game() noexcept;
+    /**
+     * Initialize SDL subsystems and construct all the modules.
+     * In case either some SDL subsystem or some module is failed to initialize,
+     * the 'run' method will return non-zero exit code without entering a frame loop.
+     */
+    Game() noexcept;
 
-        /**
-         * Return the given 'Module'.
-         */
-        template<typename Module>
-        Module& get() noexcept;
+    /**
+     * Return the given 'Module'.
+     */
+    template <typename Module>
+    Module& get() noexcept;
 
-        /**
-         * Return the given 'Module'.
-         */
-        template<typename Module>
-        const Module& get() const noexcept;
+    /**
+     * Return the given 'Module'.
+     */
+    template <typename Module>
+    const Module& get() const noexcept;
 
-    private:
-        Tuple<UniquePtr<Modules>...> m_modules;
-
+private:
+    Tuple<UniquePtr<Modules>...> m_modules;
 };
 } // namespace kw
 

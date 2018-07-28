@@ -101,5 +101,3 @@ TEST(signal, disconnect_by_object) {
 
     EXPECT_EQ(test, 5);
 }
-
-// TODO: look at signal test in BZ

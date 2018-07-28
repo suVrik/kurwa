@@ -21,60 +21,131 @@ uint32 generate_unique_token();
 } // namespace signal_details
 
 template <typename Result, typename... Arguments>
+Signal<Result(Arguments...)>::~Signal() noexcept {
+    for (auto& callback : m_callbacks) {
+        if (callback.is_signal_listener) {
+            auto listener = const_cast<SignalListener*>(reinterpret_cast<const SignalListener*>(callback.object));
+            for (auto it = listener->m_signals.begin(); it != listener->m_signals.end();) {
+                if (*it == this) {
+                    it = listener->m_signals.erase(it);
+                } else {
+                    ++it;
+                }
+            }
+        }
+    }
+}
+
+template <typename Result, typename... Arguments>
 template <typename Object>
-uint32 Signal<Result(Arguments...)>::connect(Object* object, Result (Object::*const callback)(Arguments...)) {
+uint32 Signal<Result(Arguments...)>::connect(Object* object, Result (Object::*const callback)(Arguments...)) noexcept {
     CallbackData data;
     data.callback = [object, callback](Arguments&&... arguments) {
         (object->*callback)(std::forward<Arguments>(arguments)...);
     };
-    data.object = object;
     data.token = signal_details::generate_unique_token();
-    callbacks.push_back(std::move(data));
+    handle_signal_listener(data, object);
+    m_callbacks.push_back(std::move(data));
     return data.token;
 }
 
 template <typename Result, typename... Arguments>
 template <typename Object>
-uint32 Signal<Result(Arguments...)>::connect(const Object* object,
-                                             Result (Object::*const callback)(Arguments...) const) {
+uint32 Signal<Result(Arguments...)>::connect(Object* object, Result (Object::*const callback)(Arguments...) noexcept) noexcept {
     CallbackData data;
     data.callback = [object, callback](Arguments&&... arguments) {
         (object->*callback)(std::forward<Arguments>(arguments)...);
     };
-    data.object = object;
     data.token = signal_details::generate_unique_token();
-    callbacks.push_back(std::move(data));
+    handle_signal_listener(data, object);
+    m_callbacks.push_back(std::move(data));
+    return data.token;
+}
+
+template <typename Result, typename... Arguments>
+template <typename Object>
+uint32 Signal<Result(Arguments...)>::connect(const Object* object, Result (Object::*const callback)(Arguments...) const) noexcept {
+    static_assert(!eastl::is_base_of<SignalListener, Object>::value, "You're trying to connect a callback tied with a "
+                                                                     "const instance of SignalListener, "
+                                                                     "which is not allowed! To connect a "
+                                                                     "SignalListener to a signal, it's required "
+                                                                     "to change the SignalListener.");
+    CallbackData data;
+    data.callback = [object, callback](Arguments&&... arguments) {
+        (object->*callback)(std::forward<Arguments>(arguments)...);
+    };
+    data.object             = object;
+    data.token              = signal_details::generate_unique_token();
+    data.is_signal_listener = false;
+    m_callbacks.push_back(std::move(data));
+    return data.token;
+}
+
+template <typename Result, typename... Arguments>
+template <typename Object>
+uint32 Signal<Result(Arguments...)>::connect(const Object* object, Result (Object::*const callback)(Arguments...) const noexcept) noexcept {
+    static_assert(!eastl::is_base_of<SignalListener, Object>::value, "You're trying to connect a callback tied with a "
+                                                                     "const instance of SignalListener, "
+                                                                     "which is not allowed! To connect a "
+                                                                     "SignalListener to a signal, it's required "
+                                                                     "to change the SignalListener.");
+    CallbackData data;
+    data.callback = [object, callback](Arguments&&... arguments) {
+        (object->*callback)(std::forward<Arguments>(arguments)...);
+    };
+    data.object             = object;
+    data.token              = signal_details::generate_unique_token();
+    data.is_signal_listener = false;
+    m_callbacks.push_back(std::move(data));
     return data.token;
 }
 
 template <typename Result, typename... Arguments>
 template <typename Object, typename Callback>
-eastl::enable_if_t<!eastl::is_member_function_pointer<Callback>::value, uint32>
-Signal<Result(Arguments...)>::connect(const Object* object, const Callback callback) {
+eastl::enable_if_t<!eastl::is_member_function_pointer<Callback>::value, uint32> Signal<Result(Arguments...)>::connect(Object* object, const Callback callback) noexcept {
     CallbackData data;
     data.callback = Function<Result(Arguments...)>(callback);
-    data.object = object;
-    data.token = signal_details::generate_unique_token();
-    callbacks.push_back(std::move(data));
+    data.token    = signal_details::generate_unique_token();
+    handle_signal_listener(data, object);
+    m_callbacks.push_back(std::move(data));
+    return data.token;
+}
+
+template <typename Result, typename... Arguments>
+template <typename Object, typename Callback>
+eastl::enable_if_t<!eastl::is_member_function_pointer<Callback>::value, uint32> Signal<Result(Arguments...)>::connect(const Object* object, const Callback callback) noexcept {
+    static_assert(!eastl::is_base_of<SignalListener, Object>::value, "You're trying to connect a callback tied with a "
+                                                                     "const instance of SignalListener, "
+                                                                     "which is not allowed! To connect a "
+                                                                     "SignalListener to a signal, it's required "
+                                                                     "to change the SignalListener.");
+
+    CallbackData data;
+    data.callback           = Function<Result(Arguments...)>(callback);
+    data.object             = object;
+    data.token              = signal_details::generate_unique_token();
+    data.is_signal_listener = false;
+    m_callbacks.push_back(std::move(data));
     return data.token;
 }
 
 template <typename Result, typename... Arguments>
 template <typename Callback>
-uint32 Signal<Result(Arguments...)>::connect(const Callback callback) {
+uint32 Signal<Result(Arguments...)>::connect(const Callback callback) noexcept {
     CallbackData data;
-    data.callback = Function<Result(Arguments...)>(callback);
-    data.object = nullptr;
-    data.token = signal_details::generate_unique_token();
-    callbacks.push_back(std::move(data));
+    data.callback           = Function<Result(Arguments...)>(callback);
+    data.object             = nullptr;
+    data.token              = signal_details::generate_unique_token();
+    data.is_signal_listener = false;
+    m_callbacks.push_back(std::move(data));
     return data.token;
 }
 
 template <typename Result, typename... Arguments>
-void Signal<Result(Arguments...)>::disconnect(const void* object) {
-    for (auto it = callbacks.begin(); it != callbacks.end();) {
+void Signal<Result(Arguments...)>::disconnect(const void* object) noexcept {
+    for (auto it = m_callbacks.begin(); it != m_callbacks.end();) {
         if (it->object == object) {
-            it = callbacks.erase(it);
+            it = m_callbacks.erase(it);
         } else {
             ++it;
         }
@@ -82,10 +153,10 @@ void Signal<Result(Arguments...)>::disconnect(const void* object) {
 }
 
 template <typename Result, typename... Arguments>
-void Signal<Result(Arguments...)>::disconnect(uint32 token) {
-    for (auto it = callbacks.begin(); it != callbacks.end(); ++it) {
+void Signal<Result(Arguments...)>::disconnect(uint32 token) noexcept {
+    for (auto it = m_callbacks.begin(); it != m_callbacks.end(); ++it) {
         if (it->token == token) {
-            callbacks.erase(it);
+            m_callbacks.erase(it);
             break;
         }
     }
@@ -93,7 +164,7 @@ void Signal<Result(Arguments...)>::disconnect(uint32 token) {
 
 template <typename Result, typename... Arguments>
 void Signal<Result(Arguments...)>::emit(Arguments... arguments) {
-    for (auto& callback : callbacks) {
+    for (auto& callback : m_callbacks) {
         callback.callback(arguments...);
     }
 }
@@ -101,13 +172,36 @@ void Signal<Result(Arguments...)>::emit(Arguments... arguments) {
 template <typename Result, typename... Arguments>
 template <typename Adder>
 Result Signal<Result(Arguments...)>::emit(Arguments... arguments, const Adder adder) {
-    if (!callbacks.empty()) {
-        Result result = callbacks.front().callback(arguments...);
-        for (auto it = ++callbacks.begin(); it != callbacks.end(); ++it) {
+    if (!m_callbacks.empty()) {
+        Result result = m_callbacks.front().callback(arguments...);
+        for (auto it = ++m_callbacks.begin(); it != m_callbacks.end(); ++it) {
             result = adder(result, it->callback(arguments...));
         }
         return result;
     }
     return {};
+}
+
+template <typename Result, typename... Arguments>
+template <typename Object>
+eastl::enable_if_t<eastl::is_base_of<SignalListener, Object>::value, void> Signal<Result(Arguments...)>::handle_signal_listener(CallbackData& callback_data, Object* object) noexcept {
+    SignalListener* signal_listener = static_cast<SignalListener*>(object);
+#if defined(KW_DEBUG)
+    for (auto* signal : signal_listener->m_signals) {
+        KW_ASSERT(signal != this, "The same signal is added twice to the same object! "
+                                  "This is probably not what you want!");
+    }
+#endif
+    signal_listener->m_signals.push_back(this);
+
+    callback_data.is_signal_listener = true;
+    callback_data.object             = static_cast<SignalListener*>(object);
+}
+
+template <typename Result, typename... Arguments>
+template <typename Object>
+eastl::enable_if_t<!eastl::is_base_of<SignalListener, Object>::value, void> Signal<Result(Arguments...)>::handle_signal_listener(CallbackData& callback_data, Object* object) noexcept {
+    callback_data.is_signal_listener = false;
+    callback_data.object             = object;
 }
 } // namespace kw

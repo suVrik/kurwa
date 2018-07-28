@@ -53,3 +53,21 @@ set_target_properties(framework PROPERTIES LINKER_LANGUAGE CXX)
 target_link_library(framework eastl)
 target_link_library(framework sdl2)
 target_link_library(framework fmt)
+target_link_library(framework utf8)
+
+# Required by 'kw/debug/stacktrace'
+if(WIN32)
+    target_link_libraries(framework PRIVATE $<$<CONFIG:Debug>:Dbghelp>)
+endif()
+
+# KW_DEBUG must be defined on debug configuration.
+target_compile_definitions(framework PUBLIC $<$<CONFIG:Debug>:KW_DEBUG>)
+
+# Platform definitions.
+if(WIN32)
+    target_compile_definitions(framework PUBLIC KW_WINDOWS)
+elseif(APPLE)
+    target_compile_definitions(framework PUBLIC KW_OSX)
+elseif(UNIX)
+    target_compile_definitions(framework PUBLIC KW_LINUX)
+endif()

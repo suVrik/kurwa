@@ -15,7 +15,7 @@ project(glm)
 
 add_library(glm STATIC "${CMAKE_CURRENT_SOURCE_DIR}/source/glm.cpp")
 
-target_include_directories(glm "${CMAKE_CURRENT_SOURCE_DIR}/include")
+target_include_directories(glm PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 set_target_properties(glm PROPERTIES CXX_STANDARD "17")
 

@@ -5,9 +5,11 @@
 
 #include <EASTL/internal/config.h>
 #include <EASTL/string.h>
+#include <EASTL/vector.h>
 #include <EABase/eabase.h>
 #include <string.h>
 
+#include <EASTL/internal/string_split.h>
 
 namespace eastl
 {
@@ -445,20 +447,28 @@ namespace eastl
 		return true;
 	}
 
+    /// <Kurwa definitions> ////////////////////////////////////////////////////////////////////////////////////////////
 
+    template <typename T, typename Allocator>
+    vector<basic_string_view<T>, Allocator> basic_string<T, Allocator>::split(const T* str, size_t str_size) EA_NOEXCEPT {
+        return string_details::string_split<T, Allocator>(data(), size(), str, str_size);
+    }
+
+    template vector<basic_string_view<char>> basic_string<char>::split(const char* value, size_t size) EA_NOEXCEPT;
+    template vector<basic_string_view<wchar_t>> basic_string<wchar_t>::split(const wchar_t* value, size_t size) EA_NOEXCEPT;
+    template vector<basic_string_view<char16_t>> basic_string<char16_t>::split(const char16_t* value, size_t size) EA_NOEXCEPT;
+    template vector<basic_string_view<char32_t>> basic_string<char32_t>::split(const char32_t* value, size_t size) EA_NOEXCEPT;
+
+    template <typename T>
+    vector<basic_string_view<T>> basic_string_view<T>::split(const T* str, size_t str_size) EA_NOEXCEPT {
+        return string_details::string_split<T>(data(), size(), str, str_size);
+    }
+
+    template vector<basic_string_view<char>> basic_string_view<char>::split(const char* value, size_t size) EA_NOEXCEPT;
+    template vector<basic_string_view<wchar_t>> basic_string_view<wchar_t>::split(const wchar_t* value, size_t size) EA_NOEXCEPT;
+    template vector<basic_string_view<char16_t>> basic_string_view<char16_t>::split(const char16_t* value, size_t size) EA_NOEXCEPT;
+    template vector<basic_string_view<char32_t>> basic_string_view<char32_t>::split(const char32_t* value, size_t size) EA_NOEXCEPT;
+
+    /// </Kurwa definitions> ///////////////////////////////////////////////////////////////////////////////////////////
 
 } // namespace eastl
-
-
-
-
-
-
-
-
-
-
-
-
-
-

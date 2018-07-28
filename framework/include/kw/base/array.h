@@ -14,8 +14,19 @@
 #pragma once
 
 #include <EASTL/array.h>
+#include <utility>
 
 namespace kw {
 template <typename T, size_t N>
 using Array = eastl::array<T, N>;
 } // namespace kw
+
+// Required for Structured binding declaration
+namespace std {
+template <typename T, size_t N>
+struct tuple_size<eastl::array<T, N>> : eastl::integral_constant<size_t, N> {};
+template <size_t Index, typename T, size_t N>
+struct tuple_element<Index, eastl::array<T, N>> {
+    typedef T type;
+};
+} // namespace std
