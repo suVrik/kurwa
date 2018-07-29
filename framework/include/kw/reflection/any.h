@@ -23,7 +23,7 @@ struct hash;
 namespace kw {
 /**
  * The instance of type Any contains an object of any type.
- * Keep in mind that for objects with size is less than a size of a pointer, small object optimization is used.
+ * Keep in mind that for objects which size is less than a size of a pointer, small object optimization is used.
  */
 class Any final {
 public:
