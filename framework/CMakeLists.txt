@@ -27,8 +27,6 @@ if(WIN32)
     set_target_properties("framework" PROPERTIES
             COMPILE_FLAGS "/Zc:__cplusplus")
 
-    get_target_property(myCOMPILE_FLAGS "framework" "COMPILE_FLAGS")
-
     set(compiler_flags
             CMAKE_CXX_FLAGS
             CMAKE_CXX_FLAGS_DEBUG
