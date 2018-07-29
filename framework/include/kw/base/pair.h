@@ -19,6 +19,7 @@
 namespace kw {
 template <typename T1, typename T2>
 using Pair = eastl::pair<T1, T2>;
+using eastl::make_pair;
 } // namespace kw
 
 // Required for Structured binding declaration

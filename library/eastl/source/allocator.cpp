@@ -64,20 +64,15 @@ void* allocator::allocate(size_t n, int flags) {
 }
 
 void* allocator::allocate(size_t n, size_t alignment, size_t offset, int flags) {
-#if defined(__APPLE__)
-    // Apple standart library is retarted and does not have aligned_alloc yet
+#if defined(_MSC_VER)
+    // The Windows standart library is completely retarded and they're not even planning to provide std::aligned_alloc
+    return _aligned_malloc(n, alignment);
+#else
     void* result;
     if (posix_memalign(&result, alignment, n)) {
         return nullptr;
     }
     return result;
-#elif defined(_MSC_VER)
-    // The Windows standart library is completely retarded and they're not even planning to provide std::aligned_alloc
-    return _aligned_malloc(n, alignment);
-#else
-    // The Linux standart library is a little bit retarded too,
-    // and the aligned_alloc function is out of 'std' namespace
-    return aligned_alloc(n, alignment);
 #endif
 }
 
