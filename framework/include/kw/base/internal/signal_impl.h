@@ -20,7 +20,7 @@ namespace signal_details {
 uint32 generate_unique_token();
 
 template <typename Object, typename Callback, typename Result, typename... Arguments>
-Function<Result(Arguments...)> method(Object* object, Callback callback) {
+Function<Result(Arguments...)> method(Object object, Callback callback) {
     if constexpr (eastl::is_same_v<Result, void>) {
         return [ object, callback ](Arguments && ... arguments) noexcept(noexcept(callback))->void {
             (object->*callback)(eastl::forward<Arguments>(arguments)...);
@@ -53,7 +53,7 @@ template <typename Result, typename... Arguments>
 template <typename Object>
 uint32 Signal<Result(Arguments...)>::connect(Object* object, Result (Object::*const callback)(Arguments...)) noexcept {
     CallbackData data;
-    data.callback = signal_details::method<Object, Result (Object::*const)(Arguments...), Result, Arguments...>(object, callback);
+    data.callback = signal_details::method<Object*, Result (Object::*const)(Arguments...), Result, Arguments...>(object, callback);
     data.token = signal_details::generate_unique_token();
     handle_signal_listener(data, object);
     m_callbacks.push_back(std::move(data));
@@ -64,7 +64,7 @@ template <typename Result, typename... Arguments>
 template <typename Object>
 uint32 Signal<Result(Arguments...)>::connect(Object* object, Result (Object::*const callback)(Arguments...) noexcept) noexcept {
     CallbackData data;
-    data.callback = signal_details::method<Object, Result (Object::*const)(Arguments...) noexcept, Result, Arguments...>(object, callback);
+    data.callback = signal_details::method<Object*, Result (Object::*const)(Arguments...) noexcept, Result, Arguments...>(object, callback);
     data.token    = signal_details::generate_unique_token();
     handle_signal_listener(data, object);
     m_callbacks.push_back(std::move(data));
@@ -80,7 +80,7 @@ uint32 Signal<Result(Arguments...)>::connect(const Object* object, Result (Objec
                                                                      "SignalListener to a signal, it's required "
                                                                      "to change the SignalListener.");
     CallbackData data;
-    data.callback = signal_details::method<Object, Result (Object::*const)(Arguments...) const, Result, Arguments...>(object, callback);
+    data.callback           = signal_details::method<const Object*, Result (Object::*const)(Arguments...) const, Result, Arguments...>(object, callback);
     data.object             = object;
     data.token              = signal_details::generate_unique_token();
     data.is_signal_listener = false;
@@ -97,7 +97,7 @@ uint32 Signal<Result(Arguments...)>::connect(const Object* object, Result (Objec
                                                                      "SignalListener to a signal, it's required "
                                                                      "to change the SignalListener.");
     CallbackData data;
-    data.callback           = signal_details::method<Object, Result (Object::*const callback)(Arguments...) const noexcept, Result, Arguments...>(object, callback);
+    data.callback           = signal_details::method<const Object*, Result (Object::*const)(Arguments...) const noexcept, Result, Arguments...>(object, callback);
     data.object             = object;
     data.token              = signal_details::generate_unique_token();
     data.is_signal_listener = false;
@@ -177,6 +177,8 @@ void Signal<Result(Arguments...)>::emit(Arguments... arguments) {
 template <typename Result, typename... Arguments>
 template <typename Adder>
 Result Signal<Result(Arguments...)>::emit(Arguments... arguments, const Adder adder, eastl::conditional_t<eastl::is_same_v<Result, void>, int32, Result> default_value) {
+    static_assert(!eastl::is_same_v<Result, void>, "This 'emit' signature is intended for non-void signals!");
+
     if (!m_callbacks.empty()) {
         Result result = m_callbacks.front().callback(arguments...);
         for (auto it = ++m_callbacks.begin(); it != m_callbacks.end(); ++it) {

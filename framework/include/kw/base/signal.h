@@ -218,7 +218,7 @@ public:
      * \endcode
      */
     template <typename Adder>
-    Result emit(Arguments... arguments, const Adder adder, eastl::conditional_t<eastl::is_same_v<Result, void>, int32, Result> default_value = {});
+    Result emit(Arguments... arguments, const Adder adder, eastl::conditional_t<eastl::is_same_v<Result, void>, int32, Result> default_value);
 
 private:
     struct CallbackData {
