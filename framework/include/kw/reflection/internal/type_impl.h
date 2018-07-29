@@ -32,7 +32,7 @@ template <typename T, typename Base, typename... Bases>
 void register_parents(Vector<Type::Parent>& parents) {
     static_assert(eastl::is_base_of<Base, T>::value, "Invalid list of base classes!");
 
-    parents.push_back({ Type::of<Base>(), static_cast<const Base*>(reinterpret_cast<const T*>(nullptr)) });
+    parents.push_back({ Type::of<Base>(), static_cast<const Base*>(static_cast<const T*>(nullptr)) });
 
     register_parents<T, Bases...>(parents);
 }
@@ -41,10 +41,10 @@ void register_parents(Vector<Type::Parent>& parents) {
 template <typename T>
 const Type* Type::of() {
     if constexpr (eastl::is_same_v<T, eastl::decay_t<T>>) {
-        static Type type(reinterpret_cast<const T*>(nullptr));
+        static Type type(static_cast<const T*>(nullptr));
         return &type;
     } else {
-        return of<eastl::decay_t<T>>();
+        return Type::of<eastl::decay_t<T>>();
     }
 }
 
