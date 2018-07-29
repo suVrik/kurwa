@@ -14,47 +14,55 @@
 #include <kw/reflection/type.h>
 
 namespace kw {
-const std::type_info& Type::get_type_info() const {
+const std::type_info& Type::get_type_info() const noexcept {
     return m_type_info;
 }
 
-size_t Type::get_size() const {
+size_t Type::get_size() const noexcept {
     return m_size;
 }
 
-const char* Type::get_name() const {
+const char* Type::get_name() const noexcept {
     return m_type_info.name();
 }
 
-const Vector<Type::Parent>& Type::get_parents() const {
+const Vector<Type::Parent>& Type::get_parents() const noexcept {
     return m_parents;
 }
 
-Type::destructor_t Type::get_destructor() const {
+Type::default_constructor_t Type::get_default_constructor() const noexcept {
+    return m_default_constructor;
+}
+
+Type::destructor_t Type::get_destructor() const noexcept {
     return m_destructor;
 }
 
-Type::comparator_t Type::get_comparator() const {
+Type::comparator_t Type::get_comparator() const noexcept {
     return m_comparator;
 }
 
-bool Type::is_small_object() const {
+Type::hash_t Type::get_hash() const noexcept {
+    return m_hash;
+}
+
+bool Type::is_small_object() const noexcept {
     return m_size < sizeof(void*);
 }
 
-bool Type::is_base_of(const Type* type) const {
+Pair<bool, intptr_t> Type::is_base_of(const Type* type) const noexcept {
     return type->is_inherited_from(this);
 }
 
-bool Type::is_inherited_from(const Type* type) const {
+Pair<bool, intptr_t> Type::is_inherited_from(const Type* type) const noexcept {
     for (const Parent& base : m_parents) {
         if (base.type == type) {
-            return true;
+            return { true, base.offset };
         }
-        if (base.type->is_inherited_from(type)) {
-            return true;
+        if (Pair<bool, intptr_t> result = base.type->is_inherited_from(type); result.first) {
+            return { true, result.second + base.offset };
         }
     }
-    return false;
+    return { false, 0 };
 }
 } // namespace kw

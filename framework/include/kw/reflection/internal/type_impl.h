@@ -23,6 +23,44 @@ using operator_equals_t = decltype(eastl::declval<const T&>() == eastl::declval<
 template <class T>
 using operator_less_t = decltype(eastl::declval<const T&>() < eastl::declval<const T&>());
 
+template <class T>
+using hash_t = decltype(eastl::hash<T>());
+
+// <is_virtual_base_of implementation from boost library>
+// https://github.com/S2E/s2e-old/blob/master/stp/src/boost/type_traits/is_virtual_base_of.hpp
+
+template <typename Base, typename Derived, typename tag>
+struct is_virtual_base_of_impl {
+    static constexpr bool value = false;
+};
+
+template <typename Base, typename Derived>
+struct is_virtual_base_of_impl<Base, Derived, eastl::true_type> {
+    struct X : Derived, virtual Base {
+        X();
+        X(const X&);
+        X& operator=(const X&);
+        ~X() throw();
+    };
+
+    struct Y : Derived {
+        Y();
+        Y(const Y&);
+        Y& operator=(const Y&);
+        ~Y() throw();
+    };
+
+    static constexpr bool value = sizeof(X) == sizeof(Y);
+};
+
+template <typename Base, typename Derived>
+struct is_virtual_base_of {
+    static constexpr bool tag_value = eastl::is_base_of<Base, Derived>::value && !eastl::is_same_v<Base, Derived>;
+    static constexpr bool value = is_virtual_base_of_impl<Base, Derived, eastl::integral_constant<bool, tag_value>>::value;
+};
+
+// </is_virtual_base_of>
+
 template <typename T>
 void register_parents(Vector<Type::Parent>& parents) {
     // All base classes are registered. Nothing to do.
@@ -31,15 +69,25 @@ void register_parents(Vector<Type::Parent>& parents) {
 template <typename T, typename Base, typename... Bases>
 void register_parents(Vector<Type::Parent>& parents) {
     static_assert(eastl::is_base_of<Base, T>::value, "Invalid list of base classes!");
+    static_assert(!is_virtual_base_of<Base, T>::value, "Virtual inheritance is not supported!");
 
-    parents.push_back({ Type::of<Base>(), static_cast<const Base*>(static_cast<const T*>(nullptr)) });
+    // '1' because nullptr doesn't work with inheritance.
+    parents.push_back({ Type::of<Base>(), reinterpret_cast<intptr_t>(static_cast<const Base*>(reinterpret_cast<const T*>(1))) - 1 });
 
     register_parents<T, Bases...>(parents);
+}
+
+template <typename T>
+constexpr size_t get_size() {
+    if constexpr (!eastl::is_same_v<T, void>) {
+        return sizeof(T);
+    }
+    return 0;
 }
 } // namespace type_details
 
 template <typename T>
-const Type* Type::of() {
+const Type* Type::of() noexcept {
     if constexpr (eastl::is_same_v<T, eastl::decay_t<T>>) {
         static Type type(static_cast<const T*>(nullptr));
         return &type;
@@ -49,86 +97,127 @@ const Type* Type::of() {
 }
 
 template <typename T, typename... Bases>
-void Type::register_parents() {
+void Type::register_parents() noexcept {
     auto type = const_cast<Type*>(Type::of<T>());
     type->m_parents.reserve(sizeof...(Bases));
     type_details::register_parents<T, Bases...>(type->m_parents);
 }
 
 template <typename T>
-bool Type::is_same() const {
+bool Type::is_same() const noexcept {
     return this == Type::of<T>();
 }
 
 template <typename T>
-bool Type::is_base_of() const {
+Pair<bool, intptr_t> Type::is_base_of() const noexcept {
     return is_base_of(Type::of<T>());
 }
 
 template <typename T>
-bool Type::is_inherited_from() const {
+Pair<bool, intptr_t> Type::is_inherited_from() const noexcept {
     return is_inherited_from(Type::of<T>());
 }
 
 template <typename T>
-Type::Type(const T* dummy)
+Type::Type(const T* dummy) noexcept
     : m_type_info(typeid(T))
-    , m_size(sizeof(T)) {
-    if constexpr (sizeof(T) > sizeof(void*)) {
-        m_destructor = [](void* value) { delete static_cast<T*>(value); };
-    } else {
-        if constexpr (eastl::is_destructible<T>()) {
-            m_destructor = [](void* value) { reinterpret_cast<T*>(&value)->~T(); };
+    , m_size(type_details::get_size<T>()) {
+    if constexpr (eastl::is_default_constructible_v<T>) {
+        if constexpr (type_details::get_size<T>() > sizeof(void*)) {
+            m_default_constructor = [](void** value) noexcept {
+                *reinterpret_cast<T**>(value) = new T();
+            };
         } else {
-            m_destructor = [](void*) {};
+            m_default_constructor = [](void** value) noexcept {
+                new (reinterpret_cast<T*>(value)) T();
+            };
         }
+    } else {
+        m_default_constructor = nullptr;
     }
 
-    // It could look really nice and short, if I would put 'if constexpr' inside of lambda, but it doesn't work.
-    if constexpr (sizeof(T) > sizeof(void*)) {
+    if constexpr (type_details::get_size<T>() > sizeof(void*)) {
+        m_destructor = [](void* value) noexcept {
+            delete static_cast<T*>(value);
+        };
+
         if constexpr (eastl::is_detected_v<type_details::operator_equals_t, T>) {
             if constexpr (eastl::is_detected_v<type_details::operator_less_t, T>) {
-                m_comparator = [](const void* a, const void* b) {
-                    const T* const ta = reinterpret_cast<const T*>(a);
-                    const T* const tb = reinterpret_cast<const T*>(b);
+                m_comparator = [](const void* a, const void* b) noexcept {
+                    const T* const ta = static_cast<const T*>(a);
+                    const T* const tb = static_cast<const T*>(b);
                     return *ta == *tb ? 0 : (*ta < *tb ? -1 : 1);
                 };
             } else {
-                m_comparator = [](const void* a, const void* b) {
-                    return *reinterpret_cast<const T*>(a) == *reinterpret_cast<const T*>(b) ? 0 : -1;
+                m_comparator = [](const void* a, const void* b) noexcept {
+                    return *static_cast<const T*>(a) == *static_cast<const T*>(b) ? 0 : -1;
                 };
             }
         } else {
             if constexpr (eastl::is_detected_v<type_details::operator_less_t, T>) {
-                m_comparator = [](const void* a, const void* b) {
-                    return *reinterpret_cast<const T*>(a) < *reinterpret_cast<const T*>(b) ? -1 : 1;
+                m_comparator = [](const void* a, const void* b) noexcept {
+                    return *static_cast<const T*>(a) < *static_cast<const T*>(b) ? -1 : 1;
                 };
             } else {
-                m_comparator = [](const void*, const void*) { return -1; };
+                m_comparator = [](const void*, const void*) noexcept {
+                    return -1;
+                };
             }
         }
     } else {
+        if constexpr (eastl::is_destructible<T>()) {
+            m_destructor = [](void* value) noexcept {
+                reinterpret_cast<T*>(&value)->~T();
+            };
+        } else {
+            m_destructor = [](void*) noexcept {};
+        }
+
         if constexpr (eastl::is_detected_v<type_details::operator_equals_t, T>) {
             if constexpr (eastl::is_detected_v<type_details::operator_less_t, T>) {
-                m_comparator = [](const void* a, const void* b) {
+                m_comparator = [](const void* a, const void* b) noexcept {
                     const T* const ta = reinterpret_cast<const T*>(&a);
                     const T* const tb = reinterpret_cast<const T*>(&b);
                     return *ta == *tb ? 0 : (*ta < *tb ? -1 : 1);
                 };
             } else {
-                m_comparator = [](const void* a, const void* b) {
+                m_comparator = [](const void* a, const void* b) noexcept {
                     return *reinterpret_cast<const T*>(&a) == *reinterpret_cast<const T*>(&b) ? 0 : -1;
                 };
             }
         } else {
-            if constexpr (eastl::is_detected_v<type_details::operator_less_t, T>) {
-                m_comparator = [](const void* a, const void* b) {
+            if constexpr (eastl::is_same_v<T, void>) {
+                // All void types are considered equal.
+                m_comparator = [](const void*, const void*) noexcept {
+                    return 0;
+                };
+            } else if constexpr (eastl::is_detected_v<type_details::operator_less_t, T>) {
+                m_comparator = [](const void* a, const void* b) noexcept {
                     return *reinterpret_cast<const T*>(&a) < *reinterpret_cast<const T*>(&b) ? -1 : 1;
                 };
             } else {
-                m_comparator = [](const void*, const void*) { return -1; };
+                m_comparator = [](const void*, const void*) noexcept {
+                    return -1;
+                };
             }
         }
+    }
+
+    if constexpr (eastl::is_detected_exact_v<size_t, type_details::hash_t, T>) {
+        if constexpr (type_details::get_size<T>() > sizeof(void*)) {
+            m_hash = [](const void* value) noexcept->size_t {
+                return eastl::hash<T>(*static_cast<const T*>(value));
+            };
+        } else {
+            m_hash = [](const void* value) noexcept->size_t {
+                return eastl::hash<T>(*reinterpret_cast<const T*>(&value));
+            };
+        }
+    } else {
+        m_hash = [](const void* value) noexcept->size_t {
+            KW_ASSERT("Object of type '{}' doesn't have a hash function defined!", typeid(T).name());
+            return reinterpret_cast<size_t>(value);
+        };
     }
 }
 } // namespace kw

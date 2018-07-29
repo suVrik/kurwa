@@ -14,8 +14,6 @@
 #include <kw/reflection/type.h>
 
 #include <gmock/gmock.h>
-#include <kw/base/string.h>
-#include <kw/utilities/trace.h>
 
 TEST(type, of) {
     using namespace kw;
@@ -62,94 +60,94 @@ TEST(type, register_parents) {
 
     EXPECT_TRUE(base_a->get_parents().empty());
 
-    EXPECT_FALSE(base_a->is_inherited_from<DummyChildA>());
-    EXPECT_FALSE(base_a->is_inherited_from<DummyChildB>());
-    EXPECT_FALSE(base_a->is_inherited_from<DummyBaseA>());
-    EXPECT_FALSE(base_a->is_inherited_from<DummyBaseB>());
+    EXPECT_FALSE(base_a->is_inherited_from<DummyChildA>().first);
+    EXPECT_FALSE(base_a->is_inherited_from<DummyChildB>().first);
+    EXPECT_FALSE(base_a->is_inherited_from<DummyBaseA>().first);
+    EXPECT_FALSE(base_a->is_inherited_from<DummyBaseB>().first);
 
-    EXPECT_FALSE(base_a->is_inherited_from(a));
-    EXPECT_FALSE(base_a->is_inherited_from(b));
-    EXPECT_FALSE(base_a->is_inherited_from(base_a));
-    EXPECT_FALSE(base_a->is_inherited_from(base_b));
+    EXPECT_FALSE(base_a->is_inherited_from(a).first);
+    EXPECT_FALSE(base_a->is_inherited_from(b).first);
+    EXPECT_FALSE(base_a->is_inherited_from(base_a).first);
+    EXPECT_FALSE(base_a->is_inherited_from(base_b).first);
 
-    EXPECT_TRUE(base_a->is_base_of<DummyChildA>());
-    EXPECT_TRUE(base_a->is_base_of<DummyChildB>());
-    EXPECT_FALSE(base_a->is_base_of<DummyBaseA>());
-    EXPECT_FALSE(base_a->is_base_of<DummyBaseB>());
+    EXPECT_TRUE(base_a->is_base_of<DummyChildA>().first);
+    EXPECT_TRUE(base_a->is_base_of<DummyChildB>().first);
+    EXPECT_FALSE(base_a->is_base_of<DummyBaseA>().first);
+    EXPECT_FALSE(base_a->is_base_of<DummyBaseB>().first);
 
-    EXPECT_TRUE(base_a->is_base_of(a));
-    EXPECT_TRUE(base_a->is_base_of(b));
-    EXPECT_FALSE(base_a->is_base_of(base_a));
-    EXPECT_FALSE(base_a->is_base_of(base_b));
+    EXPECT_TRUE(base_a->is_base_of(a).first);
+    EXPECT_TRUE(base_a->is_base_of(b).first);
+    EXPECT_FALSE(base_a->is_base_of(base_a).first);
+    EXPECT_FALSE(base_a->is_base_of(base_b).first);
 
     EXPECT_TRUE(base_b->get_parents().empty());
 
-    EXPECT_FALSE(base_b->is_inherited_from<DummyChildA>());
-    EXPECT_FALSE(base_b->is_inherited_from<DummyChildB>());
-    EXPECT_FALSE(base_b->is_inherited_from<DummyBaseA>());
-    EXPECT_FALSE(base_b->is_inherited_from<DummyBaseB>());
+    EXPECT_FALSE(base_b->is_inherited_from<DummyChildA>().first);
+    EXPECT_FALSE(base_b->is_inherited_from<DummyChildB>().first);
+    EXPECT_FALSE(base_b->is_inherited_from<DummyBaseA>().first);
+    EXPECT_FALSE(base_b->is_inherited_from<DummyBaseB>().first);
 
-    EXPECT_FALSE(base_b->is_inherited_from(a));
-    EXPECT_FALSE(base_b->is_inherited_from(b));
-    EXPECT_FALSE(base_b->is_inherited_from(base_a));
-    EXPECT_FALSE(base_b->is_inherited_from(base_b));
+    EXPECT_FALSE(base_b->is_inherited_from(a).first);
+    EXPECT_FALSE(base_b->is_inherited_from(b).first);
+    EXPECT_FALSE(base_b->is_inherited_from(base_a).first);
+    EXPECT_FALSE(base_b->is_inherited_from(base_b).first);
 
-    EXPECT_FALSE(base_b->is_base_of<DummyChildA>());
-    EXPECT_TRUE(base_b->is_base_of<DummyChildB>());
-    EXPECT_FALSE(base_b->is_base_of<DummyBaseA>());
-    EXPECT_FALSE(base_b->is_base_of<DummyBaseB>());
+    EXPECT_FALSE(base_b->is_base_of<DummyChildA>().first);
+    EXPECT_TRUE(base_b->is_base_of<DummyChildB>().first);
+    EXPECT_FALSE(base_b->is_base_of<DummyBaseA>().first);
+    EXPECT_FALSE(base_b->is_base_of<DummyBaseB>().first);
 
-    EXPECT_FALSE(base_b->is_base_of(a));
-    EXPECT_TRUE(base_b->is_base_of(b));
-    EXPECT_FALSE(base_b->is_base_of(base_a));
-    EXPECT_FALSE(base_b->is_base_of(base_b));
+    EXPECT_FALSE(base_b->is_base_of(a).first);
+    EXPECT_TRUE(base_b->is_base_of(b).first);
+    EXPECT_FALSE(base_b->is_base_of(base_a).first);
+    EXPECT_FALSE(base_b->is_base_of(base_b).first);
 
     EXPECT_EQ(a->get_parents().size(), 1);
     EXPECT_EQ(a->get_parents()[0].type, base_a);
 
-    EXPECT_FALSE(a->is_inherited_from<DummyChildA>());
-    EXPECT_FALSE(a->is_inherited_from<DummyChildB>());
-    EXPECT_TRUE(a->is_inherited_from<DummyBaseA>());
-    EXPECT_FALSE(a->is_inherited_from<DummyBaseB>());
+    EXPECT_FALSE(a->is_inherited_from<DummyChildA>().first);
+    EXPECT_FALSE(a->is_inherited_from<DummyChildB>().first);
+    EXPECT_TRUE(a->is_inherited_from<DummyBaseA>().first);
+    EXPECT_FALSE(a->is_inherited_from<DummyBaseB>().first);
 
-    EXPECT_FALSE(a->is_inherited_from(a));
-    EXPECT_FALSE(a->is_inherited_from(b));
-    EXPECT_TRUE(a->is_inherited_from(base_a));
-    EXPECT_FALSE(a->is_inherited_from(base_b));
+    EXPECT_FALSE(a->is_inherited_from(a).first);
+    EXPECT_FALSE(a->is_inherited_from(b).first);
+    EXPECT_TRUE(a->is_inherited_from(base_a).first);
+    EXPECT_FALSE(a->is_inherited_from(base_b).first);
 
-    EXPECT_FALSE(a->is_base_of<DummyChildA>());
-    EXPECT_FALSE(a->is_base_of<DummyChildB>());
-    EXPECT_FALSE(a->is_base_of<DummyBaseA>());
-    EXPECT_FALSE(a->is_base_of<DummyBaseB>());
+    EXPECT_FALSE(a->is_base_of<DummyChildA>().first);
+    EXPECT_FALSE(a->is_base_of<DummyChildB>().first);
+    EXPECT_FALSE(a->is_base_of<DummyBaseA>().first);
+    EXPECT_FALSE(a->is_base_of<DummyBaseB>().first);
 
-    EXPECT_FALSE(a->is_base_of(a));
-    EXPECT_FALSE(a->is_base_of(b));
-    EXPECT_FALSE(a->is_base_of(base_a));
-    EXPECT_FALSE(a->is_base_of(base_b));
+    EXPECT_FALSE(a->is_base_of(a).first);
+    EXPECT_FALSE(a->is_base_of(b).first);
+    EXPECT_FALSE(a->is_base_of(base_a).first);
+    EXPECT_FALSE(a->is_base_of(base_b).first);
 
     EXPECT_EQ(b->get_parents().size(), 2);
     EXPECT_EQ(b->get_parents()[0].type, base_a);
     EXPECT_EQ(b->get_parents()[1].type, base_b);
 
-    EXPECT_FALSE(b->is_inherited_from<DummyChildA>());
-    EXPECT_FALSE(b->is_inherited_from<DummyChildB>());
-    EXPECT_TRUE(b->is_inherited_from<DummyBaseA>());
-    EXPECT_TRUE(b->is_inherited_from<DummyBaseB>());
+    EXPECT_FALSE(b->is_inherited_from<DummyChildA>().first);
+    EXPECT_FALSE(b->is_inherited_from<DummyChildB>().first);
+    EXPECT_TRUE(b->is_inherited_from<DummyBaseA>().first);
+    EXPECT_TRUE(b->is_inherited_from<DummyBaseB>().first);
 
-    EXPECT_FALSE(b->is_inherited_from(a));
-    EXPECT_FALSE(b->is_inherited_from(b));
-    EXPECT_TRUE(b->is_inherited_from(base_a));
-    EXPECT_TRUE(b->is_inherited_from(base_b));
+    EXPECT_FALSE(b->is_inherited_from(a).first);
+    EXPECT_FALSE(b->is_inherited_from(b).first);
+    EXPECT_TRUE(b->is_inherited_from(base_a).first);
+    EXPECT_TRUE(b->is_inherited_from(base_b).first);
 
-    EXPECT_FALSE(b->is_base_of<DummyChildA>());
-    EXPECT_FALSE(b->is_base_of<DummyChildB>());
-    EXPECT_FALSE(b->is_base_of<DummyBaseA>());
-    EXPECT_FALSE(b->is_base_of<DummyBaseB>());
+    EXPECT_FALSE(b->is_base_of<DummyChildA>().first);
+    EXPECT_FALSE(b->is_base_of<DummyChildB>().first);
+    EXPECT_FALSE(b->is_base_of<DummyBaseA>().first);
+    EXPECT_FALSE(b->is_base_of<DummyBaseB>().first);
 
-    EXPECT_FALSE(b->is_base_of(a));
-    EXPECT_FALSE(b->is_base_of(b));
-    EXPECT_FALSE(b->is_base_of(base_a));
-    EXPECT_FALSE(b->is_base_of(base_b));
+    EXPECT_FALSE(b->is_base_of(a).first);
+    EXPECT_FALSE(b->is_base_of(b).first);
+    EXPECT_FALSE(b->is_base_of(base_a).first);
+    EXPECT_FALSE(b->is_base_of(base_b).first);
 }
 
 // Even tho the test's name is 'get_type_info', besides that, it also tests the following methods:
@@ -168,4 +166,28 @@ TEST(type, get_type_info) {
     EXPECT_TRUE(a->is_same<int>());
     EXPECT_TRUE(a->is_same<int32_t>());
     EXPECT_FALSE(a->is_same<kw::int64>());
+}
+
+TEST(type, inheritance_offsets) {
+    using namespace kw;
+
+    struct DummyBaseA {
+        int32 dummy_a;
+    };
+    struct DummyBaseB {
+        int32 dummy_b;
+    };
+    struct DummyChild : DummyBaseA, DummyBaseB {};
+
+    EXPECT_EQ(sizeof(DummyChild), sizeof(int32) * 2);
+
+    Type::register_parents<DummyChild, DummyBaseA, DummyBaseB>();
+
+    const Type* a = Type::of<DummyChild>();
+
+    EXPECT_TRUE(a->is_inherited_from<DummyBaseA>().first);
+    EXPECT_TRUE(a->is_inherited_from<DummyBaseB>().first);
+
+    EXPECT_EQ(a->is_inherited_from<DummyBaseA>().second, 0);
+    EXPECT_EQ(a->is_inherited_from<DummyBaseB>().second, sizeof(int32));
 }
