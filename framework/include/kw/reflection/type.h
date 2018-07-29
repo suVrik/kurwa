@@ -21,7 +21,14 @@
 
 namespace kw {
 /**
- * TODO: Good description
+ * Type is a structure that contains information about specific types.
+ * For the same type there's always the same Type instance. So when it is not possible to check if two objects
+ * belong to the same type using templates (like when they're hidden in Any structure), but there're Types of these
+ * objects available, it is enough to just compare these Types.
+ * Type also stores inheritance information, destructors and comparators. Keep in mind tho, that it is very difficult
+ * to understand right away what kind of functionality is needed for Type (is_pointer, is_array, maybe something else?),
+ * so feel free to add whatever you need.
+ * Please, inspect this class to get more information.
  */
 class Type final {
 public:

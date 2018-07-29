@@ -40,7 +40,6 @@ void register_parents(Vector<Type::Parent>& parents) {
 
 template <typename T>
 const Type* Type::of() {
-    // TODO: check how it looks in assembly
     if constexpr (eastl::is_same_v<T, eastl::decay_t<T>>) {
         static Type type(reinterpret_cast<const T*>(nullptr));
         return &type;
