@@ -40,7 +40,7 @@ SampleModule::SampleModule(kw::Game<Modules...>* game) {
 
 template <typename... Modules>
 bool SampleModule::on_init_listener(kw::Game<Modules...>* game) {
-    kw::InputModule& input = game->get<kw::InputModule>();
+    kw::InputModule& input = game->template get<kw::InputModule>();
     kw::trace("Number of gamepads now: {}", input.get_num_gamepads());
 
     return true;
@@ -48,7 +48,7 @@ bool SampleModule::on_init_listener(kw::Game<Modules...>* game) {
 
 template <typename... Modules>
 bool SampleModule::on_destroy_listener(kw::Game<Modules...>* game) {
-    kw::InputModule& input = game->get<kw::InputModule>();
+    kw::InputModule& input = game->template get<kw::InputModule>();
     kw::trace("Number of gamepads now: {}", input.get_num_gamepads());
 
     return true;
@@ -72,7 +72,7 @@ Game::Game() {
 
 template <typename... Modules>
 bool Game::on_init_listener(kw::Game<Modules...>* game) {
-    auto& input_module = this->get<kw::InputModule>();
+    auto& input_module = get<kw::InputModule>();
     input_module.on_gamepad_added.connect(this, [](kw::Gamepad& gamepad) { kw::trace("Gamepad added!"); });
     input_module.on_gamepad_removed.connect(this, [](kw::Gamepad& gamepad) { kw::trace("Gamepad removed!"); });
     return true;
