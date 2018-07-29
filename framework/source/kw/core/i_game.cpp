@@ -34,9 +34,6 @@ IGame::~IGame() noexcept {
 }
 
 int32 IGame::run() noexcept {
-    constexpr int32 ERROR_CODE   = 1;
-    constexpr int32 SUCCESS_CODE = 0;
-
     if (is_initialized) {
         SDL_Event event;
         while (true) {

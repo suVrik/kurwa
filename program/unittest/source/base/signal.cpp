@@ -56,7 +56,7 @@ TEST(signal, non_void_callback_order) {
     my_signal.connect([]() { return 1; });
     my_signal.connect([]() { return 3; });
     my_signal.connect([]() { return 5; });
-    kw::int32 test = my_signal.emit([](kw::int32 a, kw::int32 b) { return b << a; });
+    kw::int32 test = my_signal.emit([](kw::int32 a, kw::int32 b) { return b << a; }, 0);
 
     EXPECT_EQ(test, 320);
 }

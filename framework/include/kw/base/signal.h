@@ -199,6 +199,7 @@ public:
     /**
      * Call all the connected callbacks with the given 'arguments' in order from the first to the last
      * connected callback. Return the result of applying the given 'adder' to every sequential pair of callbacks.
+     * If none listeners are available, 'default_value' is returned.
      *
      * The required adder signature: Result(Result, Result) — with optional const-reference qualifiers.
      *
@@ -217,7 +218,7 @@ public:
      * \endcode
      */
     template <typename Adder>
-    Result emit(Arguments... arguments, const Adder adder);
+    Result emit(Arguments... arguments, const Adder adder, eastl::conditional_t<eastl::is_same_v<Result, void>, int32, Result> default_value);
 
 private:
     struct CallbackData {
@@ -228,10 +229,7 @@ private:
     };
 
     template <typename Object>
-    eastl::enable_if_t<eastl::is_base_of<SignalListener, Object>::value, void> handle_signal_listener(CallbackData& callback_data, Object* object) noexcept;
-
-    template <typename Object>
-    eastl::enable_if_t<!eastl::is_base_of<SignalListener, Object>::value, void> handle_signal_listener(CallbackData& callback_data, Object* object) noexcept;
+    void handle_signal_listener(CallbackData& callback_data, Object* object) noexcept;
 
     List<CallbackData> m_callbacks;
 };
