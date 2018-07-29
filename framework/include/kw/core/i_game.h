@@ -31,6 +31,12 @@ namespace kw {
 class IGame {
 public:
     /**
+     * Possible return values of 'run' method.
+     */
+    static constexpr int32 ERROR_CODE   = 1;
+    static constexpr int32 SUCCESS_CODE = 0;
+
+    /**
      * Initialize SDL subsystems.
      */
     IGame() noexcept;
@@ -43,7 +49,7 @@ public:
     /**
      * Run a frame loop.
      */
-    int32 run() noexcept;
+    virtual int32 run() noexcept;
 
     /**
      * Make 'run' method return 0 after current frame.

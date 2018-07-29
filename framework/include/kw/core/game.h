@@ -69,6 +69,14 @@ public:
     template <typename Module>
     const Module& get() const noexcept;
 
+    /**
+     * Run a frame loop.
+     */
+    int32 run() noexcept final;
+
+    Signal<bool(Game<Modules...>*)> on_init;    /// Emitted after all the modules successfully initialized.
+    Signal<bool(Game<Modules...>*)> on_destroy; /// Emitted at the end of 'run', while all the modules are still valid.
+
 private:
     Tuple<UniquePtr<Modules>...> m_modules;
 };

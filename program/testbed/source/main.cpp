@@ -19,21 +19,63 @@
 
 #include <SDL2/SDL_main.h>
 
-class Game final : public kw::Game<kw::WindowModule, kw::InputModule>, public kw::SignalListener {
+class SampleModule {
+public:
+    template <typename... Modules>
+    explicit SampleModule(kw::Game<Modules...>*);
+
+private:
+    template <typename... Modules>
+    bool on_init_listener(kw::Game<Modules...>*);
+
+    template <typename... Modules>
+    bool on_destroy_listener(kw::Game<Modules...>*);
+};
+
+template <typename... Modules>
+SampleModule::SampleModule(kw::Game<Modules...>* game) {
+    game->on_init.connect(this, &SampleModule::on_init_listener);
+    game->on_destroy.connect(this, &SampleModule::on_destroy_listener);
+}
+
+template <typename... Modules>
+bool SampleModule::on_init_listener(kw::Game<Modules...>* game) {
+    kw::InputModule& input = game->get<kw::InputModule>();
+    kw::trace("Number of gamepads now: {}", input.get_num_gamepads());
+
+    return true;
+}
+
+template <typename... Modules>
+bool SampleModule::on_destroy_listener(kw::Game<Modules...>* game) {
+    kw::InputModule& input = game->get<kw::InputModule>();
+    kw::trace("Number of gamepads now: {}", input.get_num_gamepads());
+
+    return true;
+}
+
+class Game final : public kw::Game<kw::WindowModule, kw::InputModule, SampleModule>, public kw::SignalListener {
 public:
     Game();
 
 private:
+    template <typename... Modules>
+    bool on_init_listener(kw::Game<Modules...>* game);
     void on_update_listener();
     void test_input();
 };
 
 Game::Game() {
     on_update.connect(this, &Game::on_update_listener);
+    on_init.connect(this, &Game::on_init_listener);
+}
 
-    auto& input_module = get<kw::InputModule>();
+template <typename... Modules>
+bool Game::on_init_listener(kw::Game<Modules...>* game) {
+    auto& input_module = this->get<kw::InputModule>();
     input_module.on_gamepad_added.connect(this, [](kw::Gamepad& gamepad) { kw::trace("Gamepad added!"); });
     input_module.on_gamepad_removed.connect(this, [](kw::Gamepad& gamepad) { kw::trace("Gamepad removed!"); });
+    return true;
 }
 
 // There's no ImGui yet => No sane testbed yet
@@ -53,7 +95,7 @@ void Game::test_input() {
         const bool is_down     = keyboard.is_down(i);
         const bool is_repeat   = keyboard.is_repeat(i);
         const bool is_released = keyboard.is_released(i);
-        const kw::String text  = keyboard.get_text();
+        const kw::String& text = keyboard.get_text();
         if (is_pressed || is_down || is_repeat || is_released) {
             kw::trace("Keyboard Button #{} ('{}')     P: {}, D: {}, Rep: {}, Rel: {}, Txt: {}", static_cast<kw::int32>(i), kw::ControlUtils::get_control_name(i), is_pressed, is_down, is_repeat, is_released, text);
         }

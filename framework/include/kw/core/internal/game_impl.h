@@ -47,4 +47,49 @@ template <typename Module>
 const Module& Game<Modules...>::get() const noexcept {
     return *kw::get<UniquePtr<Module>>(m_modules);
 }
+
+template <typename... Modules>
+int32 Game<Modules...>::run() noexcept {
+    auto all = [](bool a, bool b) noexcept->bool {
+        return a && b;
+    };
+
+    if (is_initialized) {
+        try {
+            if (!on_init.emit(this, all, true)) {
+                return ERROR_CODE;
+            }
+        } catch (const RuntimeError& error) {
+            // 'fprintf' is for developer. It's easier to examine info in console, rather than in a message box.
+            fprintf(stderr, "%s\n", error.what());
+            message_box(error.what());
+            is_initialized = false;
+        } catch (...) {
+            fprintf(stderr, "Runtime error in anonymous 'on_init' listener!\n");
+            message_box("Runtime error in anonymous 'on_init' listener!");
+            is_initialized = false;
+        }
+
+        int32 result = IGame::run();
+
+        try {
+            if (!on_destroy.emit(this, all, true)) {
+                return ERROR_CODE;
+            }
+        } catch (const RuntimeError& error) {
+            // 'fprintf' is for developer. It's easier to examine info in console, rather than in a message box.
+            fprintf(stderr, "%s\n", error.what());
+            message_box(error.what());
+            is_initialized = false;
+        } catch (...) {
+            fprintf(stderr, "Runtime error in anonymous 'on_destroy' listener!\n");
+            message_box("Runtime error in anonymous 'on_destroy' listener!");
+            is_initialized = false;
+        }
+
+        return result;
+    }
+
+    return ERROR_CODE;
+}
 } // namespace kw
