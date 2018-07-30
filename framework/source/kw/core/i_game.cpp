@@ -97,7 +97,7 @@ void IGame::exit() noexcept {
 }
 
 void IGame::message_box(const String& message) const noexcept {
-    fprintf(stderr, message.c_str()); // For developer. Sometimes the message box is not even shown.
+    fputs(message.c_str(), stderr); // For developer. Sometimes the message box is not even shown.
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Runtime error", message.c_str(), nullptr);
 }
 } // namespace kw

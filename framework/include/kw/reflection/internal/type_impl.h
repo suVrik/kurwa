@@ -29,6 +29,13 @@ using hash_t = decltype(eastl::hash<T>());
 // <is_virtual_base_of implementation from boost library>
 // https://github.com/S2E/s2e-old/blob/master/stp/src/boost/type_traits/is_virtual_base_of.hpp
 
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable : 4584)
+#elif defined(__GNUC__)
+#pragma GCC system_header
+#endif
+
 template <typename Base, typename Derived, typename tag>
 struct is_virtual_base_of_impl {
     static constexpr bool value = false;
@@ -58,6 +65,10 @@ struct is_virtual_base_of {
     static constexpr bool tag_value = eastl::is_base_of<Base, Derived>::value && !eastl::is_same_v<Base, Derived>;
     static constexpr bool value = is_virtual_base_of_impl<Base, Derived, eastl::integral_constant<bool, tag_value>>::value;
 };
+
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
 // </is_virtual_base_of>
 
