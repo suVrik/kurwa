@@ -23,9 +23,7 @@ namespace kw {
 IGame::IGame() noexcept {
     is_initialized = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_HAPTIC | SDL_INIT_GAMECONTROLLER) == 0;
     if (!is_initialized) {
-        message_box(fmt::format("Failed to initialize SDL2!\n"
-                                "The error message: {}",
-                                SDL_GetError()));
+        message_box(fmt::format("Failed to initialize SDL2!\nThe error message: {}", SDL_GetError()));
     }
 }
 
@@ -35,36 +33,60 @@ IGame::~IGame() noexcept {
 
 int32 IGame::run() noexcept {
     if (is_initialized) {
-        SDL_Event event;
-        while (true) {
-            while (SDL_PollEvent(&event)) {
-                if (event.type == SDL_QUIT) {
-                    return SUCCESS_CODE;
-                } else {
-                    try {
-                        on_event.emit(event);
-                    } catch (const std::runtime_error& error) {
-                        message_box(error.what());
-                        return ERROR_CODE;
-                    } catch (...) {
-                        message_box("Runtime error in anonymous 'on_event' callback!");
-                        return ERROR_CODE;
+        try {
+            on_init.emit(this);
+        } catch (const std::runtime_error& error) {
+            message_box(error.what());
+            return 1;
+        } catch (...) {
+            message_box("Runtime error in anonymous 'on_init' callback!");
+            return 1;
+        }
+
+        const int32 result = [this] {
+            SDL_Event event;
+            while (true) {
+                while (SDL_PollEvent(&event)) {
+                    if (event.type == SDL_QUIT) {
+                        return 0;
+                    } else {
+                        try {
+                            on_event.emit(event);
+                        } catch (const std::runtime_error& error) {
+                            message_box(error.what());
+                            return 1;
+                        } catch (...) {
+                            message_box("Runtime error in anonymous 'on_event' callback!");
+                            return 1;
+                        }
                     }
                 }
+                try {
+                    on_update.emit();
+                } catch (const std::runtime_error& error) {
+                    message_box(error.what());
+                    return 1;
+                } catch (...) {
+                    message_box("Runtime error in anonymous 'on_update' callback!");
+                    return 1;
+                }
             }
-            try {
-                on_update.emit();
-            } catch (const std::runtime_error& error) {
-                message_box(error.what());
-                return ERROR_CODE;
-            } catch (...) {
-                message_box("Runtime error in anonymous 'on_update' callback!");
-                return ERROR_CODE;
-            }
+        }();
+
+        try {
+            on_destroy.emit(this);
+        } catch (const std::runtime_error& error) {
+            message_box(error.what());
+            return 1;
+        } catch (...) {
+            message_box("Runtime error in anonymous 'on_destroy' callback!");
+            return 1;
         }
+
+        return result;
     }
 
-    return ERROR_CODE;
+    return 1;
 }
 
 void IGame::exit() noexcept {
@@ -75,6 +97,13 @@ void IGame::exit() noexcept {
 }
 
 void IGame::message_box(const String& message) const noexcept {
+    fprintf(stderr, message.c_str()); // For developer. Sometimes the message box is not even shown.
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Runtime error", message.c_str(), nullptr);
 }
 } // namespace kw
+
+namespace eastl {
+size_t hash<std::type_index>::operator()(const std::type_index& value) const {
+    return value.hash_code();
+}
+} // namespace eastl

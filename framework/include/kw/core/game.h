@@ -13,10 +13,10 @@
 
 #pragma once
 
+#include <kw/base/slow.h>
 #include <kw/base/string.h>
 #include <kw/base/tuple.h>
 #include <kw/base/types.h>
-#include <kw/base/unique_ptr.h>
 #include <kw/core/i_game.h>
 #include <kw/debug/runtime_error.h>
 
@@ -45,12 +45,6 @@ template <typename... Modules>
 class Game : public IGame {
 public:
     /**
-     * Defined as std::true_type if the given 'Module' is present, otherwise defined as false.
-     */
-    template <typename Module>
-    using has_t = kw::has_t<Module, Tuple<Modules...>>;
-
-    /**
      * Initialize SDL subsystems and construct all the modules.
      * In case either some SDL subsystem or some module is failed to initialize,
      * the 'run' method will return non-zero exit code without entering a frame loop.
@@ -58,27 +52,35 @@ public:
     Game() noexcept;
 
     /**
+     * Return true if the given 'Module' is present. Otherwise return false.
+     *
+     * This implementation of 'has' is faster than the one from 'IGame'.
+     */
+    template <typename Module>
+    bool has() const noexcept;
+
+    /**
      * Return the given 'Module'.
+     *
+     * It is safe to cache a pointer to this 'Module'.
+     *
+     * This implementation of 'get' is faster than the one from 'IGame'.
      */
     template <typename Module>
     Module& get() noexcept;
 
     /**
      * Return the given 'Module'.
+     *
+     * It is safe to cache a pointer to this 'Module'.
+     *
+     * This implementation of 'get' is faster than the one from 'IGame'.
      */
     template <typename Module>
     const Module& get() const noexcept;
 
-    /**
-     * Run a frame loop.
-     */
-    int32 run() noexcept final;
-
-    Signal<bool(Game<Modules...>*)> on_init;    /// Emitted after all the modules successfully initialized.
-    Signal<bool(Game<Modules...>*)> on_destroy; /// Emitted at the end of 'run', while all the modules are still valid.
-
 private:
-    Tuple<UniquePtr<Modules>...> m_modules;
+    Tuple<Slow<Modules>...> m_modules;
 };
 } // namespace kw
 

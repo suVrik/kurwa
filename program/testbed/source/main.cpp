@@ -21,37 +21,26 @@
 
 class SampleModule {
 public:
-    template <typename... Modules>
-    explicit SampleModule(kw::Game<Modules...>*);
+    explicit SampleModule(kw::IGame* game);
 
 private:
-    template <typename... Modules>
-    bool on_init_listener(kw::Game<Modules...>*);
-
-    template <typename... Modules>
-    bool on_destroy_listener(kw::Game<Modules...>*);
+    void on_init_listener(kw::IGame* game);
+    void on_destroy_listener(kw::IGame* game);
 };
 
-template <typename... Modules>
-SampleModule::SampleModule(kw::Game<Modules...>* game) {
+SampleModule::SampleModule(kw::IGame* game) {
     game->on_init.connect(this, &SampleModule::on_init_listener);
     game->on_destroy.connect(this, &SampleModule::on_destroy_listener);
 }
 
-template <typename... Modules>
-bool SampleModule::on_init_listener(kw::Game<Modules...>* game) {
-    kw::InputModule& input = game->template get<kw::InputModule>();
+void SampleModule::on_init_listener(kw::IGame* game) {
+    kw::InputModule& input = game->get<kw::InputModule>();
     kw::trace("Number of gamepads now: {}", input.get_num_gamepads());
-
-    return true;
 }
 
-template <typename... Modules>
-bool SampleModule::on_destroy_listener(kw::Game<Modules...>* game) {
-    kw::InputModule& input = game->template get<kw::InputModule>();
+void SampleModule::on_destroy_listener(kw::IGame* game) {
+    kw::InputModule& input = game->get<kw::InputModule>();
     kw::trace("Number of gamepads now: {}", input.get_num_gamepads());
-
-    return true;
 }
 
 class Game final : public kw::Game<kw::WindowModule, kw::InputModule, SampleModule>, public kw::SignalListener {
@@ -59,8 +48,7 @@ public:
     Game();
 
 private:
-    template <typename... Modules>
-    bool on_init_listener(kw::Game<Modules...>* game);
+    void on_init_listener(kw::IGame* game);
     void on_update_listener();
     void test_input();
 };
@@ -70,12 +58,10 @@ Game::Game() {
     on_init.connect(this, &Game::on_init_listener);
 }
 
-template <typename... Modules>
-bool Game::on_init_listener(kw::Game<Modules...>* game) {
+void Game::on_init_listener(kw::IGame* game) {
     auto& input_module = get<kw::InputModule>();
     input_module.on_gamepad_added.connect(this, [](kw::Gamepad& gamepad) { kw::trace("Gamepad added!"); });
     input_module.on_gamepad_removed.connect(this, [](kw::Gamepad& gamepad) { kw::trace("Gamepad removed!"); });
-    return true;
 }
 
 // There's no ImGui yet => No sane testbed yet
