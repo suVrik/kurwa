@@ -24,7 +24,7 @@ void construct_slow_tuple(Tup& modules, Game game, HashMap<std::type_index, void
 template <typename Tup, typename Game, typename Current, typename... Following>
 void construct_slow_tuple(Tup& modules, Game game, HashMap<std::type_index, void*>& modules_pointers) {
     eastl::get<Current>(modules).construct(game);
-    modules_pointers.emplace(typeid(Current::value_type), &(*eastl::get<Current>(modules)));
+    modules_pointers.emplace(typeid(typename Current::value_type), &(*eastl::get<Current>(modules)));
     construct_slow_tuple<Tup, Game, Following...>(modules, game, modules_pointers);
 }
 } // namespace game_details
