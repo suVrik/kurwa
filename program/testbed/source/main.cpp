@@ -16,8 +16,11 @@
 #include <kw/input/input_module.h>
 #include <kw/math/math.h>
 #include <kw/utilities/trace.h>
+#include <kw/render/render_module.h>
+#include <kw/base/queue.h>
 
 #include <SDL2/SDL_main.h>
+#include <ctime>
 
 class SampleModule {
 public:
@@ -34,16 +37,16 @@ SampleModule::SampleModule(kw::IGame* game) {
 }
 
 void SampleModule::on_init_listener(kw::IGame* game) {
-    kw::InputModule& input = game->get<kw::InputModule>();
+    auto& input = game->get<kw::InputModule>();
     kw::trace("Number of gamepads now: {}", input.get_num_gamepads());
 }
 
 void SampleModule::on_destroy_listener(kw::IGame* game) {
-    kw::InputModule& input = game->get<kw::InputModule>();
+    auto& input = game->get<kw::InputModule>();
     kw::trace("Number of gamepads now: {}", input.get_num_gamepads());
 }
 
-class Game final : public kw::Game<kw::WindowModule, kw::InputModule, SampleModule>, public kw::SignalListener {
+class Game final : public kw::Game<kw::WindowModule, kw::InputModule, SampleModule, kw::RenderModule>, public kw::SignalListener {
 public:
     Game();
 
@@ -51,11 +54,12 @@ private:
     void on_init_listener(kw::IGame* game);
     void on_update_listener();
     void test_input();
+    void test_render();
 };
 
 Game::Game() {
-    on_update.connect(this, &Game::on_update_listener);
     on_init.connect(this, &Game::on_init_listener);
+    on_update.connect(this, &Game::on_update_listener);
 }
 
 void Game::on_init_listener(kw::IGame* game) {
@@ -67,6 +71,7 @@ void Game::on_init_listener(kw::IGame* game) {
 // There's no ImGui yet => No sane testbed yet
 void Game::on_update_listener() {
     test_input();
+    test_render();
 }
 
 void Game::test_input() {
@@ -129,6 +134,23 @@ void Game::test_input() {
             }
         }
     }
+}
+
+void Game::test_render() {
+    //upd
+    kw::render::CommandBuffer command_buffer;
+    kw::render::Command command {};
+    command.clear.type = kw::render::CommandType::CLEAR;
+    command.clear.r = 0.9f / sinf(std::time(nullptr) % 10);
+    command.clear.g = 0.9f;
+    command.clear.b = 0.9f;
+    command.clear.a = 1.f;
+    command_buffer.commands.push_back(command);
+
+    //rndr
+    auto& render_module = get<kw::RenderModule>();
+    kw::Renderer* const renderer = render_module.get_renderer();
+    renderer->process_command_buffer(command_buffer);
 }
 
 int main(int argc, char* argv[]) {

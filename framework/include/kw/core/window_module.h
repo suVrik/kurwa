@@ -63,6 +63,11 @@ public:
     uint32 get_height() const noexcept;
 
     /**
+     * Return SDL window.
+     */
+    SDL_Window* get_window() const noexcept;
+
+    /**
      * Change window's height.
      */
     void set_height(uint32 value) noexcept;
@@ -102,6 +107,7 @@ public:
     Signal<void(bool)> on_state_changed;    /// Emitted when window is restored or minimized.
 
 private:
+    void on_init_listener(kw::IGame *game);
     void on_event_listener(SDL_Event& event) noexcept;
 
     SDL_Window* m_window;

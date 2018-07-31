@@ -52,6 +52,12 @@ target_link_library(framework eastl)
 target_link_library(framework sdl2)
 target_link_library(framework fmt)
 target_link_library(framework utf8)
+target_link_library(framework glew)
+
+if(LINUX)
+    find_package(Vulkan REQUIRED)
+    target_link_libraries(framework PRIVATE Vulkan::Vulkan)
+endif()
 
 # Required by 'kw/debug/stacktrace'
 if(WIN32)

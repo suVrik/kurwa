@@ -19,20 +19,14 @@
 #include <SDL2/SDL_video.h>
 
 #include <fmt/format.h>
+#include <kw/render/render_module.h>
 
 namespace kw {
 WindowModule::WindowModule(IGame* game) noexcept(false)
     : m_title("Game")
     , m_width(800)
     , m_height(600) {
-    m_window = SDL_CreateWindow(m_title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, m_width, m_height, SDL_WINDOW_SHOWN);
-
-    if (m_window == nullptr) {
-        throw RuntimeError(fmt::format("Failed to initialize a window!\n"
-                                       "The error message: {}",
-                                       SDL_GetError()));
-    }
-
+    game->on_init.connect(this, &WindowModule::on_init_listener);
     game->on_event.connect(this, &WindowModule::on_event_listener);
 }
 
@@ -69,6 +63,10 @@ void WindowModule::set_height(uint32 value) noexcept {
     SDL_SetWindowSize(m_window, m_width, m_height);
 }
 
+SDL_Window* WindowModule::get_window() const noexcept {
+    return m_window;
+}
+
 bool WindowModule::is_fullscreen() const noexcept {
     return m_is_fullscreen;
 }
@@ -101,6 +99,24 @@ bool WindowModule::has_focus() const noexcept {
 
 bool WindowModule::is_restored() const noexcept {
     return m_is_restored;
+}
+
+void WindowModule::on_init_listener(kw::IGame *game) {
+    Uint32 flags = SDL_WINDOW_SHOWN;
+    switch (game->get<kw::RenderModule>().get_renderer_type()) {
+        case RendererType::OPENGL:
+            flags |= SDL_WINDOW_OPENGL;
+            break;
+        case RendererType::VULKAN:
+            flags |= SDL_WINDOW_VULKAN;
+            break;
+        default:
+            break;
+    }
+    m_window = SDL_CreateWindow(m_title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, m_width, m_height, flags);
+    if (m_window == nullptr) {
+        throw RuntimeError(fmt::format("Failed to initialize a window!\nThe error message: {}", SDL_GetError()));
+    }
 }
 
 void WindowModule::on_event_listener(SDL_Event& event) noexcept {
