@@ -16,12 +16,12 @@
 #include <kw/base/string.h>
 
 namespace kw {
-/** todo bad bad bad bad bad bad bad bad bad bad bad bad bad bad bad bad bad bad bad bad bad bad bad bad bad bad bad
- * FastName is such representation of a string, where for the same strings the value returned by 'c_str' is the same.
- * It allows to calculate hash very fast and to compare these FastNames.
- *
- * Please keep in mind, that all the constructors (except for the argumentless one) are quite slow, and it is
- * recommended to cache FastName instances for maximum perfomance.
+/**
+ * FastName is a string, that can be compared really-really quickly. The key idea behind it is that equal FastName
+ * strings have equal c-string pointers and operator== basically compares these pointers. Besides this operator,
+ * there's nothing special about this structure.
+ * Use it in places where you need to compare strings very often. Prefer caching FastName instances, as FastName
+ * constructor is kind of slow (it uses a hash map).
  */
 class FastName {
 public:
@@ -71,8 +71,8 @@ public:
     size_t length() const noexcept;
 
     /**
-     * operator== and operator!= are almost free.
-     * Other operators implement linear algorithm under the hood, so generic string performance.
+     * operator== and operator!= do not cost anything.
+     * Other operators implement linear algorithm under the hood, which is default string implementation.
      */
     bool operator==(const FastName& another) const noexcept;
     bool operator!=(const FastName& another) const noexcept;
