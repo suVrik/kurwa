@@ -40,6 +40,9 @@ namespace kw {
  *
  * If module is failed to initialize, it's allowed to throw a std::runtime_error which will be handled in IGame class.
  * Nevertheless, possible exceptions in destructor are not handled and lead to undefined behaviour.
+ *
+ * Keep in mind, that accessing other modules from constructor of your module is forbidden and
+ * leads to memory access violation. If you need to access other modules, please, do it in your 'on_init' listener.
  */
 template <typename... Modules>
 class Game : public IGame {
