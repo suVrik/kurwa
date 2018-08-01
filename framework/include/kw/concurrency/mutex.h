@@ -13,9 +13,14 @@
 
 #pragma once
 
-#include <EASTL/hash_set.h>
+#include <mutex>
 
 namespace kw {
-template <typename Value, typename Hash = eastl::hash<Value>, typename Predicate = eastl::equal_to<Value>>
-using HashSet = eastl::hash_set<Value, Hash, Predicate>;
+using Mutex = std::mutex;
+
+template <typename T>
+using LockGuard = std::lock_guard<T>;
+
+template <typename T>
+using UniqueLock = std::unique_lock<T>;
 } // namespace kw

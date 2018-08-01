@@ -16,6 +16,6 @@
 #include <EASTL/hash_map.h>
 
 namespace kw {
-template <typename Key, typename T>
-using HashMap = eastl::hash_map<Key, T>;
+template <typename Key, typename Value, typename Hash = eastl::hash<Key>, typename Predicate = eastl::equal_to<Key>>
+using HashMap = eastl::hash_map<Key, Value, Hash, Predicate>;
 } // namespace kw
