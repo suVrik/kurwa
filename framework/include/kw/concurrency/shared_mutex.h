@@ -13,9 +13,11 @@
 
 #pragma once
 
-#include <EASTL/hash_set.h>
+#include <shared_mutex>
 
 namespace kw {
-template <typename Value, typename Hash = eastl::hash<Value>, typename Predicate = eastl::equal_to<Value>>
-using HashSet = eastl::hash_set<Value, Hash, Predicate>;
+using SharedTimedMutex = std::shared_timed_mutex;
+
+template <typename T>
+using SharedLock = std::shared_lock<T>;
 } // namespace kw
