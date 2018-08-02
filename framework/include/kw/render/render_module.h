@@ -17,11 +17,12 @@
 #include <kw/base/optional.h>
 #include <kw/base/signal.h>
 #include <kw/base/unique_ptr.h>
-#include "renderer.h"
+#include <kw/render/renderering_backend.h>
+#include <kw/core/scene_module.h>
 
 namespace kw {
 
-enum class RendererType {
+enum class RenderingBackendType {
     OPENGL,
     VULKAN
 };
@@ -42,22 +43,22 @@ public:
 
     RenderModule& operator=(const RenderModule& original) = delete;
 
-    void on_init_listener(kw::IGame* game);
-
     /**
      * Return a renderer instance.
      */
-    Renderer* const get_renderer() const noexcept;
+    RenderingBackend* const get_renderer() const noexcept;
 
     /**
      * Return a specified renderer type.
      */
-    const RendererType get_renderer_type() noexcept;
+    const RenderingBackendType get_renderer_type() noexcept;
 
 private:
-    UniquePtr<Renderer> m_renderer;
+    void on_init_listener(kw::IGame* game) noexcept(false);
+
+    UniquePtr<RenderingBackend> m_renderer;
     SDL_Window* m_window;
-    RendererType m_renderer_type = RendererType::VULKAN;
+    RenderingBackendType m_renderer_type = RenderingBackendType::OPENGL;
 };
 
 } // namespace kw

@@ -11,14 +11,15 @@
  *  See the License for the specific language governing permissions and limitations under the License.
  */
 
-#include <kw/core/game.h>
 #include <kw/core/i_game.h>
-#include <kw/debug/assert.h>
-#include <kw/render/render_module.h>
-#include <kw/render/renderer_gl.h>
-#include <kw/render/renderer_vk.h>
 #include <kw/core/window_module.h>
+#include <kw/render/render_module.h>
+#include <kw/render/renderering_backend.h>
+#include <kw/render/backend_gl.h>
+#include <kw/render/backend_vk.h>
+
 #include <SDL2/SDL_video.h>
+#include <kw/core/scene_module.h>
 
 namespace kw {
 
@@ -26,26 +27,26 @@ RenderModule::RenderModule(kw::IGame* game) noexcept {
     game->on_init.connect(this, &RenderModule::on_init_listener);
 }
 
-void RenderModule::on_init_listener(kw::IGame* game) {
+void RenderModule::on_init_listener(kw::IGame* game) noexcept(false) {
     auto& window_module = game->get<kw::WindowModule>();
     m_window = window_module.get_window();
     switch (m_renderer_type) {
-        case RendererType::OPENGL:
-            m_renderer = eastl::make_unique<render::RendererGl>(game);
+        case RenderingBackendType::OPENGL:
+            m_renderer = eastl::make_unique<render::BackendGl>(game);
             break;
-        case RendererType::VULKAN:
-            m_renderer = eastl::make_unique<render::RendererVk>(game);
+        case RenderingBackendType::VULKAN:
+            m_renderer = eastl::make_unique<render::BackendVk>(game);
             break;
         default:
             break;
     }
 }
 
-Renderer* const RenderModule::get_renderer() const noexcept {
+RenderingBackend* const RenderModule::get_renderer() const noexcept {
     return m_renderer.get();
 }
 
-const RendererType RenderModule::get_renderer_type() noexcept {
+const RenderingBackendType RenderModule::get_renderer_type() noexcept {
     return m_renderer_type;
 }
 

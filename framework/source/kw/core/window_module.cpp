@@ -14,15 +14,15 @@
 #include <kw/core/i_game.h>
 #include <kw/core/window_module.h>
 #include <kw/debug/runtime_error.h>
+#include <kw/render/render_module.h>
 
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_video.h>
 
 #include <fmt/format.h>
-#include <kw/render/render_module.h>
 
 namespace kw {
-WindowModule::WindowModule(IGame* game) noexcept(false)
+WindowModule::WindowModule(IGame* game) noexcept
     : m_title("Game")
     , m_width(800)
     , m_height(600) {
@@ -101,13 +101,13 @@ bool WindowModule::is_restored() const noexcept {
     return m_is_restored;
 }
 
-void WindowModule::on_init_listener(kw::IGame *game) {
+void WindowModule::on_init_listener(kw::IGame *game) noexcept(false) {
     Uint32 flags = SDL_WINDOW_SHOWN;
     switch (game->get<kw::RenderModule>().get_renderer_type()) {
-        case RendererType::OPENGL:
+        case RenderingBackendType::OPENGL:
             flags |= SDL_WINDOW_OPENGL;
             break;
-        case RendererType::VULKAN:
+        case RenderingBackendType::VULKAN:
             flags |= SDL_WINDOW_VULKAN;
             break;
         default:

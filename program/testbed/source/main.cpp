@@ -11,16 +11,14 @@
  *  See the License for the specific language governing permissions and limitations under the License.
  */
 
+#include <kw/base/queue.h>
 #include <kw/core/game.h>
+#include <kw/core/scene_module.h>
 #include <kw/core/window_module.h>
 #include <kw/input/input_module.h>
 #include <kw/math/math.h>
-#include <kw/utilities/trace.h>
 #include <kw/render/render_module.h>
-#include <kw/base/queue.h>
-
-#include <SDL2/SDL_main.h>
-#include <ctime>
+#include <kw/utilities/trace.h>
 
 class SampleModule {
 public:
@@ -46,7 +44,7 @@ void SampleModule::on_destroy_listener(kw::IGame* game) {
     kw::trace("Number of gamepads now: {}", input.get_num_gamepads());
 }
 
-class Game final : public kw::Game<kw::WindowModule, kw::InputModule, SampleModule, kw::RenderModule>, public kw::SignalListener {
+class Game final : public kw::Game<kw::WindowModule, kw::InputModule, SampleModule, kw::RenderModule, kw::SceneModule>, public kw::SignalListener {
 public:
     Game();
 
@@ -54,7 +52,6 @@ private:
     void on_init_listener(kw::IGame* game);
     void on_update_listener();
     void test_input();
-    void test_render();
 };
 
 Game::Game() {
@@ -71,7 +68,6 @@ void Game::on_init_listener(kw::IGame* game) {
 // There's no ImGui yet => No sane testbed yet
 void Game::on_update_listener() {
     test_input();
-    test_render();
 }
 
 void Game::test_input() {
@@ -134,23 +130,6 @@ void Game::test_input() {
             }
         }
     }
-}
-
-void Game::test_render() {
-    //upd
-    kw::render::CommandBuffer command_buffer;
-    kw::render::Command command {};
-    command.clear.type = kw::render::CommandType::CLEAR;
-    command.clear.r = 0.9f / sinf(std::time(nullptr) % 10);
-    command.clear.g = 0.9f;
-    command.clear.b = 0.9f;
-    command.clear.a = 1.f;
-    command_buffer.commands.push_back(command);
-
-    //rndr
-    auto& render_module = get<kw::RenderModule>();
-    kw::Renderer* const renderer = render_module.get_renderer();
-    renderer->process_command_buffer(command_buffer);
 }
 
 int main(int argc, char* argv[]) {
