@@ -30,6 +30,7 @@ void BackendOpenGL::on_init_listener(kw::IGame* game) noexcept(false) {
     RenderingBackend::on_init_listener(game);
 
     SDL_GL_CreateContext(m_window);
+    SDL_GL_SetSwapInterval(1);
 
     glewExperimental = GL_TRUE;
     GLenum err = glewInit();

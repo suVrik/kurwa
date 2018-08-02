@@ -13,9 +13,9 @@ cmake_minimum_required(VERSION 3.9)
 
 project(glew)
 
-add_definitions(-DGLEW_STATIC)
 add_library(glew INTERFACE IMPORTED GLOBAL)
 target_include_directory(glew)
 target_link_library(glew "libGLEW*")
 find_package(OpenGL REQUIRED)
 target_link_libraries(glew INTERFACE ${OPENGL_LIBRARIES})
+target_compile_definitions(glew INTERFACE GLEW_STATIC)
