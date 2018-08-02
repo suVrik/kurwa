@@ -13,6 +13,7 @@ cmake_minimum_required(VERSION 3.9)
 
 project(glew)
 
+add_definitions(-DGLEW_STATIC)
 add_library(glew INTERFACE IMPORTED GLOBAL)
 target_include_directory(glew)
 target_link_library(glew "libGLEW*")
