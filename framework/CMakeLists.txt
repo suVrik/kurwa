@@ -52,6 +52,13 @@ target_link_library(framework eastl)
 target_link_library(framework sdl2)
 target_link_library(framework fmt)
 target_link_library(framework utf8)
+target_link_library(framework glew)
+
+if(LINUX)
+    set(THREADS_PREFER_PTHREAD_FLAG ON)
+    find_package(Threads REQUIRED)
+    target_link_libraries(framework PRIVATE Threads::Threads)
+endif()
 
 # Required by 'kw/debug/stacktrace'
 if(WIN32)

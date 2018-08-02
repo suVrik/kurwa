@@ -22,11 +22,11 @@ uint32 generate_unique_token();
 template <typename Object, typename Callback, typename Result, typename... Arguments>
 Function<Result(Arguments...)> method(Object object, Callback callback) {
     if constexpr (eastl::is_same_v<Result, void>) {
-        return [ object, callback ](Arguments && ... arguments) noexcept(noexcept(callback))->void {
+        return [ object, callback ](Arguments && ... arguments) noexcept(noexcept((object->*callback)(eastl::forward<Arguments>(arguments)...)))->void {
             (object->*callback)(eastl::forward<Arguments>(arguments)...);
         };
     } else {
-        return [ object, callback ](Arguments && ... arguments) noexcept(noexcept(callback))->Result {
+        return [ object, callback ](Arguments && ... arguments) noexcept(noexcept((object->*callback)(eastl::forward<Arguments>(arguments)...)))->Result {
             return (object->*callback)(eastl::forward<Arguments>(arguments)...);
         };
     }
