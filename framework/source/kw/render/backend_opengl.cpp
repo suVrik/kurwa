@@ -39,7 +39,7 @@ void BackendOpenGL::on_init_listener(kw::IGame* game) noexcept(false) {
 }
 
 void BackendOpenGL::process_command_buffer(CommandBuffer&& command_buffer) noexcept {
-    for (render::Command& command : command_buffer.commands) {
+    for (Command& command : command_buffer.commands) {
         switch (command.type) {
             case CommandType::CLEAR:
                 glClearColor(command.clear.r, command.clear.g, command.clear.b, command.clear.a);

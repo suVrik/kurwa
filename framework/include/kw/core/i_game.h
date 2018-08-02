@@ -41,7 +41,7 @@ public:
     /**
      * Run a frame loop.
      */
-    int32 run();
+    int32 run() noexcept;
 
     /**
      * Make 'run' method return 0 after current frame.

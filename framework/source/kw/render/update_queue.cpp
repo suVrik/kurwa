@@ -16,14 +16,14 @@
 namespace kw {
 namespace render {
 
-render::CommandBuffer UpdateQueue::pop() {
+CommandBuffer UpdateQueue::pop() {
     LockGuard<Mutex> lock(m_mutex);
-    render::CommandBuffer command_buffer = eastl::move(m_queue.front());
+    CommandBuffer command_buffer = eastl::move(m_queue.front());
     m_queue.pop();
     return command_buffer;
 }
 
-void UpdateQueue::push(render::CommandBuffer&& command_buffer) {
+void UpdateQueue::push(CommandBuffer&& command_buffer) {
     LockGuard<Mutex> lock(m_mutex);
     m_queue.push(command_buffer);
 }

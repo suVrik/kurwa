@@ -30,7 +30,7 @@ IGame::~IGame() noexcept {
     SDL_Quit();
 }
 
-int32 IGame::run() {
+int32 IGame::run() noexcept {
     if (is_initialized) {
         try {
             on_init.emit(this);
