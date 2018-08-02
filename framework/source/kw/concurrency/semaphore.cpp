@@ -12,13 +12,16 @@
  */
 
 #include <kw/concurrency/semaphore.h>
+
 #include <SDL2/SDL_mutex.h>
 
 namespace kw {
-Semaphore::Semaphore() noexcept : sem(SDL_CreateSemaphore(0)) {
+Semaphore::Semaphore() noexcept
+    : sem(SDL_CreateSemaphore(0)) {
 }
 
-Semaphore::Semaphore(unsigned short counter) noexcept : sem(SDL_CreateSemaphore(counter)) {
+Semaphore::Semaphore(uint32 counter) noexcept
+    : sem(SDL_CreateSemaphore(counter)) {
 }
 
 Semaphore::~Semaphore() noexcept {

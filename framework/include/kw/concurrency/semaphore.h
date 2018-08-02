@@ -13,16 +13,23 @@
 
 #pragma once
 
+#include <kw/base/types.h>
+
 struct SDL_semaphore;
 
 namespace kw {
 /**
- * Semaphore is a class that provides a synchronization service for multithreaded code.
+ * Semaphore class describes a lockable object.
+ * Any thread can signal a semaphore, at any time, whether or not that thread has previously waited for the semaphore.
+ * Ownership is taken with a wait operation, also known as decrementing the semaphore.
+ * Ownership is released with a post operation, also known as incrementing the semaphore.
+ * If the count is greater than zero then the decrement happens, and the wait call returns.
+ * If the count is zero then it cannot be decremented, so the wait call will block until another thread calls post.
  */
 class Semaphore {
 public:
     Semaphore() noexcept;
-    explicit Semaphore(unsigned short counter) noexcept;
+    explicit Semaphore(uint32 counter) noexcept;
     ~Semaphore() noexcept;
     Semaphore(const Semaphore& original) = delete;
     Semaphore& operator=(const Semaphore& original) = delete;

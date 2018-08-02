@@ -16,7 +16,7 @@
 #include <kw/base/array.h>
 #include <kw/base/signal.h>
 #include <kw/base/string.h>
-#include "commands.h"
+#include <kw/render/commands.h>
 
 struct SDL_Window;
 
@@ -24,7 +24,8 @@ namespace kw {
 class IGame;
 
 /**
- * RenderingBackend class represents a rendering backend interface.
+ * RenderingBackend class provides methods to interact with GPU and to output visuals to the screen.
+ * The class is abstract from any underlying platform-dependent graphics API.
  */
 class RenderingBackend : public SignalListener {
 public:

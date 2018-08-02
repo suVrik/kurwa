@@ -12,32 +12,36 @@
  */
 
 #include <kw/core/i_game.h>
-#include <kw/render/backend_gl.h>
+#include <kw/debug/runtime_error.h>
+#include <kw/render/backend_opengl.h>
+
 #include <GL/glew.h>
+
 #include <SDL2/SDL_video.h>
 
 namespace kw {
 namespace render {
 
-BackendGl::BackendGl(kw::IGame* game) noexcept {
-    game->on_init.connect(this, &BackendGl::on_init_listener);
+BackendOpenGL::BackendOpenGL(kw::IGame* game) noexcept {
+    game->on_init.connect(this, &BackendOpenGL::on_init_listener);
 };
 
-void BackendGl::on_init_listener(kw::IGame* game) {
+void BackendOpenGL::on_init_listener(kw::IGame* game) noexcept(false) {
     RenderingBackend::on_init_listener(game);
+
     SDL_GL_CreateContext(m_window);
-    SDL_GL_SetSwapInterval(1);
+
     glewExperimental = GL_TRUE;
     GLenum err = glewInit();
-    if (GLEW_OK != err) {
-        fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
+    if (err != GLEW_OK) {
+        throw RuntimeError(fmt::format("Failed to initialize GLEW!\nThe error message: {}", glewGetErrorString(err)));
     }
 }
 
-void BackendGl::process_command_buffer(CommandBuffer&& command_buffer) noexcept {
+void BackendOpenGL::process_command_buffer(CommandBuffer&& command_buffer) noexcept {
     for (render::Command& command : command_buffer.commands) {
         switch (command.type) {
-            case render::CommandType::CLEAR:
+            case CommandType::CLEAR:
                 glClearColor(command.clear.r, command.clear.g, command.clear.b, command.clear.a);
                 glClear(GL_COLOR_BUFFER_BIT);
                 break;

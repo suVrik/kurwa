@@ -16,6 +16,7 @@
 #include <kw/base/signal.h>
 #include <kw/base/string.h>
 #include <kw/base/types.h>
+#include <kw/base/queue.h>
 #include <kw/concurrency/atomic.h>
 #include <kw/concurrency/mutex.h>
 #include <kw/concurrency/semaphore.h>
@@ -31,29 +32,6 @@ class IGame;
 class RenderingBackend;
 
 /**
- * UpdateQueue is a thread-safe wrapper around a List, which is used to prerecord updates for a rendering backend.
- */
-class UpdateQueue {
-public:
-    render::CommandBuffer front() const {
-        return m_queue.front();
-    }
-
-    void pop() {
-        LockGuard<Mutex> lock(m_mutex);
-        m_queue.pop_front();
-    }
-
-    void push(render::CommandBuffer&& command_buffer) {
-        LockGuard<Mutex> lock(m_mutex);
-        m_queue.emplace_back(command_buffer);
-    }
-private:
-    List<render::CommandBuffer> m_queue;
-    Mutex m_mutex;
-};
-
-/**
  * Scene module creates an update loop, records and stores the commands to be sent to a rendering backend.
  */
 class SceneModule : public SignalListener {
@@ -62,17 +40,10 @@ public:
     SceneModule(const SceneModule& original) = delete;
     SceneModule& operator=(const SceneModule& original) = delete;
 private:
-    void on_init_listener(kw::IGame *game) noexcept(false);
-    void on_update_listener() noexcept(false);
+    void on_init_listener(kw::IGame *game) noexcept;
     void on_destroy_listener(kw::IGame *game) noexcept;
 
-    // The number of updates to prepare beforehand
-    const unsigned short VIRTUAL_FRAMES_NUMBER = 2;
     Thread m_thread;
-    RenderingBackend* m_renderer;
-    AtomicBool is_update_thread_active = true;
-    Semaphore m_render_semaphore;
-    Semaphore m_update_semaphore;
-    UpdateQueue m_update_queue;
+    Atomic<bool> is_update_thread_active = true;
 };
 } // namespace kw

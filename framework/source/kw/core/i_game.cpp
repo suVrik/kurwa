@@ -12,12 +12,11 @@
  */
 
 #include <kw/core/i_game.h>
+#include <kw/debug/runtime_error.h>
 
 #include <SDL2/SDL.h>
 
 #include <fmt/format.h>
-
-#include <stdexcept>
 
 namespace kw {
 IGame::IGame() noexcept {
@@ -31,11 +30,11 @@ IGame::~IGame() noexcept {
     SDL_Quit();
 }
 
-int32 IGame::run() noexcept {
+int32 IGame::run() {
     if (is_initialized) {
         try {
             on_init.emit(this);
-        } catch (const std::runtime_error& error) {
+        } catch (const RuntimeError& error) {
             message_box(error.what());
             return 1;
         } catch (...) {
@@ -52,7 +51,7 @@ int32 IGame::run() noexcept {
                     } else {
                         try {
                             on_event.emit(event);
-                        } catch (const std::runtime_error& error) {
+                        } catch (const RuntimeError& error) {
                             message_box(error.what());
                             return 1;
                         } catch (...) {
@@ -63,7 +62,7 @@ int32 IGame::run() noexcept {
                 }
                 try {
                     on_update.emit();
-                } catch (const std::runtime_error& error) {
+                } catch (const RuntimeError& error) {
                     message_box(error.what());
                     return 1;
                 } catch (...) {
@@ -75,7 +74,7 @@ int32 IGame::run() noexcept {
 
         try {
             on_destroy.emit(this);
-        } catch (const std::runtime_error& error) {
+        } catch (const RuntimeError& error) {
             message_box(error.what());
             return 1;
         } catch (...) {

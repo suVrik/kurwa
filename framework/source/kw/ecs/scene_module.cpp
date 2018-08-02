@@ -12,50 +12,34 @@
  */
 
 #include <kw/core/i_game.h>
-#include <kw/core/scene_module.h>
+#include <kw/ecs/scene_module.h>
 #include <kw/render/render_module.h>
 
-#include <ctime>
-
 namespace kw {
-SceneModule::SceneModule(IGame* game) noexcept {
+SceneModule::SceneModule(IGame* game) noexcept : is_update_thread_active(true) {
     game->on_init.connect(this, &SceneModule::on_init_listener);
-    game->on_update.connect(this, &SceneModule::on_update_listener);
     game->on_destroy.connect(this, &SceneModule::on_destroy_listener);
 }
 
-void SceneModule::on_init_listener(kw::IGame *game) noexcept(false) {
-    auto& scene_module = game->get<RenderModule>();
-    m_renderer = scene_module.get_renderer();
-    m_thread = Thread([this]() {
-        for (unsigned short i = 0; i < VIRTUAL_FRAMES_NUMBER; i++) {
-            m_render_semaphore.post();
-        }
-
+void SceneModule::on_init_listener(kw::IGame *game) noexcept {
+    auto& render_module = game->get<RenderModule>();
+    m_thread = Thread([&render_module, this]() {
+        float red = 0.0f;
         while (is_update_thread_active) {
-            m_render_semaphore.wait();
-
             render::CommandBuffer command_buffer;
             render::Command command {};
             command.clear.type = kw::render::CommandType::CLEAR;
-            command.clear.r = 0.9f / sinf(std::time(nullptr) % 10);
+            command.clear.r = 0.9f * red;
             command.clear.g = 0.9f;
             command.clear.b = 0.9f;
             command.clear.a = 1.f;
             command_buffer.commands.push_back(command);
 
-            m_update_queue.push(eastl::move(command_buffer));
-            m_update_semaphore.post();
+            render_module.push_command_buffer(eastl::move(command_buffer));
+
+            if (red > 1.f) red = 0.f; else red += 0.01f;
         }
     });
-}
-
-void SceneModule::on_update_listener() noexcept(false) {
-    m_update_semaphore.wait();
-    kw::render::CommandBuffer buffer = m_update_queue.front();
-    m_update_queue.pop();
-    m_render_semaphore.post();
-    m_renderer->process_command_buffer(eastl::move(buffer));
 }
 
 void SceneModule::on_destroy_listener(kw::IGame *game) noexcept {

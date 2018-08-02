@@ -13,30 +13,25 @@
 
 #pragma once
 
-#include <kw/base/vector.h>
+#include <kw/base/queue.h>
+#include <kw/concurrency/mutex.h>
+#include <kw/render/commands.h>
 
 namespace kw {
 namespace render {
 
-enum class CommandType {
-    CLEAR
-};
+/**
+ * UpdateQueue is a thread-safe wrapper around a Queue, which is used to prerecord updates for a rendering backend.
+ */
+class UpdateQueue {
+public:
+    CommandBuffer pop();
 
-struct CommandClear {
-    CommandType type;
-    float r;
-    float g;
-    float b;
-    float a;
-};
+    void push(CommandBuffer&& command_buffer);
 
-union Command {
-    CommandType type;
-    CommandClear clear;
-};
-
-struct CommandBuffer {
-    Vector<Command> commands;
+private:
+    Queue<CommandBuffer> m_queue;
+    Mutex m_mutex;
 };
 
 } // namespace render

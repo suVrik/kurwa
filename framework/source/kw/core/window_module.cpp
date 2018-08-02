@@ -17,6 +17,7 @@
 #include <kw/render/render_module.h>
 
 #include <SDL2/SDL_events.h>
+#include <SDL2/SDL_main.h>
 #include <SDL2/SDL_video.h>
 
 #include <fmt/format.h>
@@ -103,12 +104,9 @@ bool WindowModule::is_restored() const noexcept {
 
 void WindowModule::on_init_listener(kw::IGame *game) noexcept(false) {
     Uint32 flags = SDL_WINDOW_SHOWN;
-    switch (game->get<kw::RenderModule>().get_renderer_type()) {
+    switch (game->get<kw::RenderModule>().get_rendering_backend_type()) {
         case RenderingBackendType::OPENGL:
             flags |= SDL_WINDOW_OPENGL;
-            break;
-        case RenderingBackendType::VULKAN:
-            flags |= SDL_WINDOW_VULKAN;
             break;
         default:
             break;

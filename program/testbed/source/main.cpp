@@ -11,40 +11,15 @@
  *  See the License for the specific language governing permissions and limitations under the License.
  */
 
-#include <kw/base/queue.h>
 #include <kw/core/game.h>
-#include <kw/core/scene_module.h>
+#include <kw/ecs/scene_module.h>
 #include <kw/core/window_module.h>
 #include <kw/input/input_module.h>
 #include <kw/math/math.h>
 #include <kw/render/render_module.h>
 #include <kw/utilities/trace.h>
 
-class SampleModule {
-public:
-    explicit SampleModule(kw::IGame* game);
-
-private:
-    void on_init_listener(kw::IGame* game);
-    void on_destroy_listener(kw::IGame* game);
-};
-
-SampleModule::SampleModule(kw::IGame* game) {
-    game->on_init.connect(this, &SampleModule::on_init_listener);
-    game->on_destroy.connect(this, &SampleModule::on_destroy_listener);
-}
-
-void SampleModule::on_init_listener(kw::IGame* game) {
-    auto& input = game->get<kw::InputModule>();
-    kw::trace("Number of gamepads now: {}", input.get_num_gamepads());
-}
-
-void SampleModule::on_destroy_listener(kw::IGame* game) {
-    auto& input = game->get<kw::InputModule>();
-    kw::trace("Number of gamepads now: {}", input.get_num_gamepads());
-}
-
-class Game final : public kw::Game<kw::WindowModule, kw::InputModule, SampleModule, kw::RenderModule, kw::SceneModule>, public kw::SignalListener {
+class Game final : public kw::Game<kw::WindowModule, kw::InputModule, kw::RenderModule, kw::SceneModule>, public kw::SignalListener {
 public:
     Game();
 

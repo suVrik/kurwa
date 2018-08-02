@@ -11,29 +11,22 @@
  *  See the License for the specific language governing permissions and limitations under the License.
  */
 
-#pragma once
-
-#include "rendering_backend.h"
+#include <kw/render/update_queue.h>
 
 namespace kw {
 namespace render {
 
-/**
- * BackendGl is a class that implements an OpenGL rendering backend.
- */
-class BackendGl : public RenderingBackend {
-public:
-    explicit BackendGl(kw::IGame* game) noexcept;
-    BackendGl(const BackendGl& original) = delete;
-    BackendGl& operator=(const BackendGl& original) = delete;
+render::CommandBuffer UpdateQueue::pop() {
+    LockGuard<Mutex> lock(m_mutex);
+    render::CommandBuffer command_buffer = eastl::move(m_queue.front());
+    m_queue.pop();
+    return command_buffer;
+}
 
-    /**
-     * Execute the commands in a command buffer and present the resulting image.
-     */
-    void process_command_buffer(CommandBuffer&& command_buffer) noexcept override;
-private:
-    void on_init_listener(kw::IGame* game) noexcept(false) override;
-};
+void UpdateQueue::push(render::CommandBuffer&& command_buffer) {
+    LockGuard<Mutex> lock(m_mutex);
+    m_queue.push(command_buffer);
+}
 
 } // namespace render
 } // namespace kw

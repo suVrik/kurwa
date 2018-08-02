@@ -13,30 +13,26 @@
 
 #pragma once
 
-#include <kw/base/vector.h>
+#include "rendering_backend.h"
 
 namespace kw {
 namespace render {
 
-enum class CommandType {
-    CLEAR
-};
+/**
+ * BackendOpenGL is a class that implements OpenGL rendering backend.
+ */
+class BackendOpenGL : public RenderingBackend {
+public:
+    explicit BackendOpenGL(kw::IGame* game) noexcept;
+    BackendOpenGL(const BackendOpenGL& original) = delete;
+    BackendOpenGL& operator=(const BackendOpenGL& original) = delete;
 
-struct CommandClear {
-    CommandType type;
-    float r;
-    float g;
-    float b;
-    float a;
-};
-
-union Command {
-    CommandType type;
-    CommandClear clear;
-};
-
-struct CommandBuffer {
-    Vector<Command> commands;
+    /**
+     * Execute the commands in a command buffer and present the resulting image to the screen.
+     */
+    void process_command_buffer(CommandBuffer&& command_buffer) noexcept override;
+private:
+    void on_init_listener(kw::IGame* game) noexcept(false) override;
 };
 
 } // namespace render

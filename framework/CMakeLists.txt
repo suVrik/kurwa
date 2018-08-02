@@ -60,10 +60,6 @@ if(LINUX)
     target_link_libraries(framework PRIVATE Threads::Threads)
 endif()
 
-if(DARWIN)
-    target_link_libraries(Graphics "-framework OpenGL")
-endif()
-
 # Required by 'kw/debug/stacktrace'
 if(WIN32)
     target_link_libraries(framework PRIVATE $<$<CONFIG:Debug>:Dbghelp>)

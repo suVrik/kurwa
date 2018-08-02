@@ -13,18 +13,18 @@
 
 #pragma once
 
-#include <kw/base/list.h>
-#include <kw/base/optional.h>
 #include <kw/base/signal.h>
 #include <kw/base/unique_ptr.h>
+#include <kw/concurrency/semaphore.h>
 #include <kw/render/rendering_backend.h>
-#include <kw/core/scene_module.h>
+#include <kw/render/update_queue.h>
+
+struct SDL_Window;
 
 namespace kw {
 
 enum class RenderingBackendType {
-    OPENGL,
-    VULKAN
+    OPENGL
 };
 
 class IGame;
@@ -38,27 +38,36 @@ public:
      * Construct a render module using the given 'game' instance.
      */
     explicit RenderModule(kw::IGame* game) noexcept;
-
     RenderModule(const RenderModule& original) = delete;
-
     RenderModule& operator=(const RenderModule& original) = delete;
+
+    /**
+     * Push a specified command buffer to the update queue.
+     */
+    void push_command_buffer(render::CommandBuffer&& command_buffer);
 
     /**
      * Return a renderer instance.
      */
-    RenderingBackend* const get_renderer() const noexcept;
+    RenderingBackend* const get_rendering_backend() const noexcept;
 
     /**
      * Return a specified renderer type.
      */
-    const RenderingBackendType get_renderer_type() noexcept;
+    const RenderingBackendType get_rendering_backend_type() noexcept;
 
 private:
     void on_init_listener(kw::IGame* game) noexcept(false);
+    void on_update_listener() noexcept(false);
 
     UniquePtr<RenderingBackend> m_renderer;
     SDL_Window* m_window;
     RenderingBackendType m_renderer_type = RenderingBackendType::OPENGL;
+    static constexpr uint32 COMMAND_BUFFER_QUEUE_SIZE = 2;
+
+    Semaphore m_render_semaphore;
+    Semaphore m_update_semaphore;
+    render::UpdateQueue m_update_queue;
 };
 
 } // namespace kw

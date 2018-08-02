@@ -18,6 +18,4 @@
 namespace kw {
 template <typename T>
 using Atomic = std::atomic<T>;
-
-using AtomicBool = std::atomic_bool;
 } // namespace kw
