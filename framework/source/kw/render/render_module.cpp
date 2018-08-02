@@ -16,7 +16,6 @@
 #include <kw/render/render_module.h>
 #include <kw/render/renderering_backend.h>
 #include <kw/render/backend_gl.h>
-#include <kw/render/backend_vk.h>
 
 #include <SDL2/SDL_video.h>
 #include <kw/core/scene_module.h>
@@ -35,7 +34,6 @@ void RenderModule::on_init_listener(kw::IGame* game) noexcept(false) {
             m_renderer = eastl::make_unique<render::BackendGl>(game);
             break;
         case RenderingBackendType::VULKAN:
-            m_renderer = eastl::make_unique<render::BackendVk>(game);
             break;
         default:
             break;

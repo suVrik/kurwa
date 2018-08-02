@@ -58,9 +58,6 @@ if(LINUX)
     set(THREADS_PREFER_PTHREAD_FLAG ON)
     find_package(Threads REQUIRED)
     target_link_libraries(framework PRIVATE Threads::Threads)
-
-    find_package(Vulkan REQUIRED)
-    target_link_libraries(framework PRIVATE Vulkan::Vulkan)
 endif()
 
 # Required by 'kw/debug/stacktrace'
