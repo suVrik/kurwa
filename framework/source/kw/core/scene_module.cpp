@@ -26,7 +26,7 @@ void SceneModule::on_init_listener(kw::IGame *game) noexcept(false) {
     auto& scene_module = game->get<RenderModule>();
     m_renderer = scene_module.get_renderer();
     m_thread = Thread([this]() {
-        for (ushort i = 0; i < VIRTUAL_FRAMES_NUMBER; i++) {
+        for (unsigned short i = 0; i < VIRTUAL_FRAMES_NUMBER; i++) {
             m_render_semaphore.post();
         }
 

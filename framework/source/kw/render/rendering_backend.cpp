@@ -13,7 +13,7 @@
 
 #include <kw/core/i_game.h>
 #include <kw/core/window_module.h>
-#include <kw/render/renderering_backend.h>
+#include <kw/render/rendering_backend.h>
 
 namespace kw {
 void RenderingBackend::on_init_listener(kw::IGame* game) {

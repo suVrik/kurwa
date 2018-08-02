@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "renderering_backend.h"
+#include "rendering_backend.h"
 
 namespace kw {
 namespace render {

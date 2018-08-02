@@ -18,7 +18,7 @@
 #include <kw/base/string.h>
 #include "commands.h"
 
-class SDL_Window;
+struct SDL_Window;
 
 namespace kw {
 class IGame;

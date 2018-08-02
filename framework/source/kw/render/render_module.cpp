@@ -14,7 +14,7 @@
 #include <kw/core/i_game.h>
 #include <kw/core/window_module.h>
 #include <kw/render/render_module.h>
-#include <kw/render/renderering_backend.h>
+#include <kw/render/rendering_backend.h>
 #include <kw/render/backend_gl.h>
 
 #include <SDL2/SDL_video.h>

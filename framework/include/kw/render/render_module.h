@@ -17,7 +17,7 @@
 #include <kw/base/optional.h>
 #include <kw/base/signal.h>
 #include <kw/base/unique_ptr.h>
-#include <kw/render/renderering_backend.h>
+#include <kw/render/rendering_backend.h>
 #include <kw/core/scene_module.h>
 
 namespace kw {
