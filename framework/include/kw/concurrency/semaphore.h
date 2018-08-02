@@ -45,4 +45,4 @@ public:
 private:
     SDL_semaphore* sem;
 };
-}
+} // namespace kw
