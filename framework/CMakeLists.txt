@@ -54,8 +54,6 @@ target_link_library(framework fmt)
 target_link_library(framework utf8)
 target_link_library(framework glew)
 
-find_package(OpenGL REQUIRED)
-
 if(LINUX)
     set(THREADS_PREFER_PTHREAD_FLAG ON)
     find_package(Threads REQUIRED)
@@ -63,8 +61,7 @@ if(LINUX)
 endif()
 
 if(DARWIN)
-    find_library(OpenGL_LIBRARY OpenGL)
-    target_link_libraries(framework PRIVATE ${OpenGL_LIBRARY})
+    target_link_libraries(Graphics "-framework OpenGL")
 endif()
 
 # Required by 'kw/debug/stacktrace'
