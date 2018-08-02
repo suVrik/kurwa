@@ -15,6 +15,8 @@
 #include <kw/core/scene_module.h>
 #include <kw/render/render_module.h>
 
+#include <ctime>
+
 namespace kw {
 SceneModule::SceneModule(IGame* game) noexcept {
     game->on_init.connect(this, &SceneModule::on_init_listener);

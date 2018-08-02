@@ -54,6 +54,8 @@ target_link_library(framework fmt)
 target_link_library(framework utf8)
 target_link_library(framework glew)
 
+find_package(OpenGL REQUIRED)
+
 if(LINUX)
     set(THREADS_PREFER_PTHREAD_FLAG ON)
     find_package(Threads REQUIRED)
