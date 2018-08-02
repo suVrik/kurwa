@@ -26,7 +26,7 @@ using operator_less_t = decltype(eastl::declval<const T&>() < eastl::declval<con
 template <class T>
 using hash_t = decltype(eastl::hash<T>());
 
-// <is_virtual_base_of implementation from boost library>
+// is_virtual_base_of implementation from boost library
 // https://github.com/S2E/s2e-old/blob/master/stp/src/boost/type_traits/is_virtual_base_of.hpp
 
 #if defined(_MSC_VER)
@@ -70,8 +70,6 @@ struct is_virtual_base_of {
 #pragma warning(pop)
 #endif
 
-// </is_virtual_base_of>
-
 template <typename T>
 void register_parents(Vector<Type::Parent>& parents) {
     // All base classes are registered. Nothing to do.
@@ -80,10 +78,10 @@ void register_parents(Vector<Type::Parent>& parents) {
 template <typename T, typename Base, typename... Bases>
 void register_parents(Vector<Type::Parent>& parents) {
     static_assert(eastl::is_base_of<Base, T>::value, "Invalid list of base classes!");
-    static_assert(!is_virtual_base_of<Base, T>::value, "Virtual inheritance is not supported!");
+    static_assert(!is_virtual_base_of<Base, T>::value, "Virtual inheritance is not yet supported!");
 
     // '1' because nullptr doesn't work with inheritance.
-    parents.push_back({ Type::of<Base>(), reinterpret_cast<intptr_t>(static_cast<const Base*>(reinterpret_cast<const T*>(1))) - 1 });
+    parents.push_back({ Type::of<eastl::decay_t<Base>>(), reinterpret_cast<uintptr_t>(static_cast<const Base*>(reinterpret_cast<const T*>(1))) - 1 });
 
     register_parents<T, Bases...>(parents);
 }
@@ -100,7 +98,7 @@ constexpr size_t get_size() {
 template <typename T>
 const Type* Type::of() noexcept {
     if constexpr (eastl::is_same_v<T, eastl::decay_t<T>>) {
-        static Type type(static_cast<const T*>(nullptr));
+        static Type type(static_cast<const T*>(nullptr)); // Dummy parameter.
         return &type;
     } else {
         return Type::of<eastl::decay_t<T>>();
@@ -109,24 +107,24 @@ const Type* Type::of() noexcept {
 
 template <typename T, typename... Bases>
 void Type::register_parents() noexcept {
-    auto type = const_cast<Type*>(Type::of<T>());
+    auto type = const_cast<Type*>(Type::of<eastl::decay_t<T>>());
     type->m_parents.reserve(sizeof...(Bases));
     type_details::register_parents<T, Bases...>(type->m_parents);
 }
 
 template <typename T>
 bool Type::is_same() const noexcept {
-    return this == Type::of<T>();
+    return this == Type::of<eastl::decay_t<T>>();
 }
 
 template <typename T>
-Pair<bool, intptr_t> Type::is_base_of() const noexcept {
-    return is_base_of(Type::of<T>());
+Pair<bool, uintptr_t> Type::is_base_of() const noexcept {
+    return is_base_of(Type::of<eastl::decay_t<T>>());
 }
 
 template <typename T>
-Pair<bool, intptr_t> Type::is_inherited_from() const noexcept {
-    return is_inherited_from(Type::of<T>());
+Pair<bool, uintptr_t> Type::is_inherited_from() const noexcept {
+    return is_inherited_from(Type::of<eastl::decay_t<T>>());
 }
 
 template <typename T>
@@ -187,13 +185,13 @@ Type::Type(const T* dummy) noexcept
         if constexpr (eastl::is_detected_v<type_details::operator_equals_t, T>) {
             if constexpr (eastl::is_detected_v<type_details::operator_less_t, T>) {
                 m_comparator = [](const void* a, const void* b) noexcept {
-                    const T* const ta = reinterpret_cast<const T*>(&a);
-                    const T* const tb = reinterpret_cast<const T*>(&b);
+                    const T* const ta = reinterpret_cast<T*>(const_cast<void**>(&a));
+                    const T* const tb = reinterpret_cast<T*>(const_cast<void**>(&b));
                     return *ta == *tb ? 0 : (*ta < *tb ? -1 : 1);
                 };
             } else {
                 m_comparator = [](const void* a, const void* b) noexcept {
-                    return *reinterpret_cast<const T*>(&a) == *reinterpret_cast<const T*>(&b) ? 0 : -1;
+                    return *reinterpret_cast<T*>(const_cast<void**>(&a)) == *reinterpret_cast<T*>(const_cast<void**>(&b)) ? 0 : -1;
                 };
             }
         } else {
@@ -204,7 +202,7 @@ Type::Type(const T* dummy) noexcept
                 };
             } else if constexpr (eastl::is_detected_v<type_details::operator_less_t, T>) {
                 m_comparator = [](const void* a, const void* b) noexcept {
-                    return *reinterpret_cast<const T*>(&a) < *reinterpret_cast<const T*>(&b) ? -1 : 1;
+                    return *reinterpret_cast<T*>(const_cast<void**>(&a)) < *reinterpret_cast<T*>(const_cast<void**>(&b)) ? -1 : 1;
                 };
             } else {
                 m_comparator = [](const void*, const void*) noexcept {
@@ -229,6 +227,12 @@ Type::Type(const T* dummy) noexcept
             KW_ASSERT("Object of type '{}' doesn't have a hash function defined!", typeid(T).name());
             return reinterpret_cast<size_t>(value);
         };
+    }
+
+    if constexpr (eastl::is_pointer<T>::value) {
+        m_without_pointer = Type::of<eastl::remove_pointer_t<T>>();
+    } else {
+        m_without_pointer = nullptr;
     }
 }
 } // namespace kw

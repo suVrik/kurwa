@@ -39,7 +39,7 @@ public:
     Slow(const Slow&) = delete;
     Slow(Slow&& original) noexcept;
     Slow& operator=(const Slow&) = delete;
-    Slow& operator               =(Slow&& original) noexcept;
+    Slow& operator=(Slow&& original) noexcept;
 
     /**
      * Construct an object of type 'T' using the given 'Arguments'.

@@ -10,16 +10,3 @@
  *  distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and limitations under the License.
  */
-
-#pragma once
-
-#include <EASTL/string.h>
-
-namespace kw {
-template <typename T>
-using BasicString = eastl::basic_string<T>;
-using String = eastl::string;
-using String16 = eastl::string16;
-using String32 = eastl::string32;
-using eastl::to_string;
-} // namespace kw

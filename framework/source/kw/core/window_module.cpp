@@ -107,7 +107,7 @@ void WindowModule::on_event_listener(SDL_Event& event) noexcept {
     if (event.type == SDL_WINDOWEVENT) {
         switch (event.window.event) {
             case SDL_WINDOWEVENT_RESIZED:
-                m_width  = static_cast<uint32>(event.window.data1);
+                m_width = static_cast<uint32>(event.window.data1);
                 m_height = static_cast<uint32>(event.window.data2);
                 on_resize.emit(m_width, m_height);
                 break;

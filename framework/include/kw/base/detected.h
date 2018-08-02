@@ -23,19 +23,19 @@ namespace detail {
 template <class Default, class AlwaysVoid, template <class...> class Op, class... Args>
 struct detector {
     using value_t = eastl::false_type;
-    using type    = Default;
+    using type = Default;
 };
 
 template <class Default, template <class...> class Op, class... Args>
 struct detector<Default, eastl::void_t<Op<Args...>>, Op, Args...> {
     using value_t = eastl::true_type;
-    using type    = Op<Args...>;
+    using type = Op<Args...>;
 };
 } // namespace detail
 
 struct nonesuch {
-    nonesuch()                = delete;
-    ~nonesuch()               = delete;
+    nonesuch() = delete;
+    ~nonesuch() = delete;
     nonesuch(nonesuch const&) = delete;
     void operator=(nonesuch const&) = delete;
 };

@@ -40,7 +40,7 @@ String Stacktrace::get_stacktrace(uint32 skip_count, uint32 offset) noexcept {
     skip_count++;
 
     HANDLE process = GetCurrentProcess();
-    HANDLE thread  = GetCurrentThread();
+    HANDLE thread = GetCurrentThread();
 
     CONTEXT context{};
     context.ContextFlags = CONTEXT_FULL;
@@ -50,12 +50,12 @@ String Stacktrace::get_stacktrace(uint32 skip_count, uint32 offset) noexcept {
     SymSetOptions(SYMOPT_LOAD_LINES);
 
     STACKFRAME64 frame{};
-    frame.AddrPC.Offset    = context.Rip;
-    frame.AddrPC.Mode      = AddrModeFlat;
+    frame.AddrPC.Offset = context.Rip;
+    frame.AddrPC.Mode = AddrModeFlat;
     frame.AddrFrame.Offset = context.Rbp;
-    frame.AddrFrame.Mode   = AddrModeFlat;
+    frame.AddrFrame.Mode = AddrModeFlat;
     frame.AddrStack.Offset = context.Rsp;
-    frame.AddrStack.Mode   = AddrModeFlat;
+    frame.AddrStack.Mode = AddrModeFlat;
 
     String result;
     while (StackWalk64(IMAGE_FILE_MACHINE_AMD64, process, thread, &frame, &context, nullptr, SymFunctionTableAccess64, SymGetModuleBase64, nullptr) == TRUE) {
@@ -69,8 +69,8 @@ String Stacktrace::get_stacktrace(uint32 skip_count, uint32 offset) noexcept {
         uint32 line_number = 0;
 
         char symbol_buffer[sizeof(IMAGEHLP_SYMBOL64) + 255];
-        auto* symbol          = reinterpret_cast<IMAGEHLP_SYMBOL64*>(symbol_buffer);
-        symbol->SizeOfStruct  = sizeof(symbol_buffer);
+        auto* symbol = reinterpret_cast<IMAGEHLP_SYMBOL64*>(symbol_buffer);
+        symbol->SizeOfStruct = sizeof(symbol_buffer);
         symbol->MaxNameLength = 254;
         if (SymGetSymFromAddr64(process, frame.AddrPC.Offset, nullptr, symbol) == TRUE) {
             symbol_name = symbol->Name;
@@ -80,7 +80,7 @@ String Stacktrace::get_stacktrace(uint32 skip_count, uint32 offset) noexcept {
         IMAGEHLP_LINE64 line;
         line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
         if (SymGetLineFromAddr64(process, frame.AddrPC.Offset, &displacement, &line) == TRUE) {
-            file_name   = line.FileName;
+            file_name = line.FileName;
             line_number = line.LineNumber;
         }
 

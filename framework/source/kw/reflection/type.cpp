@@ -50,16 +50,24 @@ bool Type::is_small_object() const noexcept {
     return m_size < sizeof(void*);
 }
 
-Pair<bool, intptr_t> Type::is_base_of(const Type* type) const noexcept {
+bool Type::is_pointer() const noexcept {
+    return m_without_pointer != nullptr;
+}
+
+const Type* Type::remove_pointer() const noexcept {
+    return m_without_pointer;
+}
+
+Pair<bool, uintptr_t> Type::is_base_of(const Type* type) const noexcept {
     return type->is_inherited_from(this);
 }
 
-Pair<bool, intptr_t> Type::is_inherited_from(const Type* type) const noexcept {
+Pair<bool, uintptr_t> Type::is_inherited_from(const Type* type) const noexcept {
     for (const Parent& base : m_parents) {
         if (base.type == type) {
             return { true, base.offset };
         }
-        if (Pair<bool, intptr_t> result = base.type->is_inherited_from(type); result.first) {
+        if (Pair<bool, uintptr_t> result = base.type->is_inherited_from(type); result.first) {
             return { true, result.second + base.offset };
         }
     }

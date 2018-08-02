@@ -55,8 +55,8 @@ TEST(type, register_parents) {
 
     const Type* base_a = Type::of<DummyBaseA>();
     const Type* base_b = Type::of<DummyBaseB>();
-    const Type* a      = Type::of<DummyChildA>();
-    const Type* b      = Type::of<DummyChildB>();
+    const Type* a = Type::of<DummyChildA>();
+    const Type* b = Type::of<DummyChildB>();
 
     EXPECT_TRUE(base_a->get_parents().empty());
 
@@ -190,4 +190,19 @@ TEST(type, inheritance_offsets) {
 
     EXPECT_EQ(a->is_inherited_from<DummyBaseA>().second, 0);
     EXPECT_EQ(a->is_inherited_from<DummyBaseB>().second, sizeof(int32));
+}
+
+TEST(type, reference) {
+    using namespace kw;
+
+    int32 a = 17;
+    int32* b = &a;
+
+    const Type* type_a = Type::of<decltype(a)>();
+    const Type* type_b = Type::of<decltype(b)>();
+
+    EXPECT_NE(type_a, type_b);
+    EXPECT_TRUE(type_b->is_pointer());
+    EXPECT_NE(type_b->remove_pointer(), nullptr);
+    EXPECT_EQ(type_a, type_b->remove_pointer());
 }

@@ -19,6 +19,8 @@ namespace kw {
 template <typename T>
 Any::Any(T&& value) noexcept
     : m_type(Type::of<eastl::decay_t<T>>()) {
+    static_assert(!eastl::is_same_v<T, Any>, "Move-Constructor is required for T = Any");
+
     if constexpr (sizeof(T) <= sizeof(void*)) {
         typedef eastl::decay_t<T> decay_t;
         new (&m_data) decay_t(eastl::forward<T>(value));
@@ -42,14 +44,16 @@ void Any::emplace(Args&&... args) noexcept {
 
 template <typename T>
 const T* Any::cast() const noexcept {
-    const Type* const type = Type::of<T>();
+    // TODO: for non-class (non-struct) T do more constexpr, so cast<int32> and such must be really fast (and if failed
+    // to type == m_type, just return nullptr, omit the else section)
+    const Type* const type = Type::of<eastl::decay_t<T>>();
     if (type == m_type) {
         if constexpr (type_details::get_size<T>() <= sizeof(void*)) {
             return reinterpret_cast<const T*>(&m_data);
         } else {
             return static_cast<const T*>(m_data);
         }
-    } else if (Pair<bool, intptr_t> result = type->is_base_of(m_type); result.first) {
+    } else if (Pair<bool, uintptr_t> result = type->is_base_of(m_type); result.first) {
         if (type->is_small_object()) {
             return reinterpret_cast<const T*>(reinterpret_cast<const uint8*>(&m_data) + result.second);
         } else {
@@ -61,14 +65,16 @@ const T* Any::cast() const noexcept {
 
 template <typename T>
 T* Any::cast() noexcept {
-    const Type* const type = Type::of<T>();
+    // TODO: for non-class (non-struct) T do more constexpr, so cast<int32> and such must be really fast (and if failed
+    // to type == m_type, just return nullptr, omit the else section)
+    const Type* const type = Type::of<eastl::decay_t<T>>();
     if (type == m_type) {
         if constexpr (type_details::get_size<T>() <= sizeof(void*)) {
             return reinterpret_cast<T*>(&m_data);
         } else {
             return static_cast<T*>(m_data);
         }
-    } else if (Pair<bool, intptr_t> result = type->is_base_of(m_type); result.first) {
+    } else if (Pair<bool, uintptr_t> result = type->is_base_of(m_type); result.first) {
         if (m_type->is_small_object()) {
             return reinterpret_cast<T*>(reinterpret_cast<uint8*>(&m_data) + result.second);
         } else {
@@ -76,21 +82,6 @@ T* Any::cast() noexcept {
         }
     }
     return nullptr;
-}
-
-template <typename T>
-bool Any::is_same() const noexcept {
-    return m_type->is_same<T>();
-}
-
-template <typename T>
-bool Any::is_base_of() const noexcept {
-    return m_type->is_base_of<T>().first;
-}
-
-template <typename T>
-bool Any::is_inherited_from() const noexcept {
-    return m_type->is_inherited_from<T>().first;
 }
 } // namespace kw
 

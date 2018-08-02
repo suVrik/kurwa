@@ -28,6 +28,11 @@ Any::Any(const Type* type) noexcept
     constructor(&m_data);
 }
 
+Any::Any(const Type* type, const void* pointer) noexcept
+    : m_type(type)
+    , m_data(const_cast<void*>(pointer)) {
+}
+
 Any::Any(Any&& original) noexcept
     : m_type(original.m_type)
     , m_data(original.m_data) {
@@ -42,8 +47,8 @@ Any::~Any() noexcept {
 Any& Any::operator=(Any&& original) noexcept {
     this->~Any();
 
-    m_type          = original.m_type;
-    m_data          = original.m_data;
+    m_type = original.m_type;
+    m_data = original.m_data;
     original.m_type = Type::of<void>();
     original.m_data = nullptr;
 
@@ -78,17 +83,13 @@ const Type* Any::get_type() const {
     return m_type;
 }
 
-bool Any::is_base_of(const Type* type) const noexcept {
-    return m_type->is_base_of(type).first;
-}
-
-bool Any::is_inherited_from(const Type* type) const noexcept {
-    return m_type->is_inherited_from(type).first;
+void* const& Any::get_raw_data() const {
+    return m_data;
 }
 } // namespace kw
 
 namespace eastl {
 size_t hash<kw::Any>::operator()(const kw::Any& any) const {
-    return any.get_type()->get_hash()(any.m_data);
+    return any.get_type()->get_hash()(any.get_raw_data());
 }
 } // namespace eastl

@@ -39,7 +39,7 @@ public:
      */
     struct Parent {
         const Type* type; /// Type of the base class.
-        intptr_t offset;  /// Offset of the base class relatively to the child (for multiple inheritance).
+        uintptr_t offset; /// Offset of the base class relatively to the child (for multiple inheritance).
     };
 
     /**
@@ -98,7 +98,7 @@ public:
     template <typename T, typename... Bases>
     static void register_parents() noexcept;
 
-    Type(Type&&)      = delete;
+    Type(Type&&) = delete;
     Type(const Type&) = delete;
     Type& operator=(Type&&) = delete;
     Type& operator=(const Type&) = delete;
@@ -156,6 +156,20 @@ public:
     bool is_small_object() const noexcept;
 
     /**
+     * Return true if the underlying type is a pointer type.
+     *
+     * \code
+     * KW_ASSERT(Type::of<int32*>().is_pointer());
+     * \endcode
+     */
+    bool is_pointer() const noexcept;
+
+    /**
+     * If the given type is a pointer type, return type this pointer points at. Otherwise return nullptr.
+     */
+    const Type* remove_pointer() const noexcept;
+
+    /**
      * Return true if the given 'T' is the underlying type. Otherwise return false.
      */
     template <typename T>
@@ -166,7 +180,7 @@ public:
      * The second value in that case is an offset from child type to base type.
      * Otherwise return false as the first value, and nullptr as the second value.
      */
-    Pair<bool, intptr_t> is_base_of(const Type* type) const noexcept;
+    Pair<bool, uintptr_t> is_base_of(const Type* type) const noexcept;
 
     /**
      * Return true as the first value, if the underlying type is parent of the given type.
@@ -174,14 +188,14 @@ public:
      * Otherwise return false as the first value, and nullptr as the second value.
      */
     template <typename T>
-    Pair<bool, intptr_t> is_base_of() const noexcept;
+    Pair<bool, uintptr_t> is_base_of() const noexcept;
 
     /**
      * Return true as the first value, if the underlying type is inherited from the given type.
      * The second value in that case is an offset from child type to base type.
      * Otherwise return false as the first value, and nullptr as the second value.
      */
-    Pair<bool, intptr_t> is_inherited_from(const Type* type) const noexcept;
+    Pair<bool, uintptr_t> is_inherited_from(const Type* type) const noexcept;
 
     /**
      * Return true as the first value, if the underlying type is inherited from the given type.
@@ -189,7 +203,7 @@ public:
      * Otherwise return false as the first value, and nullptr as the second value.
      */
     template <typename T>
-    Pair<bool, intptr_t> is_inherited_from() const noexcept;
+    Pair<bool, uintptr_t> is_inherited_from() const noexcept;
 
 private:
     template <typename T>
@@ -197,11 +211,13 @@ private:
 
     Vector<Parent> m_parents;
     const std::type_info& m_type_info;
+    const Type* m_without_pointer;
+    size_t m_size;
+
     default_constructor_t m_default_constructor;
     destructor_t m_destructor;
     comparator_t m_comparator;
     hash_t m_hash;
-    size_t m_size;
 };
 } // namespace kw
 
