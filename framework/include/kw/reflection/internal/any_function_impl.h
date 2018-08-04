@@ -70,13 +70,8 @@ Function<Any(const Any&, Vector<Any>&)> generate_function(const ObjectFunction m
 
         // AnyFunction supports both self-contained Any's and pointer Any's
         if (any_object.get_type()->is_pointer()) {
-            if (any_object.get_type()->remove_pointer()->is_same<Object>()) {
-                object = static_cast<Object*>(const_cast<void*>(any_object.get_raw_data()));
-            } else {
-                if (auto [is_inherited, offset] = any_object.get_type()->remove_pointer()->is_inherited_from<Object>(); is_inherited) {
-                    object = static_cast<Object*>(const_cast<void*>(any_object.get_raw_data()));
-                }
-            }
+            // We're not going to change the object ourselves anyway, so we can do a const_cast.
+            object = const_cast<Object*>(any_object.cast_pointer<Object>());
 
             KW_ASSERT(object != nullptr, "Wrong object type!\nRequired: {}\nGot: {}", typeid(Object).name(),
                       any_object.get_type()->remove_pointer()->get_name());
@@ -123,7 +118,7 @@ Any AnyFunction::operator()(const ObjectType& object, Arguments&&... arguments) 
     Vector<Any> any_arguments;
     any_arguments.reserve(sizeof...(arguments));
     (any_arguments.push_back(eastl::forward<Arguments>(arguments)), ...);
-    return m_function(&object, eastl::move(any_arguments));
+    return m_function(&object, any_arguments);
 }
 
 template <typename... Arguments>
@@ -131,6 +126,6 @@ Any AnyFunction::operator()(const Any& object, Arguments&&... arguments) const n
     Vector<Any> any_arguments;
     any_arguments.reserve(sizeof...(arguments));
     (any_arguments.push_back(eastl::forward<Arguments>(arguments)), ...);
-    return m_function(object, eastl::move(any_arguments));
+    return m_function(object, any_arguments);
 }
 } // namespace kw

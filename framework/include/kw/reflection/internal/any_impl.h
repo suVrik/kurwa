@@ -91,6 +91,36 @@ T* Any::cast() noexcept {
 }
 
 template <typename T>
+const T* Any::cast_pointer() const noexcept {
+    KW_ASSERT(m_type->is_pointer(), "Contained object in Any is not a pointer!");
+
+    if (m_type->remove_pointer()->is_same<T>()) {
+        return static_cast<const T*>(m_data);
+    } else {
+        if (auto [success, offset] = m_type->remove_pointer()->is_inherited_from<T>(); success) {
+            return static_cast<const T*>(m_data);
+        }
+    }
+
+    return nullptr;
+}
+
+template <typename T>
+T* Any::cast_pointer() noexcept {
+    KW_ASSERT(m_type->is_pointer(), "Contained object in Any is not a pointer!");
+
+    if (m_type->remove_pointer()->is_same<T>()) {
+        return static_cast<T*>(m_data);
+    } else {
+        if (auto [success, offset] = m_type->remove_pointer()->is_inherited_from<T>(); success) {
+            return static_cast<T*>(m_data);
+        }
+    }
+
+    return nullptr;
+}
+
+template <typename T>
 bool Any::is_same() const noexcept {
     return m_type->is_same<T>();
 }

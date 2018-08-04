@@ -23,12 +23,13 @@ struct hash;
 namespace kw {
 /**
  * The instance of type Any contains an object of any type.
- * Keep in mind that for objects which size is less than a size of a pointer, small object optimization is used.
+ *
+ * Keep in mind that for objects with size less than a size of a pointer, small object optimization is used.
  */
 class Any final {
 public:
     /**
-     * Construct an Any instance with the object of type void.
+     * Construct an Any instance with the object of type void (without overhead).
      */
     Any() noexcept;
 
@@ -88,18 +89,32 @@ public:
     void emplace(Args&&... args) noexcept;
 
     /**
-     * If the contained object has type `T` (or inherited from it), return a pointer to it.
-     * Otherwise return nullptr.
+     * If the contained object has type `T` (or inherited from it), return a pointer to it. Otherwise return nullptr.
+     *
+     * Keep in mind, that this method doesn't work with pointer types. Use `cast_pointer` method for this.
      */
     template <typename T>
     const T* cast() const noexcept;
 
     /**
-     * If the contained object has type `T` (or inherited from it), return a pointer to it.
-     * Otherwise return nullptr.
+     * If the contained object has type `T` (or inherited from it), return a pointer to it. Otherwise return nullptr.
+     *
+     * Keep in mind, that this method doesn't work with pointer types. Use `cast_pointer` method for this.
      */
     template <typename T>
     T* cast() noexcept;
+
+    /**
+     * TODO
+     */
+    template <typename T>
+    const T* cast_pointer() const noexcept;
+
+    /**
+     * TODO
+     */
+    template <typename T>
+    T* cast_pointer() noexcept;
 
     /**
      * Return type of the contained object.
@@ -108,6 +123,7 @@ public:
 
     /**
      * Return pointer to raw data stored in this Any object.
+     *
      * Dereferencing this pointer might lead to a memory access violation due to small object optimization used in Any.
      */
     void* const& get_raw_data() const noexcept;
