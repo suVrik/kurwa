@@ -19,29 +19,29 @@
 
 namespace kw {
 /**
- * TODO
+ * The instance of AnyFunction contains a pointer to a member function with any arguments and any return value type.
  */
 class AnyFunction {
 public:
     AnyFunction() = default;
 
     /**
-     * TODO
+     * Construct AnyFunction with the given member function `function`.
      */
     template <typename Result, typename Object, typename... Arguments>
-    AnyFunction(Result (Object::*const callback)(Arguments...)) noexcept;
+    AnyFunction(Result (Object::*const function)(Arguments...)) noexcept;
 
     template <typename Result, typename Object, typename... Arguments>
-    AnyFunction(Result (Object::*const callback)(Arguments...) noexcept) noexcept;
+    AnyFunction(Result (Object::*const function)(Arguments...) noexcept) noexcept;
 
     template <typename Result, typename Object, typename... Arguments>
-    AnyFunction(Result (Object::*const callback)(Arguments...) const) noexcept;
+    AnyFunction(Result (Object::*const function)(Arguments...) const) noexcept;
 
     template <typename Result, typename Object, typename... Arguments>
-    AnyFunction(Result (Object::*const callback)(Arguments...) const noexcept) noexcept;
+    AnyFunction(Result (Object::*const function)(Arguments...) const noexcept) noexcept;
 
     /**
-     * TODO
+     * Call the contained member function of the given `object` using provided `arguments`.
      */
     template <typename ObjectType, typename... Arguments>
     Any operator()(const ObjectType& object, Arguments&&... arguments) const noexcept(false);

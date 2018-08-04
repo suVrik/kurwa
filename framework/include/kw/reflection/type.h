@@ -23,14 +23,15 @@
 
 namespace kw {
 /**
- * Type is a structure that contains information about specific types.
+ * Type is a structure that contains information about a specific type.
+ *
  * For the same type there's always the same Type instance. So when it is not possible to check if two objects
- * belong to the same type using templates (like when they're hidden in Any structure), but there're Types of these
- * objects available, it is enough to just compare these Types.
- * Type also stores inheritance information, destructors and comparators. Keep in mind tho, that it is very difficult
- * to understand right away what kind of functionality is needed for Type (is_pointer, is_array, maybe something else?),
- * so feel free to add whatever you need.
- * Please, inspect this class to get more information.
+ * belong to the same type using templates (like when they're hidden in Any structure), but there're `Type`s of these
+ * objects available, it is enough to just compare these `Type`s.
+ *
+ * Type also stores inheritance information, destructor, default constructor and comparator. Keep in mind though,
+ * that it is very difficult to understand right away what kind of functionality is needed for Type (is_array, is_const
+ * maybe something else?), so feel free to add or propose whatever you need.
  */
 class Type final {
 public:
@@ -43,35 +44,40 @@ public:
     };
 
     /**
-     * Construct an object of underlying type.
-     * If underlying type is small enough, object is considered to be stored inside of a pointer,
-     * and so constructor is called on the pointer, but not on what pointer points at.
+     * Construct an object of this type.
+     *
+     * If an object of this type is small enough, it is considered to be stored inside of a pointer (it is called
+     * small object optimization), and so constructor is called on the pointer, but not on what pointer points at.
      */
     typedef void (*default_constructor_t)(void**) noexcept;
 
     /**
-     * Clean up an object of the underlying type.
-     * If underlying type is small enough, object is considered to be stored inside of a pointer,
-     * and so destructor is called on the pointer, but not on what pointer points at.
+     * Clean up an object of this type.
+     *
+     * If an object of this type is small enough, it is considered to be stored inside of a pointer (it is called
+     * small object optimization), and so destructor is called on the pointer, but not on what pointer points at.
      */
     typedef void (*destructor_t)(void*) noexcept;
 
     /**
-     * Return 0 if the given objects of the underlying type are equal.
+     * Return 0 if the given objects of this type are equal.
      * Return -1 if the first object is less than the second.
-     * Return 1 if the first object is more than the second.
+     * Return 1 if the first object is greater than the second.
      */
     typedef int32 (*comparator_t)(const void*, const void*) noexcept;
 
     /**
-     * Return hash of the object with the underlying type.
+     * Return hash of the object with this type.
+     *
      * If the object doesn't have a hash function, this function will cause an invalid assertion and
-     * return a object's pointer casted to size_t (so it's not completely broken in release build).
+     * return an object's pointer casted to size_t (so it's not completely broken in release build).
      */
     typedef size_t (*hash_t)(const void*) noexcept;
 
     /**
-     * Return an unique Type instance for any unique type T.
+     * Return an unique `Type` instance for any unique type `T`.
+     *
+     * WARNING: References are removed from original types for simplification. Use pointers instead.
      *
      * \code
      * Type* type_a = Type::of<MyClass>();
@@ -84,8 +90,10 @@ public:
     static const Type* of() noexcept;
 
     /**
-     * Unfortunately C++ doesn't provide any way to get base classes of some type,
-     * so the following function must be used to provide this information.
+     * Unfortunately C++ doesn't provide any way to get base classes of some type, so the following function
+     * must be used to provide this information.
+     *
+     * WARNING: Virtual inheritance is not supported yet due to implementation complexity.
      *
      * \code
      * struct DummyBaseA {};
@@ -104,7 +112,7 @@ public:
     Type& operator=(const Type&) = delete;
 
     /**
-     * Return std::type_info of the underlying type.
+     * Return `std::type_info` of the underlying type.
      */
     const std::type_info& get_type_info() const noexcept;
 
@@ -114,94 +122,83 @@ public:
     size_t get_size() const noexcept;
 
     /**
-     * Return name of the underlying type (compiler-dependent).
+     * Return name of the underlying type (it is compiler-dependent, must be used only for debug purposes).
      */
     const char* get_name() const noexcept;
 
     /**
-     * Return the set parent classes of the underlying type.
+     * Return the set of parent classes of this type.
+     *
      * Keep in mind that parent classes must be registered manually via `register_parents` method.
      */
     const Vector<Parent>& get_parents() const noexcept;
 
     /**
-     * Return the default constructor function for the underlying type.
-     * If the underlying type is not default constructible, return nullptr.
-     * Please, take a look at `default_constructor_t` structure.
+     * Return the default constructor function for this type. If this type is not default constructible, return nullptr.
      */
     default_constructor_t get_default_constructor() const noexcept;
 
     /**
-     * Return the destructor function for the underlying type.
-     * Please, take a look at `destructor_t` structure.
+     * Return the destructor function for this type.
      */
     destructor_t get_destructor() const noexcept;
 
     /**
-     * Return the comparator function for the underlying type.
-     * Please, take a look at `comparator_t` structure.
+     * Return the comparator function for this type.
      */
     comparator_t get_comparator() const noexcept;
 
     /**
-     * Return the hash function for the underlying type.
-     * Please, take a look at `hash_t` structure.
+     * Return the hash function for this type.
      */
     hash_t get_hash() const noexcept;
 
     /**
-     * If Any holding an object of this Type must use Small Object Optimization, the return value is true.
-     * Otherwise the return value is false.
+     * Return true if Any containing an object of this type must use small object optimization. Otherwise return false.
      */
     bool is_small_object() const noexcept;
 
     /**
-     * Return true if the underlying type is a pointer type.
+     * Return true if this is a pointer type.
      *
      * \code
-     * KW_ASSERT(Type::of<int32*>().is_pointer());
+     * KW_ASSERT(Type::of<int32*>()->is_pointer());
      * \endcode
      */
     bool is_pointer() const noexcept;
 
     /**
-     * If the given type is a pointer type, return type this pointer points at. Otherwise return nullptr.
+     * If this type is a pointer type, return type this pointer points at. Otherwise return nullptr.
+     *
+     * \code
+     * KW_ASSERT(Type::of<int32*>()->remove_pointer() == Type::of<int32>());
+     * \endcode
      */
     const Type* remove_pointer() const noexcept;
 
     /**
-     * Return true if the given `T` is the underlying type. Otherwise return false.
+     * Return true if the given `T` is this type. Otherwise return false.
      */
     template <typename T>
     bool is_same() const noexcept;
 
     /**
-     * Return true as the first value, if the underlying type is parent of the given type.
+     * Return true as the first value, if this type is parent of the given type.
      * The second value in that case is an offset from child type to base type.
      * Otherwise return false as the first value, and nullptr as the second value.
      */
     Pair<bool, uintptr_t> is_base_of(const Type* type) const noexcept;
 
-    /**
-     * Return true as the first value, if the underlying type is parent of the given type.
-     * The second value in that case is an offset from child type to base type.
-     * Otherwise return false as the first value, and nullptr as the second value.
-     */
     template <typename T>
     Pair<bool, uintptr_t> is_base_of() const noexcept;
 
     /**
-     * Return true as the first value, if the underlying type is inherited from the given type.
+     * Return true as the first value, if this type is inherited from the given type.
      * The second value in that case is an offset from child type to base type.
      * Otherwise return false as the first value, and nullptr as the second value.
      */
     Pair<bool, uintptr_t> is_inherited_from(const Type* type) const noexcept;
 
-    /**
-     * Return true as the first value, if the underlying type is inherited from the given type.
-     * The second value in that case is an offset from child type to base type.
-     * Otherwise return false as the first value, and nullptr as the second value.
-     */
     template <typename T>
     Pair<bool, uintptr_t> is_inherited_from() const noexcept;
 

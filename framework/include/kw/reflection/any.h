@@ -105,13 +105,15 @@ public:
     T* cast() noexcept;
 
     /**
-     * TODO
+     * If the contained object is a pointer to object of type `T` (or inherited from it), return a pointer to it.
+     * Otherwise return nullptr.
      */
     template <typename T>
     const T* cast_pointer() const noexcept;
 
     /**
-     * TODO
+     * If the contained object is a pointer to object of type `T` (or inherited from it), return a pointer to it.
+     * Otherwise return nullptr.
      */
     template <typename T>
     T* cast_pointer() noexcept;

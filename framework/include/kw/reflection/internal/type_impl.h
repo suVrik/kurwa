@@ -225,6 +225,7 @@ Type::Type(const T* dummy) noexcept
     } else {
         m_hash = [](const void* value) noexcept->size_t {
             KW_ASSERT("Object of type '{}' doesn't have a hash function defined!", typeid(T).name());
+
             return reinterpret_cast<size_t>(value);
         };
     }

@@ -21,7 +21,7 @@ extern HashMap<const Type*, const Reflection*> reflections;
 } // namespace reflection_details
 
 template <typename T>
-Reflection* Reflection::add_reflection() {
+Reflection* Reflection::add() {
     using namespace reflection_details;
 
     if constexpr (eastl::is_same_v<T, eastl::decay_t<T>>) {
@@ -42,7 +42,7 @@ Reflection* Reflection::add_reflection() {
         // nullptr means that the given type is already added
         return nullptr;
     } else {
-        return Reflection::add_reflection<eastl::decay_t<T>>();
+        return Reflection::add<eastl::decay_t<T>>();
     }
 }
 

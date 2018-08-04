@@ -155,6 +155,19 @@ Reflection::Reflection(const Type* type) noexcept
 #endif
 }
 
+const FastName& Reflection::Meta::get_name() const noexcept {
+    return m_name;
+}
+
+const Any& Reflection::Meta::get_value() const noexcept {
+    return m_value;
+}
+
+Reflection::Meta::Meta(const FastName& name, Any&& value) noexcept
+    : m_name(name)
+    , m_value(eastl::move(value)) {
+}
+
 const Type* Reflection::Field::get_type() const noexcept {
     return m_type->remove_pointer();
 }
@@ -185,6 +198,10 @@ const Vector<const Reflection::Meta*>& Reflection::Field::get_meta() const noexc
 
 void Reflection::Field::add_meta(const FastName& name, Any&& value) noexcept {
     m_meta.push_back(reflection_details::add_meta(name, eastl::move(value)));
+}
+
+uintptr_t Reflection::Field::get_offset() const noexcept {
+    return m_offset;
 }
 
 Reflection::Field::Field(const Type* type, const FastName& name, uintptr_t offset) noexcept
@@ -218,18 +235,5 @@ void Reflection::Method::add_meta(const FastName& name, Any&& value) noexcept {
 Reflection::Method::Method(const FastName& name, AnyFunction&& method) noexcept
     : m_name(name)
     , m_method(eastl::move(method)) {
-}
-
-const FastName& Reflection::Meta::get_name() const noexcept {
-    return m_name;
-}
-
-const Any& Reflection::Meta::get_value() const noexcept {
-    return m_value;
-}
-
-Reflection::Meta::Meta(const FastName& name, Any&& value) noexcept
-    : m_name(name)
-    , m_value(eastl::move(value)) {
 }
 } // namespace kw

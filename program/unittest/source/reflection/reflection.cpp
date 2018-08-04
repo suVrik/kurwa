@@ -22,7 +22,7 @@ template <typename T>
 void no_fields_no_meta() {
     using namespace kw;
 
-    Reflection::add_reflection<T>();
+    Reflection::add<T>();
 
     const Reflection* reflection = Reflection::of<T>();
 
@@ -252,7 +252,7 @@ void fields_meta() {
 
     // Separate reflection adding and using to imitate different scopes
     {
-        Reflection* reflection = Reflection::add_reflection<T>();
+        Reflection* reflection = Reflection::add<T>();
         EXPECT_NE(reflection, nullptr);
         reflection->add_meta(meta_a, 100);
         reflection->add_meta(meta_b, 200);
@@ -384,7 +384,7 @@ TEST(reflection, fields_meta) {
     };
 
     Type::register_parents<WeirdInheritance, MyMultipleInheritanceClass>();
-    Reflection::add_reflection<WeirdInheritance>();
+    Reflection::add<WeirdInheritance>();
 
     {
         Any any_t = WeirdInheritance();

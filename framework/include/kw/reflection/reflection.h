@@ -21,71 +21,92 @@
 
 namespace kw {
 /**
- * Reflection of specific object `T` is a set of its reflectable fields and meta fields.
+ * Reflection of specific object `T` is a set of its reflectable fields, methods and meta fields.
  *
- * TODO(another pull request): better description
+ * For example for such object:
+ *
+ * \code
+ * struct Foo {
+ *     void bar(int8 arg1, int16 arg2);
+ *
+ *     int32 a;
+ *     int64 b;
+ * };
+ * \endcode
+ *
+ * Its reflection could be:
+ * * Methods: void (Foo::*bar)(int8, int16)
+ * * Fields: int32 a, int64 b
+ *
+ * But not necessary all the fields or methods are in the reflection, you can add specific fields and methods in
+ * reflection of any type.
  */
 class Reflection {
 public:
     /**
-     * Field reflection represents an actual field in object (i.e. we have an object Cat and it has a field
-     * called `name`, reflection of this field knows its type, address relative to field's object and name).
-     * Fields are inherited.
+     * Reflection::Meta is just some information that can be stored in object, field or method reflection.
      *
-     * TODO(another pull request): better description
-     */
-    class Field;
-
-    /**
-     * TODO
-     */
-    class Method;
-
-    /**
-     * Meta is just some information that can be stored in object, field or method reflection. Meta is inherited.
-     *
-     * TODO(another pull request): better description
+     * Meta is inherited. If parent reflection already contains a meta field with specific name, it is overridden by a
+     * child meta field.
      */
     class Meta;
 
     /**
-     * Create reflection of the given type `T`. Return added reflection. If reflection is already added, return nullptr.
+     * Reflection::Field reflects an actual field of an object (i.e. we have an object of type Cat and it has a field
+     * called `name`, reflection of this field is its type, address relative to field's object and name).
      *
-     * For each unique `T` this method must be called once.
+     * Fields are inherited. If parent reflection already contains a field with specific name, it is overridden by a
+     * child field. But keep in mind, if two parent objects have fields with the same name, it is an assertion failure.
+     */
+    class Field;
+
+    /**
+     * Reflection::Method reflects an actual method of an object (i.e. if we have an object of type Cat and it has a
+     * method called `meow`, reflection of this method is a `Function` (please take a look at AnyFunction class) and
+     * a name.
+     *
+     * Methods are inherited. If parent reflection already contains a method with specific name, it is overridden by a
+     * child method. But keep in mind, if two parent objects have methods with the same name,
+     * it is an assertion failure.
+     */
+    class Method;
+
+    /**
+     * Add reflection of the given type `T` and return it. If reflection is already added, return nullptr.
      *
      * Do not use template `of` method before calling this method (because then it caches nullptr Reflection).
      *
      * If `T` has parents, `Type::register_parents<T, ...>` must be called before this method (and its parents too)
-     * otherwise neither fields nor meta will not be inherited.
+     * otherwise neither fields nor method nor meta will be inherited.
      */
     template <typename T>
-    static Reflection* add_reflection();
+    static Reflection* add();
 
     /**
-     * Return reflection of the given type `T`. If reflection for the given type doesn't exist, nullptr is returned.
+     * Return reflection of the given type `T`. If reflection for the given type doesn't exist, return nullptr.
      *
      * Keep in mind, that this overload of `of` method is the fastest one, because it's based on static cached
      * variable, while other overloads are implemented using hash map search.
      *
-     * WARNING: Must be called after `add_reflection<T>()`, because this method caches a value from reflection hash map.
+     * WARNING: Must be called after `add<T>()`, because this method caches a value from reflection hash map.
      */
     template <typename T>
     static const Reflection* of() noexcept;
 
     /**
-     * Return reflection of the given type `type`. If reflection for the given type doesn't exist, nullptr is returned.
+     * Return reflection of the given type `type`. If reflection of the given type doesn't exist, return nullptr .
      */
     static const Reflection* of(const Type* type) noexcept;
 
     /**
-     * Return reflection of a type stored in the given `any`. If reflection for the given type doesn't exist,
-     * nullptr is returned.
+     * Return reflection of a type stored in the given `any`. If reflection of the given type doesn't exist,
+     * return nullptr.
      */
     static const Reflection* of(const Any& any) noexcept;
 
     /**
-     * Return field with the given `name`, stored in reflection. If the field with the given name doesn't exist,
-     * return nullptr.
+     * Return a field with the given `name`, stored in this reflection. If the field with the given `name` doesn't
+     * exist, return nullptr.
      */
     const Field* get_field(const FastName& name) const noexcept;
 
@@ -95,39 +116,46 @@ public:
     const Vector<const Field*>& get_fields() const noexcept;
 
     /**
-     * Add field with the given type `T` and `name` to reflection. When choosing `offset`,
-     * take parent classes and aligning into account.
+     * Add a field with the given type `T` and `name` to reflection. When choosing `offset`, take parent classes
+     * and aligning into account (you can use `offsetof` function for this purpose).
      */
     template <typename T>
     Field* add_field(const FastName& name, uintptr_t offset) noexcept;
 
     /**
-     * TODO
+     * Return a method with the given `name`, stored in this reflection. If the method with the given `name` doesn't
+     * exist, return nullptr.
      */
     const Method* get_method(const FastName& name) const noexcept;
 
     /**
-     * TODO
+     * Return vector of methods stored in this reflection (including inherited methods).
      */
     const Vector<const Method*>& get_methods() const noexcept;
 
     /**
-     * TODO
+     * Add a method with the given `name` represented by provided `function`. As far as `AnyFunction`s constructor
+     * is implicit, it is allowed to just pass a pointer to a method.
+     *
+     * \code
+     * reflection->add_method(FastName("foo"), &MyClass::foo);
+     * \endcode
      */
     Method* add_method(const FastName& name, AnyFunction&& function) noexcept;
 
     /**
-     * Return meta field with the given `name` for this object reflection.
+     * Return meta field with the given `name` stored in this reflection. If the meta field with the given `name`
+     * doesn't exist, return nullptr.
      */
     const Meta* get_meta(const FastName& name) const noexcept;
 
     /**
-     * Return all meta fields for this object reflection.
+     * Return all meta fields stored in this reflection.
      */
     const Vector<const Meta*>& get_meta() const noexcept;
 
     /**
-     * Add meta field to this object reflection.
+     * Add a meta field with the given `name` and `value`.
      */
     void add_meta(const FastName& name, Any&& value) noexcept;
 
@@ -152,43 +180,86 @@ extern Reflection::Meta* add_meta(const FastName& name, Any&& value) noexcept;
 } // namespace reflection_details
 
 /**
- * Field reflection represents an actual field in object (i.e. we have an object Cat and it has a field called `name`,
- * reflection of this field knows its type, address relative to field's object and name).
+ * Reflection::Meta is just some information that can be stored in object, field or method reflection.
+ *
+ * Meta is inherited. If parent reflection already contains a meta field with specific name, it is overridden by a
+ * child meta field.
  */
-class Reflection::Field {
+class Reflection::Meta {
 public:
     /**
-     * Return type of the field. Always a pointer.
-     */
-    const Type* get_type() const noexcept;
-
-    /**
-     * Return name of the field.
+     * Return name of this meta field.
      */
     const FastName& get_name() const noexcept;
 
     /**
-     * Return a pointer to a field in the given `object` (which must have type of parent reflection,
-     * which is not present in this class for optimization reasons).
+     * Return value of this meta field.
+     */
+    const Any& get_value() const noexcept;
+
+private:
+    Meta(const FastName& name, Any&& value) noexcept;
+
+    FastName m_name;
+    Any m_value;
+
+    // Allow this function to create Meta:
+    friend Meta* reflection_details::add_meta(const FastName&, Any&&) noexcept;
+};
+
+/**
+ * Reflection::Field reflects an actual field of an object (i.e. we have an object of type Cat and it has a field
+ * called `name`, reflection of this field is its type, address relative to field's object and name).
+ *
+ * Fields are inherited. If parent reflection already contains a field with specific name, it is overridden by a
+ * child field. But keep in mind, if two parent objects have fields with the same name, it is an assertion failure.
+ */
+class Reflection::Field {
+public:
+    /**
+     * Return type of this field. Always a pointer.
+     *
+     * \code
+     * KW_ASSERT(field->get_type()->is_pointer());
+     * \endcode
+     */
+    const Type* get_type() const noexcept;
+
+    /**
+     * Return name of this field.
+     */
+    const FastName& get_name() const noexcept;
+
+    /**
+     * Return a pointer to this field in the given `object`.
+     *
+     * WARNING: Please check type of `object` while working with reflection! Field does not perform this check
+     * because it doesn't contain a Type of an object it's in (because it is actually shared between multiple types).
      */
     Any get(const Any& object) const noexcept;
     template <typename T>
     Any get(const T& object) const noexcept;
 
     /**
-     * Return meta field with the given `name` for this field reflection.
+     * Return meta field with the given `name` stored in this field. If the meta field with the given `name`
+     * doesn't exist, return nullptr.
      */
     const Meta* get_meta(const FastName& name) const noexcept;
 
     /**
-     * Return all meta fields for this field reflection.
+     * Return all meta fields stored in this field.
      */
     const Vector<const Meta*>& get_meta() const noexcept;
 
     /**
-     * Add meta field to this field reflection.
+     * Add a meta field with the given `name` and `value`.
      */
     void add_meta(const FastName& name, Any&& value) noexcept;
+
+    /**
+     * Return offset of this field relatively to the object.
+     */
+    uintptr_t get_offset() const noexcept;
 
     /**
      * Return true if the field has the given type `T`. Otherwise return false.
@@ -206,15 +277,18 @@ private:
     FastName m_name;
     uintptr_t m_offset;
 
-    // Allow Reflection to access offset (for field inheritance):
-    friend class Reflection;
-
     // Allow this function to create Field:
     friend Field* reflection_details::add_field(const Type*, const FastName&, uintptr_t) noexcept;
 };
 
 /**
- * TODO
+ * Reflection::Method reflects an actual method of an object (i.e. if we have an object of type Cat and it has a
+ * method called `meow`, reflection of this method is a `Function` (please take a look at AnyFunction class) and
+ * a name.
+ *
+ * Methods are inherited. If parent reflection already contains a method with specific name, it is overridden by a
+ * child method. But keep in mind, if two parent objects have methods with the same name,
+ * it is an assertion failure.
  */
 class Reflection::Method {
 public:
@@ -223,7 +297,9 @@ public:
      */
     const FastName& get_name() const noexcept;
 
-    // TODO
+    /**
+     * Call the contained method of the given `object` using provided `arguments`.
+     */
     template <typename ObjectType, typename... Arguments>
     Any operator()(const ObjectType& object, Arguments&&... arguments) const noexcept(false);
 
@@ -231,17 +307,18 @@ public:
     Any operator()(const Any& object, Arguments&&... arguments) const noexcept(false);
 
     /**
-     * Return meta field with the given `name` for this field reflection.
+     * Return meta field with the given `name` stored in this method. If the meta field with the given `name`
+     * doesn't exist, return nullptr.
      */
     const Meta* get_meta(const FastName& name) const noexcept;
 
     /**
-     * Return all meta fields for this field reflection.
+     * Return all meta fields stored in this method.
      */
     const Vector<const Meta*>& get_meta() const noexcept;
 
     /**
-     * Add meta field to this field reflection.
+     * Add a meta field with the given `name` and `value`.
      */
     void add_meta(const FastName& name, Any&& value) noexcept;
 
@@ -254,31 +331,6 @@ private:
 
     // Allow this function to create Method:
     friend Method* reflection_details::add_method(const FastName&, AnyFunction&&) noexcept;
-};
-
-/**
- * Meta is just some information that can be stored in object, field or method reflection. Meta is inherited.
- */
-class Reflection::Meta {
-public:
-    /**
-     * Return name of the meta field.
-     */
-    const FastName& get_name() const noexcept;
-
-    /**
-     * Return value of the meta field.
-     */
-    const Any& get_value() const noexcept;
-
-private:
-    Meta(const FastName& name, Any&& value) noexcept;
-
-    FastName m_name;
-    Any m_value;
-
-    // Allow this function to create Meta:
-    friend Meta* reflection_details::add_meta(const FastName&, Any&&) noexcept;
 };
 } // namespace kw
 
