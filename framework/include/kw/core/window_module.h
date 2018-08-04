@@ -31,7 +31,7 @@ public:
     /**
      * Create a window and subscribe to event messages from 'game'.
      */
-    explicit WindowModule(IGame* game) noexcept(false);
+    explicit WindowModule(IGame* game) noexcept;
     ~WindowModule() noexcept;
 
     WindowModule(const WindowModule& original) = delete;
@@ -61,6 +61,11 @@ public:
      * Return window's height. Default is 600.
      */
     uint32 get_height() const noexcept;
+
+    /**
+     * Return SDL window.
+     */
+    SDL_Window* get_window() const noexcept;
 
     /**
      * Change window's height.
@@ -102,6 +107,7 @@ public:
     Signal<void(bool)> on_state_changed;    /// Emitted when window is restored or minimized.
 
 private:
+    void on_init_listener(kw::IGame *game) noexcept(false);
     void on_event_listener(SDL_Event& event) noexcept;
 
     SDL_Window* m_window;
