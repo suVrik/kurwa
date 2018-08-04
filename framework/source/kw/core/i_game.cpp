@@ -24,7 +24,7 @@ void death_signal(int signum) {
     const String stacktrace = kw::Stacktrace::get_stacktrace(1, 2);
     const String message    = fmt::format("Segmentation fault!\n\nStacktrace:\n{}\n", stacktrace.c_str());
 
-    fprintf(stderr, "%s", message.c_str()); // For developer. Sometimes the message box is not even shown.
+    fprintf(stderr, "%s", message.c_str()); // For developers. Sometimes the message box is not even shown.
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Runtime error", message.c_str(), nullptr);
 
     signal(signum, SIG_DFL);
@@ -112,7 +112,7 @@ void IGame::exit() noexcept {
 }
 
 void IGame::message_box(const String& message) const noexcept {
-    fputs(message.c_str(), stderr); // For developer. Sometimes the message box is not even shown.
+    fputs(message.c_str(), stderr); // For developers. Sometimes the message box is not even shown.
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Runtime error", message.c_str(), nullptr);
 }
 } // namespace kw
