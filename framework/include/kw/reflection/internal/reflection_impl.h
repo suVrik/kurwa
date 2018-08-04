@@ -27,19 +27,22 @@ Reflection* Reflection::add_reflection() {
     if constexpr (eastl::is_same_v<T, eastl::decay_t<T>>) {
         const Type* type = Type::of<T>(); // 'T' is already decayed.
 
-        KW_ASSERT(reflections.find(type) == reflections.end(), "You already added type '{}' to reflection", type->get_name());
-
         static Reflection reflection(type);
-        reflections.emplace(type, &reflection);
+        auto [iterator, success] = reflections.emplace(type, &reflection);
 
-        KW_ASSERT(!Reflection::of<T>()->get_type()->is_same<void>(),
-                  "It looks like you were trying to access type's '{}' reflection using template 'of' method "
-                  "before you actually added it!",
-                  type->get_name());
+        if (success) {
+            KW_ASSERT(Reflection::of<T>() != nullptr,
+                      "It looks like you were trying to access type's '{}' reflection using template 'of' method "
+                      "before you actually added it!",
+                      type->get_name());
 
-        return &reflection;
+            return &reflection;
+        }
+
+        // nullptr means that the given type is already added
+        return nullptr;
     } else {
-        return Reflection::add_reflection<T>();
+        return Reflection::add_reflection<eastl::decay_t<T>>();
     }
 }
 
@@ -68,8 +71,23 @@ Reflection::Field* Reflection::add_field(const FastName& name, uintptr_t offset)
 }
 
 template <typename T>
-Any Reflection::Field::get(const T& object) const {
-    return Any(m_type, static_cast<const void*>(&object + m_offset));
+Any Reflection::Field::get(const T& object) const noexcept {
+    return Any(m_type, static_cast<const void*>(reinterpret_cast<const uint8*>(&object) + m_offset));
+}
+
+template <typename T>
+bool Reflection::Field::is_same() const noexcept {
+    return m_type->remove_pointer()->is_same<T>();
+}
+
+template <typename ObjectType, typename... Arguments>
+Any Reflection::Method::operator()(const ObjectType& object, Arguments&&... arguments) const noexcept(false) {
+    return m_method(object, eastl::forward<Arguments>(arguments)...);
+}
+
+template <typename... Arguments>
+Any Reflection::Method::operator()(const Any& object, Arguments&&... arguments) const noexcept(false) {
+    return m_method(object, eastl::forward<Arguments>(arguments)...);
 }
 
 } // namespace kw

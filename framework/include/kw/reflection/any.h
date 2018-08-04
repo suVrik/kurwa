@@ -33,20 +33,36 @@ public:
     Any() noexcept;
 
     /**
-     * Construct an Any instance with the object of type 'T', direct-initialized from the given 'value'.
+     * Construct an Any instance with the object of type `T`, direct-initialized from the given `value`.
      */
     template <typename T>
     Any(T&& value) noexcept;
 
     /**
-     * Construct an Any instance with the object of the given type 'type', default-initialized.
+     * Construct an Any instance with the object of the given type `type`, default-initialized.
+     *
+     * \code
+     * struct A {
+     *     int32 value = 1337;
+     * };
+     *
+     * Any any(Type::of<A>());
+     *
+     * KW_ASSERT(any.cast<A>()->value == 1337);
+     * \endcode
      */
     explicit Any(const Type* type) noexcept;
 
     /**
-     * Construct an Any instance with the pointer to object of the given type 'type'.
+     * Construct an Any instance with the pointer type `type` that contains a pointer provided by `value`.
+     *
+     * \code
+     * int32 my_value = 33;
+     * Any any(Type::of<int32*>(), &my_value);
+     * KW_ASSERT(**any.cast<int32*> == 33);
+     * \endcode
      */
-    Any(const Type* type, const void* pointer) noexcept;
+    Any(const Type* type, const void* value) noexcept;
 
     Any(const Any&) = delete;
     Any(Any&& original) noexcept;
@@ -55,7 +71,8 @@ public:
     Any& operator=(Any&& original) noexcept;
 
     /**
-     * Operators equals and less implemented for associative arrays, but can be used for any other reason.
+     * Compare two Any instances using operators provided by their Types.
+     * If these two Any instances have different types, they're considered to be not equal.
      */
     bool operator==(const Any& another) const noexcept;
     bool operator!=(const Any& another) const noexcept;
@@ -65,19 +82,21 @@ public:
     bool operator>=(const Any& another) const noexcept;
 
     /**
-     * Change the contained object to one of type 'T', constructed from the arguments.
+     * Change the contained object to one of type `T`, constructed from the arguments.
      */
     template <typename T, typename... Args>
     void emplace(Args&&... args) noexcept;
 
     /**
-     * Cast the contained object to the given type 'T' and return a pointer to it.
+     * If the contained object has type `T` (or inherited from it), return a pointer to it.
+     * Otherwise return nullptr.
      */
     template <typename T>
     const T* cast() const noexcept;
 
     /**
-     * Cast the contained object to the given type 'T' and return a pointer to it.
+     * If the contained object has type `T` (or inherited from it), return a pointer to it.
+     * Otherwise return nullptr.
      */
     template <typename T>
     T* cast() noexcept;
@@ -85,13 +104,21 @@ public:
     /**
      * Return type of the contained object.
      */
-    const Type* get_type() const;
+    const Type* get_type() const noexcept;
 
     /**
      * Return pointer to raw data stored in this Any object.
-     * Might use small object optimization (i.e. dereferencing a pointer is a memory access violation).
+     * Dereferencing this pointer might lead to a memory access violation due to small object optimization used in Any.
      */
-    void* const& get_raw_data() const;
+    void* const& get_raw_data() const noexcept;
+
+    /**
+     * Return true if the contained object has the given type `T`. Otherwise return false.
+     *
+     * A shortcut for `any.get_type()->is_same<T>()`.
+     */
+    template <typename T>
+    bool is_same() const noexcept;
 
 private:
     const Type* m_type;

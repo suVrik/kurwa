@@ -44,8 +44,6 @@ void Any::emplace(Args&&... args) noexcept {
 
 template <typename T>
 const T* Any::cast() const noexcept {
-    // TODO: for non-class (non-struct) T do more constexpr, so cast<int32> and such must be really fast (and if failed
-    // to type == m_type, just return nullptr, omit the else section)
     const Type* const type = Type::of<eastl::decay_t<T>>();
     if (type == m_type) {
         if constexpr (type_details::get_size<T>() <= sizeof(void*)) {
@@ -53,11 +51,16 @@ const T* Any::cast() const noexcept {
         } else {
             return static_cast<const T*>(m_data);
         }
-    } else if (Pair<bool, uintptr_t> result = type->is_base_of(m_type); result.first) {
-        if (type->is_small_object()) {
-            return reinterpret_cast<const T*>(reinterpret_cast<const uint8*>(&m_data) + result.second);
-        } else {
-            return reinterpret_cast<const T*>(reinterpret_cast<const uint8*>(m_data) + result.second);
+    } else {
+        // No inheritance for scalar types
+        if constexpr (!eastl::is_scalar<T>::value) {
+            if (Pair<bool, uintptr_t> result = type->is_base_of(m_type); result.first) {
+                if (type->is_small_object()) {
+                    return reinterpret_cast<const T*>(reinterpret_cast<const uint8*>(&m_data) + result.second);
+                } else {
+                    return reinterpret_cast<const T*>(reinterpret_cast<const uint8*>(m_data) + result.second);
+                }
+            }
         }
     }
     return nullptr;
@@ -65,23 +68,31 @@ const T* Any::cast() const noexcept {
 
 template <typename T>
 T* Any::cast() noexcept {
-    // TODO: for non-class (non-struct) T do more constexpr, so cast<int32> and such must be really fast (and if failed
-    // to type == m_type, just return nullptr, omit the else section)
     const Type* const type = Type::of<eastl::decay_t<T>>();
     if (type == m_type) {
         if constexpr (type_details::get_size<T>() <= sizeof(void*)) {
-            return reinterpret_cast<T*>(&m_data);
+            return static_cast<T*>(reinterpret_cast<void*>(&m_data));
         } else {
             return static_cast<T*>(m_data);
         }
-    } else if (Pair<bool, uintptr_t> result = type->is_base_of(m_type); result.first) {
-        if (m_type->is_small_object()) {
-            return reinterpret_cast<T*>(reinterpret_cast<uint8*>(&m_data) + result.second);
-        } else {
-            return reinterpret_cast<T*>(reinterpret_cast<uint8*>(m_data) + result.second);
+    } else {
+        // No inheritance for scalar types
+        if constexpr (!eastl::is_scalar<T>::value) {
+            if (Pair<bool, uintptr_t> result = type->is_base_of(m_type); result.first) {
+                if (m_type->is_small_object()) {
+                    return reinterpret_cast<T*>(reinterpret_cast<uint8*>(&m_data) + result.second);
+                } else {
+                    return reinterpret_cast<T*>(reinterpret_cast<uint8*>(m_data) + result.second);
+                }
+            }
         }
     }
     return nullptr;
+}
+
+template <typename T>
+bool Any::is_same() const noexcept {
+    return m_type->is_same<T>();
 }
 } // namespace kw
 

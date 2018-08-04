@@ -120,32 +120,32 @@ public:
 
     /**
      * Return the set parent classes of the underlying type.
-     * Keep in mind that parent classes must be registered manually via 'register_parents' method.
+     * Keep in mind that parent classes must be registered manually via `register_parents` method.
      */
     const Vector<Parent>& get_parents() const noexcept;
 
     /**
      * Return the default constructor function for the underlying type.
      * If the underlying type is not default constructible, return nullptr.
-     * Please, take a look at 'default_constructor_t' structure.
+     * Please, take a look at `default_constructor_t` structure.
      */
     default_constructor_t get_default_constructor() const noexcept;
 
     /**
      * Return the destructor function for the underlying type.
-     * Please, take a look at 'destructor_t' structure.
+     * Please, take a look at `destructor_t` structure.
      */
     destructor_t get_destructor() const noexcept;
 
     /**
      * Return the comparator function for the underlying type.
-     * Please, take a look at 'comparator_t' structure.
+     * Please, take a look at `comparator_t` structure.
      */
     comparator_t get_comparator() const noexcept;
 
     /**
      * Return the hash function for the underlying type.
-     * Please, take a look at 'hash_t' structure.
+     * Please, take a look at `hash_t` structure.
      */
     hash_t get_hash() const noexcept;
 
@@ -170,7 +170,7 @@ public:
     const Type* remove_pointer() const noexcept;
 
     /**
-     * Return true if the given 'T' is the underlying type. Otherwise return false.
+     * Return true if the given `T` is the underlying type. Otherwise return false.
      */
     template <typename T>
     bool is_same() const noexcept;

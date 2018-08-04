@@ -26,8 +26,8 @@ TEST(any, basic) {
     Any a;
     Any b;
 
-    EXPECT_TRUE(a.get_type()->is_same<void>());
-    EXPECT_TRUE(b.get_type()->is_same<void>());
+    EXPECT_TRUE(a.is_same<void>());
+    EXPECT_TRUE(b.is_same<void>());
 
     EXPECT_EQ(a, b);
     EXPECT_LE(a, b);
@@ -60,7 +60,7 @@ TEST(any, by_move) {
     EXPECT_EQ(a.get_type(), Type::of<int32>());
     EXPECT_EQ(a.get_type(), b.get_type());
 
-    EXPECT_TRUE(a.get_type()->is_same<int32>());
+    EXPECT_TRUE(a.is_same<int32>());
 }
 
 TEST(any, structure_by_move) {
@@ -91,8 +91,8 @@ TEST(any, structure_by_move) {
     EXPECT_EQ(b.cast<big>()->a, 30);
     EXPECT_EQ(b.cast<big>()->b, 40);
 
-    EXPECT_TRUE(a.get_type()->is_same<small>());
-    EXPECT_TRUE(b.get_type()->is_same<big>());
+    EXPECT_TRUE(a.is_same<small>());
+    EXPECT_TRUE(b.is_same<big>());
 }
 
 TEST(any, big_inheritance) {
@@ -129,7 +129,7 @@ TEST(any, big_inheritance) {
     Any a(c);
 
     EXPECT_EQ(a.get_type(), Type::of<Child>());
-    EXPECT_TRUE(a.get_type()->is_same<Child>());
+    EXPECT_TRUE(a.is_same<Child>());
 
     EXPECT_NE(a.cast<Child>(), nullptr);
     EXPECT_NE(a.cast<MiddleBase>(), nullptr);
@@ -208,7 +208,7 @@ TEST(any, big_repeating_inheritance) {
     a.emplace<Child>(1001, 1002, 1003, 1004, 1005, 1006, 1007);
 
     EXPECT_EQ(a.get_type(), Type::of<Child>());
-    EXPECT_TRUE(a.get_type()->is_same<Child>());
+    EXPECT_TRUE(a.is_same<Child>());
 
     EXPECT_NE(a.cast<Child>(), nullptr);
     EXPECT_NE(a.cast<Mother>(), nullptr);
@@ -281,11 +281,13 @@ TEST(any, move_constructor) {
     using namespace kw;
 
     Any a(1000);
-    Any b(std::move(a));
+    Any b(eastl::move(a));
+    Any c = 107; // implicit constructor
 
-    EXPECT_TRUE(a.get_type()->is_same<void>());
+    EXPECT_TRUE(a.is_same<void>());
+    EXPECT_TRUE(c.is_same<int32>());
 
-    EXPECT_TRUE(b.get_type()->is_same<int32>());
+    EXPECT_TRUE(b.is_same<int32>());
     EXPECT_EQ(*b.cast<int32>(), 1000);
 }
 
@@ -297,7 +299,7 @@ TEST(any, sort) {
         vv.push_back(Any(i));
     }
     for (int32 i = 0; i < 10; i++) {
-        EXPECT_TRUE(vv[i].get_type()->is_same<int32>());
+        EXPECT_TRUE(vv[i].is_same<int32>());
         EXPECT_EQ(*vv[i].cast<int32>(), 9 - i);
     }
     eastl::sort(vv.begin(), vv.end());
@@ -315,7 +317,7 @@ TEST(any, map) {
     }
     int32 c = 0;
     for (auto& it : mm) {
-        EXPECT_TRUE(it.first.get_type()->is_same<int32>());
+        EXPECT_TRUE(it.first.is_same<int32>());
         EXPECT_EQ(*it.first.cast<int32>(), c++);
     }
 }
@@ -329,7 +331,7 @@ TEST(any, hash_map) {
     }
     int32 result = 0;
     for (auto& it : mm) {
-        EXPECT_TRUE(it.first.get_type()->is_same<int32>());
+        EXPECT_TRUE(it.first.is_same<int32>());
         result |= 1 << *it.first.cast<int32>();
     }
     EXPECT_EQ(result, 1023);

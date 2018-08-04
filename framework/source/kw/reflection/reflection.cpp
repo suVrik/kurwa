@@ -19,16 +19,22 @@ namespace kw {
 namespace reflection_details {
 HashMap<const Type*, const Reflection*> reflections;
 
-Reflection::Meta* add_meta(const FastName& name, Any&& value) {
-    static List<Reflection::Meta> meta_database;
-    meta_database.push_back(Reflection::Meta(name, eastl::move(value)));
-    return &meta_database.back();
-}
-
-Reflection::Field* add_field(const Type* pointer_type, const FastName& name, uintptr_t offset) {
+Reflection::Field* add_field(const Type* pointer_type, const FastName& name, uintptr_t offset) noexcept {
     static List<Reflection::Field> field_database;
     field_database.push_back(Reflection::Field(pointer_type, name, offset));
     return &field_database.back();
+}
+
+Reflection::Method* add_method(const FastName& name, AnyFunction&& function) noexcept {
+    static List<Reflection::Method> method_database;
+    method_database.push_back(Reflection::Method(name, eastl::move(function)));
+    return &method_database.back();
+}
+
+Reflection::Meta* add_meta(const FastName& name, Any&& value) noexcept {
+    static List<Reflection::Meta> meta_database;
+    meta_database.push_back(Reflection::Meta(name, eastl::move(value)));
+    return &meta_database.back();
 }
 } // namespace reflection_details
 
@@ -57,28 +63,47 @@ const Vector<const Reflection::Field*>& Reflection::get_fields() const noexcept 
     return m_fields;
 }
 
-const Reflection::Meta* Reflection::get_meta(const FastName& name) const {
+const Reflection::Method* Reflection::get_method(const FastName& name) const noexcept {
+    for (const Method* method : m_methods) {
+        if (method->get_name() == name) {
+            return method;
+        }
+    }
+    return nullptr;
+}
+
+const Vector<const Reflection::Method*>& Reflection::get_methods() const noexcept {
+    return m_methods;
+}
+
+Reflection::Method* Reflection::add_method(const FastName& name, AnyFunction&& function) noexcept {
+    Method* method = reflection_details::add_method(name, eastl::move(function));
+    m_methods.push_back(method);
+    return method;
+}
+
+const Reflection::Meta* Reflection::get_meta(const FastName& name) const noexcept {
     for (const Meta* meta : m_meta) {
-        if (meta->m_name == name) {
+        if (meta->get_name() == name) {
             return meta;
         }
     }
     return nullptr;
 }
 
-const Vector<const Reflection::Meta*>& Reflection::get_meta() const {
+const Vector<const Reflection::Meta*>& Reflection::get_meta() const noexcept {
     return m_meta;
 }
 
-void Reflection::add_meta(const FastName& name, Any&& value) {
+void Reflection::add_meta(const FastName& name, Any&& value) noexcept {
     m_meta.push_back(reflection_details::add_meta(name, eastl::move(value)));
 }
 
-const Type* Reflection::get_type() const {
+const Type* Reflection::get_type() const noexcept {
     return m_type;
 }
 
-Reflection::Reflection(const Type* type)
+Reflection::Reflection(const Type* type) noexcept
     : m_type(type) {
     Function<void(const Type*, uintptr_t)> inherit_fields_and_meta;
 
@@ -95,6 +120,9 @@ Reflection::Reflection(const Type* type)
                 }
             }
 
+            const Vector<const Method*>& parent_methods = parent_reflection->get_methods();
+            m_methods.insert(m_methods.end(), parent_methods.begin(), parent_methods.end());
+
             const Vector<const Meta*>& parent_meta = parent_reflection->get_meta();
             m_meta.insert(m_meta.end(), parent_meta.begin(), parent_meta.end());
         }
@@ -109,55 +137,98 @@ Reflection::Reflection(const Type* type)
     for (const Type::Parent& parent : parents) {
         inherit_fields_and_meta(parent.type, parent.offset);
     }
+
+#if defined(KW_DEBUG)
+    for (uint32 i = 0; i < m_fields.size(); i++) {
+        for (uint32 j = i + 1; j < m_fields.size(); j++) {
+            KW_ASSERT(m_fields[i]->get_name() != m_fields[j]->get_name(), "Fields with the same name '{}' in reflection of type '{}'!",
+                      m_fields[i]->get_name().c_str(), m_type->get_name());
+        }
+    }
+
+    for (uint32 i = 0; i < m_methods.size(); i++) {
+        for (uint32 j = i + 1; j < m_methods.size(); j++) {
+            KW_ASSERT(m_methods[i]->get_name() != m_methods[j]->get_name(), "Methods with the same name '{}' in reflection of type '{}'!",
+                      m_methods[i]->get_name().c_str(), m_type->get_name());
+        }
+    }
+#endif
 }
 
-Reflection::Field::Field(const Type* type, const FastName& name, uintptr_t offset)
-    : m_type(type)
-    , m_name(name)
-    , m_offset(offset) {
+const Type* Reflection::Field::get_type() const noexcept {
+    return m_type->remove_pointer();
 }
 
-const Type* Reflection::Field::get_type() const {
-    return m_type;
-}
-
-const FastName& Reflection::Field::get_name() const {
+const FastName& Reflection::Field::get_name() const noexcept {
     return m_name;
 }
 
-Any Reflection::Field::get(const Any& object) const {
+Any Reflection::Field::get(const Any& object) const noexcept {
     if (object.get_type()->is_small_object()) {
         return Any(m_type, static_cast<const void*>(reinterpret_cast<const uint8*>(&object.get_raw_data()) + m_offset));
     }
     return Any(m_type, static_cast<const void*>(reinterpret_cast<const uint8*>(object.get_raw_data()) + m_offset));
 }
 
-const Reflection::Meta* Reflection::Field::get_meta(const FastName& name) const {
+const Reflection::Meta* Reflection::Field::get_meta(const FastName& name) const noexcept {
     for (const Meta* meta : m_meta) {
-        if (meta->m_name == name) {
+        if (meta->get_name() == name) {
             return meta;
         }
     }
     return nullptr;
 }
 
-const Vector<const Reflection::Meta*>& Reflection::Field::get_meta() const {
+const Vector<const Reflection::Meta*>& Reflection::Field::get_meta() const noexcept {
     return m_meta;
 }
 
-void Reflection::Field::add_meta(const FastName& name, Any&& value) {
+void Reflection::Field::add_meta(const FastName& name, Any&& value) noexcept {
     m_meta.push_back(reflection_details::add_meta(name, eastl::move(value)));
 }
 
-const FastName& Reflection::Meta::get_name() const {
+Reflection::Field::Field(const Type* type, const FastName& name, uintptr_t offset) noexcept
+    : m_type(type)
+    , m_name(name)
+    , m_offset(offset) {
+    KW_ASSERT(type->is_pointer());
+}
+
+const FastName& Reflection::Method::get_name() const noexcept {
     return m_name;
 }
 
-const Any& Reflection::Meta::get_value() const {
+const Reflection::Meta* Reflection::Method::get_meta(const FastName& name) const noexcept {
+    for (const Meta* meta : m_meta) {
+        if (meta->get_name() == name) {
+            return meta;
+        }
+    }
+    return nullptr;
+}
+
+const Vector<const Reflection::Meta*>& Reflection::Method::get_meta() const noexcept {
+    return m_meta;
+}
+
+void Reflection::Method::add_meta(const FastName& name, Any&& value) noexcept {
+    m_meta.push_back(reflection_details::add_meta(name, eastl::move(value)));
+}
+
+Reflection::Method::Method(const FastName& name, AnyFunction&& method) noexcept
+    : m_name(name)
+    , m_method(eastl::move(method)) {
+}
+
+const FastName& Reflection::Meta::get_name() const noexcept {
+    return m_name;
+}
+
+const Any& Reflection::Meta::get_value() const noexcept {
     return m_value;
 }
 
-Reflection::Meta::Meta(const FastName& name, Any&& value)
+Reflection::Meta::Meta(const FastName& name, Any&& value) noexcept
     : m_name(name)
     , m_value(eastl::move(value)) {
 }

@@ -134,11 +134,11 @@ Type::Type(const T* dummy) noexcept
     if constexpr (eastl::is_default_constructible_v<T>) {
         if constexpr (type_details::get_size<T>() > sizeof(void*)) {
             m_default_constructor = [](void** value) noexcept {
-                *reinterpret_cast<T**>(value) = new T();
+                *static_cast<T**>(reinterpret_cast<void*>(value)) = new T();
             };
         } else {
             m_default_constructor = [](void** value) noexcept {
-                new (reinterpret_cast<T*>(value)) T();
+                new (static_cast<T*>(reinterpret_cast<void*>(value))) T();
             };
         }
     } else {
@@ -176,7 +176,7 @@ Type::Type(const T* dummy) noexcept
     } else {
         if constexpr (eastl::is_destructible<T>()) {
             m_destructor = [](void* value) noexcept {
-                reinterpret_cast<T*>(&value)->~T();
+                static_cast<T*>(reinterpret_cast<void*>(&value))->~T();
             };
         } else {
             m_destructor = [](void*) noexcept {};
@@ -185,13 +185,13 @@ Type::Type(const T* dummy) noexcept
         if constexpr (eastl::is_detected_v<type_details::operator_equals_t, T>) {
             if constexpr (eastl::is_detected_v<type_details::operator_less_t, T>) {
                 m_comparator = [](const void* a, const void* b) noexcept {
-                    const T* const ta = reinterpret_cast<T*>(const_cast<void**>(&a));
-                    const T* const tb = reinterpret_cast<T*>(const_cast<void**>(&b));
+                    const T* const ta = static_cast<const T*>(reinterpret_cast<const void*>(&a));
+                    const T* const tb = static_cast<const T*>(reinterpret_cast<const void*>(&b));
                     return *ta == *tb ? 0 : (*ta < *tb ? -1 : 1);
                 };
             } else {
                 m_comparator = [](const void* a, const void* b) noexcept {
-                    return *reinterpret_cast<T*>(const_cast<void**>(&a)) == *reinterpret_cast<T*>(const_cast<void**>(&b)) ? 0 : -1;
+                    return *static_cast<const T*>(reinterpret_cast<const void*>(&a)) == *static_cast<const T*>(reinterpret_cast<const void*>(&b)) ? 0 : -1;
                 };
             }
         } else {
@@ -202,7 +202,7 @@ Type::Type(const T* dummy) noexcept
                 };
             } else if constexpr (eastl::is_detected_v<type_details::operator_less_t, T>) {
                 m_comparator = [](const void* a, const void* b) noexcept {
-                    return *reinterpret_cast<T*>(const_cast<void**>(&a)) < *reinterpret_cast<T*>(const_cast<void**>(&b)) ? -1 : 1;
+                    return *static_cast<const T*>(reinterpret_cast<const void*>(&a)) < *static_cast<const T*>(reinterpret_cast<const void*>(&b)) ? -1 : 1;
                 };
             } else {
                 m_comparator = [](const void*, const void*) noexcept {
