@@ -75,7 +75,7 @@ public:
     typedef size_t (*hash_t)(const void*) noexcept;
 
     /**
-     * Return an unique `Type` instance for any unique type `T`.
+     * Return a unique `Type` instance for any unique type `T`.
      *
      * WARNING: References are removed from original types for simplification. Use pointers instead.
      *
