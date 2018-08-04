@@ -250,7 +250,7 @@ void fields_meta() {
     FastName meta_a("c");
     FastName meta_b("d");
 
-    // Separate reflection adding and using to imitate different scopes
+    // Separate reflection addition and usage to imitate different scopes
     {
         Reflection* reflection = Reflection::add<T>();
         EXPECT_NE(reflection, nullptr);
@@ -305,7 +305,7 @@ TEST(reflection, no_fields_no_meta) {
     reflection_test_details::no_fields_no_meta<int16**>();
     reflection_test_details::no_fields_no_meta<int32**>();
     reflection_test_details::no_fields_no_meta<int64**>();
-    // These must be equal to their non-reference bothers.
+    // These must be equal to their non-reference brothers.
     // References are not supported.
     reflection_test_details::no_fields_no_meta<bool&>();
     reflection_test_details::no_fields_no_meta<int8&>();
