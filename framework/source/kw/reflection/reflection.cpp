@@ -52,7 +52,7 @@ const Reflection* Reflection::of(const Any& any) noexcept {
 
 const Reflection::Field* Reflection::get_field(const FastName& name) const noexcept {
     for (const Field* field : m_fields) {
-        if (field->m_name == name) {
+        if (field->get_name() == name) {
             return field;
         }
     }
@@ -115,8 +115,8 @@ Reflection::Reflection(const Type* type) noexcept
                 m_fields.insert(m_fields.end(), parent_fields.begin(), parent_fields.end());
             } else {
                 for (const Reflection::Field* field : parent_fields) {
-                    const uintptr_t field_offset = offset + field->m_offset;
-                    m_fields.push_back(reflection_details::add_field(field->m_type, field->m_name, field_offset));
+                    const uintptr_t field_offset = offset + field->get_offset();
+                    m_fields.push_back(reflection_details::add_field(field->get_type(), field->get_name(), field_offset));
                 }
             }
 
