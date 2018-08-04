@@ -46,20 +46,20 @@ struct FunctionCaller<> {
 
 template <typename Argument, typename... Arguments>
 template <typename Object, typename ObjectFunction, typename... UnpackedArguments>
-static Any FunctionCaller<Argument, Arguments...>::call(Vector<Any>& arguments, Object* object, ObjectFunction method, UnpackedArguments&&... args) {
+Any FunctionCaller<Argument, Arguments...>::call(Vector<Any>& arguments, Object* object, ObjectFunction method, UnpackedArguments&&... args) {
     Any argument = eastl::move(arguments[sizeof...(UnpackedArguments)]);
     if constexpr (eastl::is_reference<Argument>::value || eastl::is_rvalue_reference<Argument>::value) {
         KW_ASSERT(argument.is_same<typename eastl::remove_reference<Argument>::type*>(), "Wrong argument type!\nRequired: {}\nGot: {}",
                   typeid(typename eastl::remove_reference<Argument>::type*).name(), argument.get_type()->get_name());
 
         Argument argument_value = eastl::forward<Argument>(**argument.cast<typename eastl::remove_reference<Argument>::type*>());
-        return FunctionCaller<Arguments...>::call<Object, ObjectFunction, UnpackedArguments..., Argument>(arguments, object, method, eastl::forward<UnpackedArguments>(args)..., eastl::forward<Argument>(argument_value));
+        return FunctionCaller<Arguments...>::template call<Object, ObjectFunction, UnpackedArguments..., Argument>(arguments, object, method, eastl::forward<UnpackedArguments>(args)..., eastl::forward<Argument>(argument_value));
     } else {
         KW_ASSERT(argument.is_same<Argument>(), "Wrong argument type!\nRequired: {}\nGot: {}", typeid(Argument).name(),
                   argument.get_type()->get_name());
 
         Argument argument_value = eastl::forward<Argument>(*argument.cast<typename eastl::remove_reference<Argument>::type>());
-        return FunctionCaller<Arguments...>::call<Object, ObjectFunction, UnpackedArguments..., Argument>(arguments, object, method, eastl::forward<UnpackedArguments>(args)..., eastl::forward<Argument>(argument_value));
+        return FunctionCaller<Arguments...>::template call<Object, ObjectFunction, UnpackedArguments..., Argument>(arguments, object, method, eastl::forward<UnpackedArguments>(args)..., eastl::forward<Argument>(argument_value));
     }
 }
 
@@ -89,7 +89,7 @@ Function<Any(const Any&, Vector<Any>)> generate_function(const ObjectFunction me
         }
 
         if (arguments.size() == sizeof...(Arguments)) {
-            return FunctionCaller<Arguments...>::call<Object, ObjectFunction>(arguments, object, method);
+            return FunctionCaller<Arguments...>::template call<Object, ObjectFunction>(arguments, object, method);
         } else {
             KW_ASSERT(false, "Invalid number of arguments!");
             return {};
