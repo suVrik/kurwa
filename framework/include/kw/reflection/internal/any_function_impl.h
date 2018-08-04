@@ -64,7 +64,7 @@ Any FunctionCaller<Argument, Arguments...>::call(Vector<Any>& arguments, Object*
 }
 
 template <typename Object, typename ObjectFunction, typename... Arguments>
-Function<Any(const Any&, Vector<Any>)> generate_function(const ObjectFunction method) noexcept {
+Function<Any(const Any&, Vector<Any>&)> generate_function(const ObjectFunction method) noexcept {
     return [method](const Any& any_object, Vector<Any>& arguments) noexcept(false)->Any {
         Object* object = nullptr;
 

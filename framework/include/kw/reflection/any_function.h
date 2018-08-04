@@ -50,7 +50,7 @@ public:
     Any operator()(const Any& object, Arguments&&... arguments) const noexcept(false);
 
 private:
-    Function<Any(const Any&, Vector<Any>)> m_function;
+    Function<Any(const Any&, Vector<Any>&)> m_function;
 };
 } // namespace kw
 
