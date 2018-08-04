@@ -56,20 +56,20 @@
     {                                                                                                                  \
         Any result = any_value;                                                                                        \
         EXPECT_TRUE(result.is_same<required_type>());                                                                  \
-        EXPECT_EQ(*result.cast<required_type>(), required_result);                                                     \
+        EXPECT_EQ(*result.template cast<required_type>(), required_result);                                            \
     }
 
 #define CHECK_POINTER_RESULT(any_value, required_type, required_result)                                                \
     {                                                                                                                  \
         Any result = any_value;                                                                                        \
         EXPECT_TRUE(result.is_same<required_type*>());                                                                 \
-        EXPECT_EQ(**result.cast<required_type*>(), required_result);                                                   \
+        EXPECT_EQ(**result.template cast<required_type*>(), required_result);                                          \
     }
 
 #define CHECK_VOID_RESULT(any_value, variable_type, required_result)                                                   \
     {                                                                                                                  \
         any_value;                                                                                                     \
-        EXPECT_EQ(object.cast<Type>()->variable_type, required_result);                                                \
+        EXPECT_EQ(object.template cast<Type>()->variable_type, required_result);                                       \
     }
 
 namespace any_function_test_details {
@@ -251,10 +251,10 @@ void test_any_function(int32 offset = 0) {
     CHECK_POINTER_RESULT(any_function8(object, &ptr8, &ptr16, &ptr32), int64, 56);
 
     // The previous set of functions had changed the object
-    EXPECT_EQ(object.cast<Type>()->value_int8, 112);
-    EXPECT_EQ(object.cast<Type>()->value_int16, 104);
-    EXPECT_EQ(object.cast<Type>()->value_int32, 88);
-    EXPECT_EQ(object.cast<Type>()->value_int64, 56);
+    EXPECT_EQ(object.template cast<Type>()->value_int8, 112);
+    EXPECT_EQ(object.template cast<Type>()->value_int16, 104);
+    EXPECT_EQ(object.template cast<Type>()->value_int32, 88);
+    EXPECT_EQ(object.template cast<Type>()->value_int64, 56);
     object = Type();
 
     CHECK_POINTER_RESULT(any_function9(object, &cptr16, &cptr32, &cptr64), int8, 112);
@@ -263,10 +263,10 @@ void test_any_function(int32 offset = 0) {
     CHECK_POINTER_RESULT(any_function12(object, &cptr8, &cptr16, &cptr32), int64, 56);
 
     // The previous set of functions had changed the object
-    EXPECT_EQ(object.cast<Type>()->value_int8, 112);
-    EXPECT_EQ(object.cast<Type>()->value_int16, 104);
-    EXPECT_EQ(object.cast<Type>()->value_int32, 88);
-    EXPECT_EQ(object.cast<Type>()->value_int64, 56);
+    EXPECT_EQ(object.template cast<Type>()->value_int8, 112);
+    EXPECT_EQ(object.template cast<Type>()->value_int16, 104);
+    EXPECT_EQ(object.template cast<Type>()->value_int32, 88);
+    EXPECT_EQ(object.template cast<Type>()->value_int64, 56);
     object = Type();
 
     CHECK_RESULT(any_function13(object, static_cast<int16>(8), static_cast<int32>(16), static_cast<int64>(32)), int8, 56);
