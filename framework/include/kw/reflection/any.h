@@ -73,7 +73,7 @@ public:
 
     /**
      * Compare two Any instances using operators provided by their Types.
-     * If these two Any instances have different types, they're considered to be not equal.
+     * If these two Any instances have different types, they're considered to be unequal.
      */
     bool operator==(const Any& another) const noexcept;
     bool operator!=(const Any& another) const noexcept;
