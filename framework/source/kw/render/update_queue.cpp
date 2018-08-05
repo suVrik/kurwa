@@ -25,7 +25,7 @@ CommandBuffer UpdateQueue::pop() {
 
 void UpdateQueue::push(CommandBuffer&& command_buffer) {
     LockGuard<Mutex> lock(m_mutex);
-    m_queue.push(command_buffer);
+    m_queue.push(eastl::move(command_buffer));
 }
 
 } // namespace render

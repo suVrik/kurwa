@@ -29,12 +29,12 @@ void SceneModule::on_init_listener(kw::IGame* game) noexcept {
         while (is_update_thread_active) {
             render::CommandBuffer command_buffer;
             render::Command command{};
-            command.clear.type = kw::render::CommandType::CLEAR;
+            command.type = kw::render::CommandType::CLEAR;
             command.clear.r = 0.9f * red;
             command.clear.g = 0.9f;
             command.clear.b = 0.9f;
             command.clear.a = 1.f;
-            command_buffer.commands.push_back(command);
+            command_buffer.commands.push_back(eastl::move(command));
 
             render_module.push_command_buffer(eastl::move(command_buffer));
 

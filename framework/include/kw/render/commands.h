@@ -41,7 +41,6 @@ enum class CommandType {
 };
 
 struct CommandClear {
-    CommandType type;
     float r;
     float g;
     float b;
@@ -49,81 +48,113 @@ struct CommandClear {
 };
 
 // TODO remove type ???
-struct CommandCreateVertexBuffer {
-    CommandType type;
-};
+struct CommandCreateVertexBuffer {};
 
-struct CommandInitImgui {
-    CommandType type;
-};
+struct CommandInitImgui {};
 
 struct CommandUpdateVertexBuffer {
-    CommandType type;
     uint32 size;
-    const void* data;
+    Vector<float> data;
 };
 
 struct CommandBindVertexBuffer {
-    CommandType type;
     uint32 vao_id;
     uint32 vbo_id;
 };
 
-struct CommandCreateIndexBuffer {
-    CommandType type;
-};
+struct CommandCreateIndexBuffer {};
 
 struct CommandUpdateIndexBuffer {
-    CommandType type;
     uint32 size;
-    const void* data;
+    Vector<uint16> data;
 };
 
 struct CommandBindIndexBuffer {
-    CommandType type;
     uint32 id;
 };
 
 struct CommandDrawIndexed {
-    CommandType type;
     uint32 size;
     const void* data;
 };
 
 struct CommandBindProgram {
-    CommandType type;
     uint32 id;
 };
 
 struct CommandBindTexture {
-    CommandType type;
     uint32 id;
 };
 
 // TODO to uniform buffer
 struct CommandUpdateUniformMatrix4f {
-    CommandType type;
     uint32 id;
-    const float* matrix;
+    Vector<float> matrix;
 };
 
-union Command {
-    CommandType type;
-    CommandClear clear;
+struct Command {
+    Command() {
+    }
 
-    CommandCreateVertexBuffer create_vertex_buffer;
-    CommandUpdateVertexBuffer update_vertex_buffer;
-    CommandBindVertexBuffer bind_vertex_buffer;
+    Command(const Command& original) = delete;
+    Command& operator=(const Command& original) = delete;
 
-    CommandCreateIndexBuffer create_index_buffer;
-    CommandUpdateIndexBuffer update_index_buffer;
-    CommandBindIndexBuffer bind_index_buffer;
+    Command(Command&& original)
+        : type(original.type) {
+        switch (type) {
+            case CommandType::UPDATE_INDEX_BUFFER:
+                update_index_buffer = eastl::move(original.update_index_buffer);
+                break;
+            case CommandType::UPDATE_VERTEX_BUFFER:
+                update_vertex_buffer = eastl::move(original.update_vertex_buffer);
+                break;
+            case CommandType::UPDATE_UNIFORM_MATRIX_4f:
+                update_uniform_matrix_4f = eastl::move(original.update_uniform_matrix_4f);
+                break;
+            default:
+                memcpy(this, &original, sizeof(Command));
+        }
+        original.type = CommandType::CLEAR;
+    }
 
-    CommandDrawIndexed draw_indexed;
-    CommandBindProgram bind_program;
-    CommandBindTexture bind_texture;
-    CommandUpdateUniformMatrix4f update_uniform_matrix_4f;
-    CommandInitImgui init_imgui;
+    Command& operator=(Command&& original) = delete;
+
+    ~Command() {
+        switch (type) {
+            case CommandType::UPDATE_INDEX_BUFFER:
+                update_index_buffer.~CommandUpdateIndexBuffer();
+                break;
+            case CommandType::UPDATE_VERTEX_BUFFER:
+                update_vertex_buffer.~CommandUpdateVertexBuffer();
+                break;
+            case CommandType::UPDATE_UNIFORM_MATRIX_4f:
+                update_uniform_matrix_4f.~CommandUpdateUniformMatrix4f();
+                break;
+            default:
+                // Other command structures do not require destruction.
+                break;
+        }
+    }
+
+    CommandType type = CommandType::CLEAR;
+
+    union {
+        CommandClear clear;
+
+        CommandCreateVertexBuffer create_vertex_buffer;
+        CommandUpdateVertexBuffer update_vertex_buffer;
+        CommandBindVertexBuffer bind_vertex_buffer;
+
+        CommandCreateIndexBuffer create_index_buffer;
+        CommandUpdateIndexBuffer update_index_buffer;
+        CommandBindIndexBuffer bind_index_buffer;
+
+        CommandDrawIndexed draw_indexed;
+        CommandBindProgram bind_program;
+        CommandBindTexture bind_texture;
+        CommandUpdateUniformMatrix4f update_uniform_matrix_4f;
+        CommandInitImgui init_imgui;
+    };
 };
 
 struct CommandBuffer {

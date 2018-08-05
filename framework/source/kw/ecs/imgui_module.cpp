@@ -16,6 +16,7 @@
 #include <SDL2/SDL_timer.h>
 #include <imgui/imgui.h>
 #include <iostream>
+#include <kw/base/vector.h>
 #include <kw/core/i_game.h>
 #include <kw/core/window_module.h>
 #include <kw/ecs/imgui_module.h>
@@ -281,8 +282,8 @@ void ImguiModule::on_populate_render_queue_listener(SceneModule* scene_module) n
     draw_data->ScaleClipRects(io.DisplayFramebufferScale);
 
     render::Command command0{};
-    command0.init_imgui.type = kw::render::CommandType::INIT_IMGUI;
-    command_buffer.commands.push_back(command0);
+    command0.type = kw::render::CommandType::INIT_IMGUI;
+    command_buffer.commands.push_back(eastl::move(command0));
 
     float L = draw_data->DisplayPos.x;
     float R = draw_data->DisplayPos.x + draw_data->DisplaySize.x;
@@ -297,26 +298,26 @@ void ImguiModule::on_populate_render_queue_listener(SceneModule* scene_module) n
 
     // glUseProgram(g_ShaderHandle);
     render::Command command1{};
-    command1.bind_program.type = kw::render::CommandType::BIND_PROGRAM;
+    command1.type = kw::render::CommandType::BIND_PROGRAM;
     command1.bind_program.id = g_ShaderHandle;
-    command_buffer.commands.push_back(command1);
+    command_buffer.commands.push_back(eastl::move(command1));
 
     // glUniformMatrix4fv(g_AttribLocationProjMtx, 1, GL_FALSE, &ortho_projection[0][0]);
     render::Command command2{};
-    command2.update_uniform_matrix_4f.type = kw::render::CommandType::UPDATE_UNIFORM_MATRIX_4f;
+    command2.type = kw::render::CommandType::UPDATE_UNIFORM_MATRIX_4f;
     command2.update_uniform_matrix_4f.id = (unsigned)g_AttribLocationProjMtx;
-    command2.update_uniform_matrix_4f.matrix = &ortho_projection[0][0];
-    command_buffer.commands.push_back(command2);
+    new (&command2.update_uniform_matrix_4f.matrix) Vector<float>(&ortho_projection[0][0], &ortho_projection[0][0] + 16);
+    command_buffer.commands.push_back(eastl::move(command2));
 
     // glBindSampler(0, 0); // We use combined texture/sampler state. Applications using GL 3.3 may set that otherwise.
 
     // glBindVertexArray(vao_handle);
     // glBindBuffer(GL_ARRAY_BUFFER, g_VboHandle);
     render::Command command3{};
-    command3.bind_vertex_buffer.type = kw::render::CommandType::BIND_VERTEX_BUFFER;
+    command3.type = kw::render::CommandType::BIND_VERTEX_BUFFER;
     command3.bind_vertex_buffer.vao_id = vao_handle;
     command3.bind_vertex_buffer.vbo_id = g_VboHandle;
-    command_buffer.commands.push_back(command3);
+    command_buffer.commands.push_back(eastl::move(command3));
 
     ImVec2 pos = draw_data->DisplayPos;
     for (int n = 0; n < draw_data->CmdListsCount; n++) {
@@ -325,31 +326,34 @@ void ImguiModule::on_populate_render_queue_listener(SceneModule* scene_module) n
 
         // glBindBuffer(GL_ARRAY_BUFFER, g_VboHandle);
         render::Command command40{};
-        command40.bind_vertex_buffer.type = kw::render::CommandType::BIND_VERTEX_BUFFER;
+        command40.type = kw::render::CommandType::BIND_VERTEX_BUFFER;
         command40.bind_vertex_buffer.vao_id = vao_handle;
         command40.bind_vertex_buffer.vbo_id = g_VboHandle;
-        command_buffer.commands.push_back(command40);
+        command_buffer.commands.push_back(eastl::move(command40));
         // glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)cmd_list->VtxBuffer.Size * sizeof(ImDrawVert), (const
         // GLvoid*)cmd_list->VtxBuffer.Data, GL_STREAM_DRAW);
         render::Command command4{};
-        command4.update_vertex_buffer.type = kw::render::CommandType::UPDATE_VERTEX_BUFFER;
+        command4.type = kw::render::CommandType::UPDATE_VERTEX_BUFFER;
         command4.update_vertex_buffer.size = cmd_list->VtxBuffer.Size * sizeof(ImDrawVert);
-        command4.update_vertex_buffer.data = (const void*)cmd_list->VtxBuffer.Data;
-        command_buffer.commands.push_back(command4);
+        new (&command4.update_vertex_buffer.data)
+            Vector<float>(reinterpret_cast<float*>(cmd_list->VtxBuffer.Data),
+                          reinterpret_cast<float*>(cmd_list->VtxBuffer.Data) + cmd_list->VtxBuffer.Size * sizeof(ImDrawVert) / sizeof(float));
+        command_buffer.commands.push_back(eastl::move(command4));
 
         // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_ElementsHandle);
         render::Command command5{};
-        command5.bind_index_buffer.type = kw::render::CommandType::BIND_INDEX_BUFFER;
+        command5.type = kw::render::CommandType::BIND_INDEX_BUFFER;
         command5.bind_index_buffer.id = g_ElementsHandle;
-        command_buffer.commands.push_back(command5);
+        command_buffer.commands.push_back(eastl::move(command5));
 
         // glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr)cmd_list->IdxBuffer.Size * sizeof(ImDrawIdx), (const
         // GLvoid*)cmd_list->IdxBuffer.Data, GL_STREAM_DRAW);
         render::Command command6{};
-        command6.update_index_buffer.type = kw::render::CommandType::UPDATE_INDEX_BUFFER;
+        command6.type = kw::render::CommandType::UPDATE_INDEX_BUFFER;
         command6.update_index_buffer.size = cmd_list->IdxBuffer.Size * sizeof(ImDrawIdx);
-        command6.update_index_buffer.data = (const void*)cmd_list->IdxBuffer.Data;
-        command_buffer.commands.push_back(command6);
+        new (&command6.update_index_buffer.data)
+            Vector<uint16>(cmd_list->IdxBuffer.Data, cmd_list->IdxBuffer.Data + cmd_list->IdxBuffer.Size);
+        command_buffer.commands.push_back(eastl::move(command6));
 
         for (int cmd_i = 0; cmd_i < cmd_list->CmdBuffer.Size; cmd_i++) {
             const ImDrawCmd* pcmd = &cmd_list->CmdBuffer[cmd_i];
@@ -367,16 +371,16 @@ void ImguiModule::on_populate_render_queue_listener(SceneModule* scene_module) n
                     // Bind texture, Draw
                     // glBindTexture(GL_TEXTURE_2D, (GLuint)(intptr_t)pcmd->TextureId);
                     render::Command command7{};
-                    command7.bind_texture.type = kw::render::CommandType::BIND_TEXTURE;
+                    command7.type = kw::render::CommandType::BIND_TEXTURE;
                     command7.bind_texture.id = (GLuint)(intptr_t)pcmd->TextureId;
-                    command_buffer.commands.push_back(command7);
+                    command_buffer.commands.push_back(eastl::move(command7));
 
                     // glDrawElements(GL_TRIANGLES, (GLsizei)pcmd->ElemCount, GL_UNSIGNED_SHORT, idx_buffer_offset);
                     render::Command command8{};
-                    command8.draw_indexed.type = kw::render::CommandType::DRAW_INDEXED;
+                    command8.type = kw::render::CommandType::DRAW_INDEXED;
                     command8.draw_indexed.size = (GLsizei)pcmd->ElemCount;
                     command8.draw_indexed.data = idx_buffer_offset;
-                    command_buffer.commands.push_back(command8);
+                    command_buffer.commands.push_back(eastl::move(command8));
                 }
             }
             idx_buffer_offset += pcmd->ElemCount;

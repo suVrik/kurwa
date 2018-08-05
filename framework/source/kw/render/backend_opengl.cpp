@@ -274,14 +274,16 @@ void BackendOpenGL::process_command_buffer(CommandBuffer&& command_buffer) noexc
                 glClear(GL_COLOR_BUFFER_BIT);
                 break;
             case CommandType::UPDATE_VERTEX_BUFFER:
-                glBufferData(GL_ARRAY_BUFFER, command.update_vertex_buffer.size, command.update_vertex_buffer.data, GL_STREAM_DRAW);
+                glBufferData(GL_ARRAY_BUFFER, command.update_vertex_buffer.size,
+                             static_cast<const void*>(command.update_vertex_buffer.data.data()), GL_STREAM_DRAW);
                 break;
             case CommandType::BIND_VERTEX_BUFFER:
                 glBindVertexArray(command.bind_vertex_buffer.vao_id);
                 glBindBuffer(GL_ARRAY_BUFFER, command.bind_vertex_buffer.vbo_id);
                 break;
             case CommandType::UPDATE_INDEX_BUFFER:
-                glBufferData(GL_ELEMENT_ARRAY_BUFFER, command.update_index_buffer.size, command.update_index_buffer.data, GL_STREAM_DRAW);
+                glBufferData(GL_ELEMENT_ARRAY_BUFFER, command.update_index_buffer.size,
+                             static_cast<const void*>(command.update_index_buffer.data.data()), GL_STREAM_DRAW);
                 break;
             case CommandType::BIND_INDEX_BUFFER:
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, command.bind_index_buffer.id);
@@ -296,7 +298,8 @@ void BackendOpenGL::process_command_buffer(CommandBuffer&& command_buffer) noexc
                 glDrawElements(GL_TRIANGLES, command.draw_indexed.size, GL_UNSIGNED_SHORT, command.draw_indexed.data);
                 break;
             case CommandType::UPDATE_UNIFORM_MATRIX_4f:
-                glUniformMatrix4fv(command.update_uniform_matrix_4f.id, 1, GL_FALSE, command.update_uniform_matrix_4f.matrix);
+                glUniformMatrix4fv(
+                    command.update_uniform_matrix_4f.id, 1, GL_FALSE, command.update_uniform_matrix_4f.matrix.data());
                 break;
             case CommandType::INIT_IMGUI:
                 glEnable(GL_BLEND);

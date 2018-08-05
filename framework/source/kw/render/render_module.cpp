@@ -19,6 +19,7 @@
 #include <kw/render/rendering_backend.h>
 
 #include <SDL2/SDL_video.h>
+#include <kw/render/commands.h>
 
 namespace kw {
 
@@ -48,8 +49,9 @@ void RenderModule::on_update_listener() noexcept(false) {
 }
 
 void RenderModule::push_command_buffer(render::CommandBuffer&& command_buffer) {
-    eastl::move(eastl::begin(command_buffer.commands), eastl::end(command_buffer.commands),
-                eastl::back_inserter(m_command_buffer.commands));
+    for (render::Command& command : command_buffer.commands) {
+        m_command_buffer.commands.push_back(eastl::move(command));
+    }
 }
 
 void RenderModule::submit_command_buffers() {
