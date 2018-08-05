@@ -46,7 +46,7 @@ Type::hash_t Type::get_hash() const noexcept {
     return m_hash;
 }
 
-Type::ContainerType Type::get_container_type() const noexcept {
+Type::Container Type::get_container() const noexcept {
     return m_container_type;
 }
 

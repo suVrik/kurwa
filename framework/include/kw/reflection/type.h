@@ -45,9 +45,10 @@ public:
 
     /**
      * The following structure lists all supported container types. To check if a specific type is a container,
-     * please use `TODO` method. To get `Type` of its template arguments, please use `TODO` method.
+     * please use `get_container` method. To get `Type` of its template arguments, please use
+     * `get_template_arguments` method.
      */
-    enum class ContainerType {
+    enum class Container {
         NONE,
         ARRAY,
         BASIC_STRING,
@@ -77,7 +78,6 @@ public:
         SET,
         SHARED_PTR,
         SLIST,
-        SLOW,
         STACK,
         STRING_HASH_MAP,
         STRING_MAP,
@@ -204,15 +204,18 @@ public:
     /**
      * Return container type.
      */
-    ContainerType get_container_type() const noexcept;
+    Container get_container() const noexcept;
 
     /**
      * Return the set of template arguments, if they are present. Otherwise return an empty set.
+     *
+     * Works only for `Container` types!
      */
     const Vector<const Type*>& get_template_arguments() const noexcept;
 
     /**
-     * Return true if Any containing an object of this type must use small object optimization. Otherwise return false.
+     * Return true if `Any` containing an object of this type must use small object optimization.
+     * Otherwise return false.
      */
     bool is_small_object() const noexcept;
 
@@ -268,7 +271,7 @@ private:
     Vector<const Type*> m_template_arguments;
     const std::type_info& m_type_info;
     const Type* m_without_pointer;
-    ContainerType m_container_type;
+    Container m_container_type;
     size_t m_size;
 
     default_constructor_t m_default_constructor;
