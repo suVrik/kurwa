@@ -117,8 +117,8 @@ private:
     uint32 m_width;
     uint32 m_height;
     bool m_is_fullscreen = false;
-    bool m_is_resizable  = false;
-    bool m_has_focus     = false;
-    bool m_is_restored   = true;
+    bool m_is_resizable = false;
+    bool m_has_focus = false;
+    bool m_is_restored = true;
 };
 } // namespace kw

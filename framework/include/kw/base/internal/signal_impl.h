@@ -22,11 +22,13 @@ uint32 generate_unique_token();
 template <typename Object, typename Callback, typename Result, typename... Arguments>
 Function<Result(Arguments...)> method(Object object, Callback callback) {
     if constexpr (eastl::is_same_v<Result, void>) {
-        return [ object, callback ](Arguments && ... arguments) noexcept(noexcept((object->*callback)(eastl::forward<Arguments>(arguments)...)))->void {
+        return [ object, callback ](Arguments && ... arguments) noexcept(noexcept((object->*callback)(eastl::forward<Arguments>(arguments)...)))
+            ->void {
             (object->*callback)(eastl::forward<Arguments>(arguments)...);
         };
     } else {
-        return [ object, callback ](Arguments && ... arguments) noexcept(noexcept((object->*callback)(eastl::forward<Arguments>(arguments)...)))->Result {
+        return [ object, callback ](Arguments && ... arguments) noexcept(noexcept((object->*callback)(eastl::forward<Arguments>(arguments)...)))
+            ->Result {
             return (object->*callback)(eastl::forward<Arguments>(arguments)...);
         };
     }
@@ -56,7 +58,7 @@ uint32 Signal<Result(Arguments...)>::connect(Object* object, Result (Object::*co
     data.callback = signal_details::method<Object*, Result (Object::*const)(Arguments...), Result, Arguments...>(object, callback);
     data.token = signal_details::generate_unique_token();
     handle_signal_listener(data, object);
-    m_callbacks.push_back(std::move(data));
+    m_callbacks.push_back(eastl::move(data));
     return data.token;
 }
 
@@ -65,9 +67,9 @@ template <typename Object>
 uint32 Signal<Result(Arguments...)>::connect(Object* object, Result (Object::*const callback)(Arguments...) noexcept) noexcept {
     CallbackData data;
     data.callback = signal_details::method<Object*, Result (Object::*const)(Arguments...) noexcept, Result, Arguments...>(object, callback);
-    data.token    = signal_details::generate_unique_token();
+    data.token = signal_details::generate_unique_token();
     handle_signal_listener(data, object);
-    m_callbacks.push_back(std::move(data));
+    m_callbacks.push_back(eastl::move(data));
     return data.token;
 }
 
@@ -80,11 +82,11 @@ uint32 Signal<Result(Arguments...)>::connect(const Object* object, Result (Objec
                                                                      "SignalListener to a signal, it's required "
                                                                      "to change the SignalListener.");
     CallbackData data;
-    data.callback           = signal_details::method<const Object*, Result (Object::*const)(Arguments...) const, Result, Arguments...>(object, callback);
-    data.object             = object;
-    data.token              = signal_details::generate_unique_token();
+    data.callback = signal_details::method<const Object*, Result (Object::*const)(Arguments...) const, Result, Arguments...>(object, callback);
+    data.object = object;
+    data.token = signal_details::generate_unique_token();
     data.is_signal_listener = false;
-    m_callbacks.push_back(std::move(data));
+    m_callbacks.push_back(eastl::move(data));
     return data.token;
 }
 
@@ -97,11 +99,11 @@ uint32 Signal<Result(Arguments...)>::connect(const Object* object, Result (Objec
                                                                      "SignalListener to a signal, it's required "
                                                                      "to change the SignalListener.");
     CallbackData data;
-    data.callback           = signal_details::method<const Object*, Result (Object::*const)(Arguments...) const noexcept, Result, Arguments...>(object, callback);
-    data.object             = object;
-    data.token              = signal_details::generate_unique_token();
+    data.callback = signal_details::method<const Object*, Result (Object::*const)(Arguments...) const noexcept, Result, Arguments...>(object, callback);
+    data.object = object;
+    data.token = signal_details::generate_unique_token();
     data.is_signal_listener = false;
-    m_callbacks.push_back(std::move(data));
+    m_callbacks.push_back(eastl::move(data));
     return data.token;
 }
 
@@ -110,9 +112,9 @@ template <typename Object, typename Callback>
 eastl::enable_if_t<!eastl::is_member_function_pointer<Callback>::value, uint32> Signal<Result(Arguments...)>::connect(Object* object, const Callback callback) noexcept {
     CallbackData data;
     data.callback = Function<Result(Arguments...)>(callback);
-    data.token    = signal_details::generate_unique_token();
+    data.token = signal_details::generate_unique_token();
     handle_signal_listener(data, object);
-    m_callbacks.push_back(std::move(data));
+    m_callbacks.push_back(eastl::move(data));
     return data.token;
 }
 
@@ -126,11 +128,11 @@ eastl::enable_if_t<!eastl::is_member_function_pointer<Callback>::value, uint32> 
                                                                      "to change the SignalListener.");
 
     CallbackData data;
-    data.callback           = Function<Result(Arguments...)>(callback);
-    data.object             = object;
-    data.token              = signal_details::generate_unique_token();
+    data.callback = Function<Result(Arguments...)>(callback);
+    data.object = object;
+    data.token = signal_details::generate_unique_token();
     data.is_signal_listener = false;
-    m_callbacks.push_back(std::move(data));
+    m_callbacks.push_back(eastl::move(data));
     return data.token;
 }
 
@@ -138,11 +140,11 @@ template <typename Result, typename... Arguments>
 template <typename Callback>
 uint32 Signal<Result(Arguments...)>::connect(const Callback callback) noexcept {
     CallbackData data;
-    data.callback           = Function<Result(Arguments...)>(callback);
-    data.object             = nullptr;
-    data.token              = signal_details::generate_unique_token();
+    data.callback = Function<Result(Arguments...)>(callback);
+    data.object = nullptr;
+    data.token = signal_details::generate_unique_token();
     data.is_signal_listener = false;
-    m_callbacks.push_back(std::move(data));
+    m_callbacks.push_back(eastl::move(data));
     return data.token;
 }
 
@@ -203,10 +205,10 @@ void Signal<Result(Arguments...)>::handle_signal_listener(CallbackData& callback
         signal_listener->m_signals.push_back(this);
 
         callback_data.is_signal_listener = true;
-        callback_data.object             = static_cast<SignalListener*>(object);
+        callback_data.object = static_cast<SignalListener*>(object);
     } else {
         callback_data.is_signal_listener = false;
-        callback_data.object             = object;
+        callback_data.object = object;
     }
 }
 } // namespace kw

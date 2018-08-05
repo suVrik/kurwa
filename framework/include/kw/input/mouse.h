@@ -71,6 +71,6 @@ private:
     Array<ButtonState, 5> m_buttons{};
     Pair<int32, int32> m_position;
     int32 m_wheel_back = 0;
-    int32 m_wheel      = 0;
+    int32 m_wheel = 0;
 };
 } // namespace kw

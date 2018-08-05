@@ -74,7 +74,7 @@ public:
     /**
      * Construct a signal.
      */
-    Signal()              = default;
+    Signal() = default;
     Signal(const Signal&) = delete;
     ~Signal() noexcept;
     Signal& operator=(const Signal&) = delete;

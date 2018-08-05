@@ -81,7 +81,7 @@ Pair<int32, int32> Mouse::get_position() const noexcept {
 void Mouse::on_event_listener(SDL_Event& event) noexcept {
     switch (event.type) {
         case SDL_MOUSEMOTION:
-            m_position.first  = event.motion.x;
+            m_position.first = event.motion.x;
             m_position.second = event.motion.y;
             break;
         case SDL_MOUSEBUTTONDOWN:
@@ -118,7 +118,7 @@ void Mouse::on_update_listener() noexcept {
         button_state = static_cast<ButtonState>(static_cast<uint8>(button_state) & 0b01U);
     }
 
-    m_wheel      = m_wheel_back;
+    m_wheel = m_wheel_back;
     m_wheel_back = 0;
 }
 } // namespace kw

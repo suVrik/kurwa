@@ -38,7 +38,7 @@ namespace kw {
  * When module is being initialized, all SDL subsystems are guaranteed to be initialized. When module is being
  * destroyed, the SDL subsystems are still guaranteed to be initialized (they're destroyed afterwards).
  *
- * If module is failed to initialize, it's allowed to throw a std::runtime_error which will be handled in IGame class.
+ * If module is failed to initialize, it's allowed to throw a RuntimeError which will be handled in IGame class.
  * Nevertheless, possible exceptions in destructor are not handled and lead to undefined behaviour.
  *
  * Keep in mind, that accessing other modules from constructor of your module is forbidden and

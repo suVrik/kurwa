@@ -15,7 +15,6 @@ project(eastl)
 
 add_library(eastl STATIC
         "${CMAKE_CURRENT_SOURCE_DIR}/source/allocator.cpp"
-        "${CMAKE_CURRENT_SOURCE_DIR}/source/allocator_eastl.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/source/assert.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/source/fixed_pool.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/source/hashtable.cpp"

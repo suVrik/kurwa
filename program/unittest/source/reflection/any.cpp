@@ -76,7 +76,7 @@ TEST(any, structure_by_move) {
     };
 
     small va = { 10, 20 };
-    big vb   = { 30, 40 };
+    big vb = { 30, 40 };
 
     Any a(va);
     Any b(vb);
@@ -146,17 +146,17 @@ TEST(any, big_inheritance) {
     EXPECT_EQ(a.cast<BaseA>()->a_2, 1002);
     EXPECT_EQ(a.cast<BaseA>()->a_1, 1001);
 
-    EXPECT_FALSE(a.is_base_of<Child>());
-    EXPECT_FALSE(a.is_base_of<MiddleBase>());
-    EXPECT_FALSE(a.is_base_of<BaseC>());
-    EXPECT_FALSE(a.is_base_of<BaseB>());
-    EXPECT_FALSE(a.is_base_of<BaseA>());
+    EXPECT_FALSE(a.get_type()->is_base_of<Child>().first);
+    EXPECT_FALSE(a.get_type()->is_base_of<MiddleBase>().first);
+    EXPECT_FALSE(a.get_type()->is_base_of<BaseC>().first);
+    EXPECT_FALSE(a.get_type()->is_base_of<BaseB>().first);
+    EXPECT_FALSE(a.get_type()->is_base_of<BaseA>().first);
 
-    EXPECT_FALSE(a.is_inherited_from<Child>());
-    EXPECT_TRUE(a.is_inherited_from<MiddleBase>());
-    EXPECT_TRUE(a.is_inherited_from<BaseC>());
-    EXPECT_TRUE(a.is_inherited_from<BaseB>());
-    EXPECT_TRUE(a.is_inherited_from<BaseA>());
+    EXPECT_FALSE(a.get_type()->is_inherited_from<Child>().first);
+    EXPECT_TRUE(a.get_type()->is_inherited_from<MiddleBase>().first);
+    EXPECT_TRUE(a.get_type()->is_inherited_from<BaseC>().first);
+    EXPECT_TRUE(a.get_type()->is_inherited_from<BaseB>().first);
+    EXPECT_TRUE(a.get_type()->is_inherited_from<BaseA>().first);
 }
 
 TEST(any, big_repeating_inheritance) {
@@ -187,12 +187,12 @@ TEST(any, big_repeating_inheritance) {
             this->Mother::a_2 = a_2;
             this->Father::a_1 = a_1;
             this->Father::a_2 = a_2;
-            this->b_1         = b_1;
-            this->b_2         = b_2;
-            this->b_3         = b_3;
-            this->c_1         = c_1;
-            this->d           = 1997;
-            this->mid         = mid;
+            this->b_1 = b_1;
+            this->b_2 = b_2;
+            this->b_3 = b_3;
+            this->c_1 = c_1;
+            this->d = 1997;
+            this->mid = mid;
         }
 
         int16 mid;
@@ -239,15 +239,15 @@ TEST(any, big_repeating_inheritance) {
     EXPECT_EQ(a.cast<Grandpa>()->a_1, 1337);
     EXPECT_EQ(a.cast<Grandpa>()->a_2, 1338);
 
-    EXPECT_FALSE(a.is_base_of<Child>());
-    EXPECT_FALSE(a.is_base_of<Mother>());
-    EXPECT_FALSE(a.is_base_of<Father>());
-    EXPECT_FALSE(a.is_base_of<Grandpa>());
+    EXPECT_FALSE(a.get_type()->is_base_of<Child>().first);
+    EXPECT_FALSE(a.get_type()->is_base_of<Mother>().first);
+    EXPECT_FALSE(a.get_type()->is_base_of<Father>().first);
+    EXPECT_FALSE(a.get_type()->is_base_of<Grandpa>().first);
 
-    EXPECT_FALSE(a.is_inherited_from<Child>());
-    EXPECT_TRUE(a.is_inherited_from<Mother>());
-    EXPECT_TRUE(a.is_inherited_from<Father>());
-    EXPECT_TRUE(a.is_inherited_from<Grandpa>());
+    EXPECT_FALSE(a.get_type()->is_inherited_from<Child>().first);
+    EXPECT_TRUE(a.get_type()->is_inherited_from<Mother>().first);
+    EXPECT_TRUE(a.get_type()->is_inherited_from<Father>().first);
+    EXPECT_TRUE(a.get_type()->is_inherited_from<Grandpa>().first);
 }
 
 TEST(any, create_from_type) {
@@ -281,9 +281,11 @@ TEST(any, move_constructor) {
     using namespace kw;
 
     Any a(1000);
-    Any b(std::move(a));
+    Any b(eastl::move(a));
+    Any c = 107; // implicit constructor
 
     EXPECT_TRUE(a.is_same<void>());
+    EXPECT_TRUE(c.is_same<int32>());
 
     EXPECT_TRUE(b.is_same<int32>());
     EXPECT_EQ(*b.cast<int32>(), 1000);

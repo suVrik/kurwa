@@ -26,8 +26,8 @@ uint32 Utf8Utils::get_length(const String& string) noexcept {
 
 uint32 Utf8Utils::get_code_point_at(const String& string, uint32 index) noexcept {
     try {
-        auto it           = string.begin();
-        auto end          = string.end();
+        auto it = string.begin();
+        auto end = string.end();
         uint32 code_point = 0;
         for (uint32 i = 0; i < index; i++) {
             code_point = utf8::next(it, end);

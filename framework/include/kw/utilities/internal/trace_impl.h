@@ -19,6 +19,6 @@ namespace kw {
 template <typename string, typename... Args>
 void trace(string format_str, const Args&... args) {
     const String str = fmt::format(format_str, args...);
-    std::puts(str.c_str());
+    puts(str.c_str());
 }
 } // namespace kw

@@ -18,8 +18,8 @@
 namespace kw {
 template <typename T>
 using BasicString = eastl::basic_string<T>;
-using String      = eastl::string;
-using String16    = eastl::string16;
-using String32    = eastl::string32;
+using String = eastl::string;
+using String16 = eastl::string16;
+using String32 = eastl::string32;
 using eastl::to_string;
 } // namespace kw
