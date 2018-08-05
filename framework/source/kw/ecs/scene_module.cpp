@@ -37,6 +37,10 @@ void SceneModule::on_init_listener(kw::IGame *game) noexcept {
 
             render_module.push_command_buffer(eastl::move(command_buffer));
 
+            on_populate_render_queue.emit(this);
+
+            render_module.submit_command_buffers();
+
             if (red > 1.f) red = 0.f; else red += 0.01f;
         }
     });

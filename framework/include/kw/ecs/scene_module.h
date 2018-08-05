@@ -39,6 +39,8 @@ public:
     explicit SceneModule(IGame* game) noexcept;
     SceneModule(const SceneModule& original) = delete;
     SceneModule& operator=(const SceneModule& original) = delete;
+
+    Signal<void(SceneModule*)> on_populate_render_queue;
 private:
     void on_init_listener(kw::IGame *game) noexcept;
     void on_destroy_listener(kw::IGame *game) noexcept;

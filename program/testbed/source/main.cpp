@@ -18,8 +18,9 @@
 #include <kw/math/math.h>
 #include <kw/render/render_module.h>
 #include <kw/utilities/trace.h>
+#include <kw/ecs/imgui_module.h>
 
-class Game final : public kw::Game<kw::WindowModule, kw::InputModule, kw::RenderModule, kw::SceneModule>, public kw::SignalListener {
+class Game final : public kw::Game<kw::WindowModule, kw::InputModule, kw::RenderModule, kw::ImguiModule, kw::SceneModule>, public kw::SignalListener {
 public:
     Game();
 

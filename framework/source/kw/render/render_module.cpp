@@ -22,7 +22,7 @@
 
 namespace kw {
 
-RenderModule::RenderModule(kw::IGame* game) noexcept
+RenderModule::RenderModule(IGame* game) noexcept
     : m_render_semaphore(COMMAND_BUFFER_QUEUE_SIZE) {
     game->on_init.connect(this, &RenderModule::on_init_listener);
     game->on_update.connect(this, &RenderModule::on_update_listener);
@@ -47,9 +47,16 @@ void RenderModule::on_update_listener() noexcept(false) {
     m_renderer->process_command_buffer(eastl::move(buffer));
 }
 
-void RenderModule::push_command_buffer(kw::render::CommandBuffer&& command_buffer) {
+void RenderModule::push_command_buffer(render::CommandBuffer&& command_buffer) {
+    eastl::move(
+            eastl::begin(command_buffer.commands),
+            eastl::end(command_buffer.commands),
+            eastl::back_inserter(m_command_buffer.commands));
+}
+
+void RenderModule::submit_command_buffers() {
     m_render_semaphore.wait();
-    m_update_queue.push(eastl::move(command_buffer));
+    m_update_queue.push(eastl::move(m_command_buffer));
     m_update_semaphore.post();
 }
 

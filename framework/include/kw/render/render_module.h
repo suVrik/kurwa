@@ -42,9 +42,16 @@ public:
     RenderModule& operator=(const RenderModule& original) = delete;
 
     /**
-     * Push a specified command buffer to the update queue.
+     * Push a specified command buffer content into a local command buffer.
      */
+
+    //TODO noexcept
     void push_command_buffer(render::CommandBuffer&& command_buffer);
+
+    /**
+     * Submit a local command buffer to the update queue.
+     */
+    void submit_command_buffers();
 
     /**
      * Return a renderer instance.
@@ -68,6 +75,7 @@ private:
     Semaphore m_render_semaphore;
     Semaphore m_update_semaphore;
     render::UpdateQueue m_update_queue;
+    render::CommandBuffer m_command_buffer;
 };
 
 } // namespace kw

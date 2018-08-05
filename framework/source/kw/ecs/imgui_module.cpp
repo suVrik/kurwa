@@ -12,37 +12,110 @@
  */
 
 #include <kw/core/i_game.h>
-#include <kw/debug/runtime_error.h>
-#include <kw/render/backend_opengl.h>
-
-#include <GL/glew.h>
-
-#include <SDL2/SDL_video.h>
+#include <kw/ecs/scene_module.h>
+#include <kw/ecs/imgui_module.h>
+#include <kw/render/render_module.h>
 #include <imgui/imgui.h>
+#include <GL/glew.h>
 #include <SDL2/SDL_timer.h>
-#include <SDL2/SDL_scancode.h>
-#include <SDL2/SDL_mouse.h>
 #include <SDL2/SDL_events.h>
+#include <kw/core/window_module.h>
+#include <iostream>
 
 namespace kw {
-namespace render {
+ImguiModule::ImguiModule(IGame* game) noexcept : g_Time(0) {
+    game->on_init.connect(this, &ImguiModule::on_init_listener);
+    game->on_event.connect(this, &ImguiModule::on_event_listener);
+    game->on_destroy.connect(this, &ImguiModule::on_destroy_listener);
+}
 
-BackendOpenGL::BackendOpenGL(kw::IGame* game) noexcept {
-    game->on_init.connect(this, &BackendOpenGL::on_init_listener);
-    //game->on_event.connect(this, &BackendOpenGL::on_event_listener);
-    RenderingBackend::on_init_listener(game);
 
-    SDL_GL_CreateContext(m_window);
-    SDL_GL_SetSwapInterval(1);
-
-    glewExperimental = GL_TRUE;
-    GLenum err = glewInit();
-    if (err != GLEW_OK) {
-        throw RuntimeError(fmt::format("Failed to initialize GLEW!\nThe error message: {}", glewGetErrorString(err)));
+void ImguiModule::on_event_listener(SDL_Event& event) noexcept {
+    ImGuiIO& io = ImGui::GetIO();
+    switch (event.type)
+    {
+        case SDL_MOUSEWHEEL:
+        {
+            if (event.wheel.x > 0) io.MouseWheelH += 1;
+            if (event.wheel.x < 0) io.MouseWheelH -= 1;
+            if (event.wheel.y > 0) io.MouseWheel += 1;
+            if (event.wheel.y < 0) io.MouseWheel -= 1;
+            break;
+        }
+        case SDL_MOUSEBUTTONDOWN:
+        {
+            if (event.button.button == SDL_BUTTON_LEFT) g_MousePressed = true;
+            break;
+        }
+        case SDL_TEXTINPUT:
+        {
+            io.AddInputCharactersUTF8(event.text.text);
+            break;
+        }
+        case SDL_KEYDOWN:
+        case SDL_KEYUP:
+        {
+            int key = event.key.keysym.scancode;
+            IM_ASSERT(key >= 0 && key < IM_ARRAYSIZE(io.KeysDown));
+            io.KeysDown[key] = (event.type == SDL_KEYDOWN);
+            io.KeyShift = ((SDL_GetModState() & KMOD_SHIFT) != 0);
+            io.KeyCtrl = ((SDL_GetModState() & KMOD_CTRL) != 0);
+            io.KeyAlt = ((SDL_GetModState() & KMOD_ALT) != 0);
+            io.KeySuper = ((SDL_GetModState() & KMOD_GUI) != 0);
+            break;
+        }
+        default:
+            break;
     }
-};
+}
 
-void BackendOpenGL::on_init_listener(kw::IGame* game) noexcept(false) {
+
+
+
+// If you get an error please report on github. You may try different GL context version or GLSL version.
+/*static bool CheckShader(GLuint handle, const char* desc)
+{
+    GLint status = 0, log_length = 0;
+    glGetShaderiv(handle, GL_COMPILE_STATUS, &status);
+    glGetShaderiv(handle, GL_INFO_LOG_LENGTH, &log_length);
+    if (status == GL_FALSE)
+        fprintf(stderr, "ERROR: ImGui_ImplOpenGL3_CreateDeviceObjects: failed to compile %s!\n", desc);
+    if (log_length > 0)
+    {
+        ImVector<char> buf;
+        buf.resize((int)(log_length + 1));
+        glGetShaderInfoLog(handle, log_length, nullptr, (GLchar*)buf.begin());
+        fprintf(stderr, "%s\n", buf.begin());
+    }
+    return status == GL_TRUE;
+}
+
+// If you get an error please report on github. You may try different GL context version or GLSL version.
+static bool CheckProgram(GLuint handle, const char* desc)
+{
+    GLint status = 0, log_length = 0;
+    glGetProgramiv(handle, GL_LINK_STATUS, &status);
+    glGetProgramiv(handle, GL_INFO_LOG_LENGTH, &log_length);
+    if (status == GL_FALSE)
+        fprintf(stderr, "ERROR: ImGui_ImplOpenGL3_CreateDeviceObjects: failed to link %s!\n", desc);
+    if (log_length > 0)
+    {
+        ImVector<char> buf;
+        buf.resize((int)(log_length + 1));
+        glGetProgramInfoLog(handle, log_length, nullptr, (GLchar*)buf.begin());
+        fprintf(stderr, "%s\n", buf.begin());
+    }
+    return status == GL_TRUE;
+}*/
+
+void ImguiModule::on_init_listener(IGame* game) noexcept {
+    auto& render_module = game->get<RenderModule>();
+    m_render_module = &render_module;
+    auto& scene_module = game->get<SceneModule>();
+    scene_module.on_populate_render_queue.connect(this, &ImguiModule::on_populate_render_queue_listener);
+
+
+    m_window = game->get<WindowModule>().get_window();
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -166,23 +239,13 @@ void BackendOpenGL::on_init_listener(kw::IGame* game) noexcept(false) {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-
-    // Restore modified GL state
-    /*glBindTexture(GL_TEXTURE_2D, (unsigned) last_texture);
-    glBindBuffer(GL_ARRAY_BUFFER, (unsigned) last_array_buffer);
-    glBindVertexArray((unsigned) last_vertex_array);
-
-    glEnable(GL_BLEND);
-    glBlendEquation(GL_FUNC_ADD);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glDisable(GL_CULL_FACE);
-    glDisable(GL_DEPTH_TEST);
-    glEnable(GL_SCISSOR_TEST);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);*/
 }
 
-void BackendOpenGL::process_command_buffer(CommandBuffer&& command_buffer) noexcept {
-    /*ImGuiIO& io = ImGui::GetIO();
+void ImguiModule::on_populate_render_queue_listener(SceneModule* scene_module) noexcept {
+    render::CommandBuffer command_buffer;
+
+
+    ImGuiIO& io = ImGui::GetIO();
     // Font atlas needs to be built, call renderer _NewFrame() function e.g. ImGui_ImplOpenGL3_NewFrame()
     IM_ASSERT(io.Fonts->IsBuilt());
     // Setup display size (every frame to accommodate for window resizing)
@@ -197,7 +260,6 @@ void BackendOpenGL::process_command_buffer(CommandBuffer&& command_buffer) noexc
     Uint64 current_time = SDL_GetPerformanceCounter();
     io.DeltaTime = g_Time > 0 ? (float)((double)(current_time - g_Time) / frequency) : (1.0f / 60.0f);
     g_Time = current_time;
-
 
 
     // Set OS mouse position if requested (rarely used, only when ImGuiConfigFlags_NavEnableSetMousePos is enabled by user)
@@ -217,7 +279,6 @@ void BackendOpenGL::process_command_buffer(CommandBuffer&& command_buffer) noexc
     }
 
 
-
     ImGui::NewFrame();
 
     bool show_demo_window = true;
@@ -225,49 +286,20 @@ void BackendOpenGL::process_command_buffer(CommandBuffer&& command_buffer) noexc
 
     ImGui::Render();
 
-
+    //ImGuiIO& io = ImGui::GetIO();
     ImDrawData* draw_data = ImGui::GetDrawData();
     // Avoid rendering when minimized, scale coordinates for retina displays (screen coordinates != framebuffer coordinates)
     int fb_width = (int)(draw_data->DisplaySize.x * io.DisplayFramebufferScale.x);
     int fb_height = (int)(draw_data->DisplaySize.y * io.DisplayFramebufferScale.y);
     if (fb_width <= 0 || fb_height <= 0)
         return;
-    draw_data->ScaleClipRects(io.DisplayFramebufferScale);*/
+    draw_data->ScaleClipRects(io.DisplayFramebufferScale);
 
-    // Backup GL state
-    /*GLenum last_active_texture; glGetIntegerv(GL_ACTIVE_TEXTURE, (GLint*)&last_active_texture);
-    glActiveTexture(GL_TEXTURE0);
-    GLint last_program; glGetIntegerv(GL_CURRENT_PROGRAM, &last_program);
-    GLint last_texture; glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
-    GLint last_sampler; glGetIntegerv(GL_SAMPLER_BINDING, &last_sampler);
-    GLint last_array_buffer; glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &last_array_buffer);
-    GLint last_vertex_array; glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &last_vertex_array);
-    GLint last_polygon_mode[2]; glGetIntegerv(GL_POLYGON_MODE, last_polygon_mode);
-    GLint last_viewport[4]; glGetIntegerv(GL_VIEWPORT, last_viewport);
-    GLint last_scissor_box[4]; glGetIntegerv(GL_SCISSOR_BOX, last_scissor_box);
-    GLenum last_blend_src_rgb; glGetIntegerv(GL_BLEND_SRC_RGB, (GLint*)&last_blend_src_rgb);
-    GLenum last_blend_dst_rgb; glGetIntegerv(GL_BLEND_DST_RGB, (GLint*)&last_blend_dst_rgb);
-    GLenum last_blend_src_alpha; glGetIntegerv(GL_BLEND_SRC_ALPHA, (GLint*)&last_blend_src_alpha);
-    GLenum last_blend_dst_alpha; glGetIntegerv(GL_BLEND_DST_ALPHA, (GLint*)&last_blend_dst_alpha);
-    GLenum last_blend_equation_rgb; glGetIntegerv(GL_BLEND_EQUATION_RGB, (GLint*)&last_blend_equation_rgb);
-    GLenum last_blend_equation_alpha; glGetIntegerv(GL_BLEND_EQUATION_ALPHA, (GLint*)&last_blend_equation_alpha);
-    GLboolean last_enable_blend = glIsEnabled(GL_BLEND);
-    GLboolean last_enable_cull_face = glIsEnabled(GL_CULL_FACE);
-    GLboolean last_enable_depth_test = glIsEnabled(GL_DEPTH_TEST);
-    GLboolean last_enable_scissor_test = glIsEnabled(GL_SCISSOR_TEST);*/
 
-    // Setup render state: alpha-blending enabled, no face culling, no depth testing, scissor enabled, polygon fill
-    /*glEnable(GL_BLEND);
-    glBlendEquation(GL_FUNC_ADD);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glDisable(GL_CULL_FACE);
-    glDisable(GL_DEPTH_TEST);
-    glEnable(GL_SCISSOR_TEST);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        render::Command command0 {};
+        command0.init_imgui.type = kw::render::CommandType::INIT_IMGUI;
+        command_buffer.commands.push_back(command0);
 
-    // Setup viewport, orthographic projection matrix
-    // Our visible imgui space lies from draw_data->DisplayPps (top left) to draw_data->DisplayPos+data_data->DisplaySize (bottom right). DisplayMin is typically (0,0) for single viewport apps.
-    //glViewport(0, 0, (GLsizei)fb_width, (GLsizei)fb_height);
     float L = draw_data->DisplayPos.x;
     float R = draw_data->DisplayPos.x + draw_data->DisplaySize.x;
     float T = draw_data->DisplayPos.y;
@@ -279,71 +311,62 @@ void BackendOpenGL::process_command_buffer(CommandBuffer&& command_buffer) noexc
                     { 0.0f,         0.0f,        -1.0f,   0.0f },
                     { (R+L)/(L-R),  (T+B)/(B-T),  0.0f,   1.0f },
             };
-    glUseProgram(g_ShaderHandle);
-    glUniformMatrix4fv(g_AttribLocationProjMtx, 1, GL_FALSE, &ortho_projection[0][0]);
+
+
+    //glUseProgram(g_ShaderHandle);
+    render::Command command1 {};
+    command1.bind_program.type = kw::render::CommandType::BIND_PROGRAM;
+    command1.bind_program.id = g_ShaderHandle;
+    command_buffer.commands.push_back(command1);
+
+    //glUniformMatrix4fv(g_AttribLocationProjMtx, 1, GL_FALSE, &ortho_projection[0][0]);
+    render::Command command2 {};
+    command2.update_uniform_matrix_4f.type = kw::render::CommandType::UPDATE_UNIFORM_MATRIX_4f;
+    command2.update_uniform_matrix_4f.id = (unsigned) g_AttribLocationProjMtx;
+    command2.update_uniform_matrix_4f.matrix = &ortho_projection[0][0];
+    command_buffer.commands.push_back(command2);
+
     //glBindSampler(0, 0); // We use combined texture/sampler state. Applications using GL 3.3 may set that otherwise.
 
-    glBindVertexArray(vao_handle);
-    glBindBuffer(GL_ARRAY_BUFFER, g_VboHandle);*/
+    //glBindVertexArray(vao_handle);
+    //glBindBuffer(GL_ARRAY_BUFFER, g_VboHandle);
+    render::Command command3 {};
+    command3.bind_vertex_buffer.type = kw::render::CommandType::BIND_VERTEX_BUFFER;
+    command3.bind_vertex_buffer.vao_id = vao_handle;
+    command3.bind_vertex_buffer.vbo_id = g_VboHandle;
+    command_buffer.commands.push_back(command3);
 
-    for (Command& command : command_buffer.commands) {
-        switch (command.type) {
-            case CommandType::CLEAR:
-                glClearColor(command.clear.r, command.clear.g, command.clear.b, command.clear.a);
-                glClear(GL_COLOR_BUFFER_BIT);
-                break;
-            case CommandType::UPDATE_VERTEX_BUFFER:
-                glBufferData(GL_ARRAY_BUFFER, command.update_vertex_buffer.size, command.update_vertex_buffer.data, GL_STREAM_DRAW);
-                break;
-            case CommandType::BIND_VERTEX_BUFFER:
-                glBindVertexArray(command.bind_vertex_buffer.vao_id);
-                glBindBuffer(GL_ARRAY_BUFFER, command.bind_vertex_buffer.vbo_id);
-                break;
-            case CommandType::UPDATE_INDEX_BUFFER:
-                glBufferData(GL_ELEMENT_ARRAY_BUFFER, command.update_index_buffer.size, command.update_index_buffer.data, GL_STREAM_DRAW);
-                break;
-            case CommandType::BIND_INDEX_BUFFER:
-                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, command.bind_index_buffer.id);
-                break;
-            case CommandType::BIND_TEXTURE:
-                glBindTexture(GL_TEXTURE_2D, command.bind_texture.id);
-                break;
-            case CommandType::BIND_PROGRAM:
-                glUseProgram(command.bind_program.id);
-                break;
-            case CommandType::DRAW_INDEXED:
-                glDrawElements(GL_TRIANGLES, command.draw_indexed.size, GL_UNSIGNED_SHORT, command.draw_indexed.data);
-                break;
-            case CommandType::UPDATE_UNIFORM_MATRIX_4f:
-                glUniformMatrix4fv(command.update_uniform_matrix_4f.id, 1, GL_FALSE, command.update_uniform_matrix_4f.matrix);
-                break;
-            case CommandType::INIT_IMGUI:
-                glEnable(GL_BLEND);
-                glBlendEquation(GL_FUNC_ADD);
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                glDisable(GL_CULL_FACE);
-                glDisable(GL_DEPTH_TEST);
-                glEnable(GL_SCISSOR_TEST);
-                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-                break;
-            default:
-                break;
-        }
-    }
-
-
-    // Draw
-    /*ImVec2 pos = draw_data->DisplayPos;
+    ImVec2 pos = draw_data->DisplayPos;
     for (int n = 0; n < draw_data->CmdListsCount; n++)
     {
         const ImDrawList* cmd_list = draw_data->CmdLists[n];
         const ImDrawIdx* idx_buffer_offset = nullptr;
 
-        glBindBuffer(GL_ARRAY_BUFFER, g_VboHandle);
-        glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)cmd_list->VtxBuffer.Size * sizeof(ImDrawVert), (const GLvoid*)cmd_list->VtxBuffer.Data, GL_STREAM_DRAW);
+        //glBindBuffer(GL_ARRAY_BUFFER, g_VboHandle);
+        render::Command command40 {};
+        command40.bind_vertex_buffer.type = kw::render::CommandType::BIND_VERTEX_BUFFER;
+        command40.bind_vertex_buffer.vao_id = vao_handle;
+        command40.bind_vertex_buffer.vbo_id = g_VboHandle;
+        command_buffer.commands.push_back(command40);
+        //glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)cmd_list->VtxBuffer.Size * sizeof(ImDrawVert), (const GLvoid*)cmd_list->VtxBuffer.Data, GL_STREAM_DRAW);
+        render::Command command4 {};
+        command4.update_vertex_buffer.type = kw::render::CommandType::UPDATE_VERTEX_BUFFER;
+        command4.update_vertex_buffer.size = cmd_list->VtxBuffer.Size * sizeof(ImDrawVert);
+        command4.update_vertex_buffer.data = (const void*)cmd_list->VtxBuffer.Data;
+        command_buffer.commands.push_back(command4);
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_ElementsHandle);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr)cmd_list->IdxBuffer.Size * sizeof(ImDrawIdx), (const GLvoid*)cmd_list->IdxBuffer.Data, GL_STREAM_DRAW);
+        //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_ElementsHandle);
+        render::Command command5 {};
+        command5.bind_index_buffer.type = kw::render::CommandType::BIND_INDEX_BUFFER;
+        command5.bind_index_buffer.id = g_ElementsHandle;
+        command_buffer.commands.push_back(command5);
+
+        //glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr)cmd_list->IdxBuffer.Size * sizeof(ImDrawIdx), (const GLvoid*)cmd_list->IdxBuffer.Data, GL_STREAM_DRAW);
+        render::Command command6 {};
+        command6.update_index_buffer.type = kw::render::CommandType::UPDATE_INDEX_BUFFER;
+        command6.update_index_buffer.size = cmd_list->IdxBuffer.Size * sizeof(ImDrawIdx);
+        command6.update_index_buffer.data = (const void*)cmd_list->IdxBuffer.Data;
+        command_buffer.commands.push_back(command6);
 
         for (int cmd_i = 0; cmd_i < cmd_list->CmdBuffer.Size; cmd_i++)
         {
@@ -362,36 +385,27 @@ void BackendOpenGL::process_command_buffer(CommandBuffer&& command_buffer) noexc
                     //glScissor((int)clip_rect.x, (int)(fb_height - clip_rect.w), (int)(clip_rect.z - clip_rect.x), (int)(clip_rect.w - clip_rect.y));
 
                     // Bind texture, Draw
-                    glBindTexture(GL_TEXTURE_2D, (GLuint)(intptr_t)pcmd->TextureId);
-                    glDrawElements(GL_TRIANGLES, (GLsizei)pcmd->ElemCount, GL_UNSIGNED_SHORT, idx_buffer_offset);
+                    //glBindTexture(GL_TEXTURE_2D, (GLuint)(intptr_t)pcmd->TextureId);
+                    render::Command command7 {};
+                    command7.bind_texture.type = kw::render::CommandType::BIND_TEXTURE;
+                    command7.bind_texture.id = (GLuint)(intptr_t)pcmd->TextureId;
+                    command_buffer.commands.push_back(command7);
+
+                    //glDrawElements(GL_TRIANGLES, (GLsizei)pcmd->ElemCount, GL_UNSIGNED_SHORT, idx_buffer_offset);
+                    render::Command command8 {};
+                    command8.draw_indexed.type = kw::render::CommandType::DRAW_INDEXED;
+                    command8.draw_indexed.size = (GLsizei) pcmd->ElemCount;
+                    command8.draw_indexed.data = idx_buffer_offset;
+                    command_buffer.commands.push_back(command8);
                 }
             }
             idx_buffer_offset += pcmd->ElemCount;
         }
     }
-    //glDeleteVertexArrays(1, &vao_handle);*/
 
-    // Restore modified GL state
-    /*glUseProgram(last_program);
-    glBindTexture(GL_TEXTURE_2D, last_texture);
-    glBindSampler(0, last_sampler);
-    glActiveTexture(last_active_texture);
-    glBindVertexArray(last_vertex_array);
-    glBindBuffer(GL_ARRAY_BUFFER, last_array_buffer);
-    glBlendEquationSeparate(last_blend_equation_rgb, last_blend_equation_alpha);
-    glBlendFuncSeparate(last_blend_src_rgb, last_blend_dst_rgb, last_blend_src_alpha, last_blend_dst_alpha);
-    if (last_enable_blend) glEnable(GL_BLEND); else glDisable(GL_BLEND);
-    if (last_enable_cull_face) glEnable(GL_CULL_FACE); else glDisable(GL_CULL_FACE);
-    if (last_enable_depth_test) glEnable(GL_DEPTH_TEST); else glDisable(GL_DEPTH_TEST);
-    if (last_enable_scissor_test) glEnable(GL_SCISSOR_TEST); else glDisable(GL_SCISSOR_TEST);
-    glPolygonMode(GL_FRONT_AND_BACK, (GLenum)last_polygon_mode[0]);
-    glViewport(last_viewport[0], last_viewport[1], (GLsizei)last_viewport[2], (GLsizei)last_viewport[3]);
-    glScissor(last_scissor_box[0], last_scissor_box[1], (GLsizei)last_scissor_box[2], (GLsizei)last_scissor_box[3]);*/
-
-
-
-    SDL_GL_SwapWindow(m_window);
+    m_render_module->push_command_buffer(eastl::move(command_buffer));
 }
 
-} // namespace render
+void ImguiModule::on_destroy_listener(IGame* game) noexcept {
+}
 } // namespace kw
