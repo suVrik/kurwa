@@ -78,6 +78,15 @@ const Vector<const Reflection::Method*>& Reflection::get_methods() const noexcep
 
 Reflection::Method* Reflection::add_method(const FastName& name, AnyFunction&& function) noexcept {
     Method* method = reflection_details::add_method(name, eastl::move(function));
+
+    // Override method with the name, if such method exists.
+    for (size_t i = 0; i < m_methods.size(); i++) {
+        if (m_methods[i]->get_name() == name) {
+            m_methods[i] = method;
+            return method;
+        }
+    }
+
     m_methods.push_back(method);
     return method;
 }
@@ -96,7 +105,17 @@ const Vector<const Reflection::Meta*>& Reflection::get_meta() const noexcept {
 }
 
 void Reflection::add_meta(const FastName& name, Any&& value) noexcept {
-    m_meta.push_back(reflection_details::add_meta(name, eastl::move(value)));
+    Meta* meta = reflection_details::add_meta(name, eastl::move(value));
+
+    // Override meta field with the name, if such meta field exists.
+    for (size_t i = 0; i < m_fields.size(); i++) {
+        if (m_meta[i]->get_name() == name) {
+            m_meta[i] = meta;
+            return;
+        }
+    }
+
+    m_meta.push_back(meta);
 }
 
 const Type* Reflection::get_type() const noexcept {
@@ -150,6 +169,13 @@ Reflection::Reflection(const Type* type) noexcept
         for (uint32 j = i + 1; j < m_methods.size(); j++) {
             KW_ASSERT(m_methods[i]->get_name() != m_methods[j]->get_name(), "Methods with the same name '{}' in reflection of type '{}'!",
                       m_methods[i]->get_name().c_str(), m_type->get_name());
+        }
+    }
+
+    for (uint32 i = 0; i < m_meta.size(); i++) {
+        for (uint32 j = i + 1; j < m_meta.size(); j++) {
+            KW_ASSERT(m_meta[i]->get_name() != m_meta[j]->get_name(), "Meta with the same name '{}' in reflection of type '{}'!",
+                      m_meta[i]->get_name().c_str(), m_type->get_name());
         }
     }
 #endif
