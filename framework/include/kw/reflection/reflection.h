@@ -56,7 +56,7 @@ public:
      * called `name`, reflection of this field is its type, address relative to field's object and name).
      *
      * Fields are inherited. If parent reflection already contains a field with specific name, it is overridden by a
-     * child field. But keep in mind, if two parent objects have fields with the same name, it is an assertion failure.
+     * child field. But keep in mind, if two parent objects have fields with the same name, an assertion error will occur.
      */
     class Field;
 
@@ -66,8 +66,7 @@ public:
      * a name.
      *
      * Methods are inherited. If parent reflection already contains a method with specific name, it is overridden by a
-     * child method. But keep in mind, if two parent objects have methods with the same name,
-     * it is an assertion failure.
+     * child method. But keep in mind, if two parent objects have methods with the same name, an assertion error will occur.
      */
     class Method;
 
@@ -212,7 +211,7 @@ private:
  * called `name`, reflection of this field is its type, address relative to field's object and name).
  *
  * Fields are inherited. If parent reflection already contains a field with specific name, it is overridden by a
- * child field. But keep in mind, if two parent objects have fields with the same name, it is an assertion failure.
+ * child field. But keep in mind, if two parent objects have fields with the same name, an assertion error will occur.
  */
 class Reflection::Field {
 public:
@@ -287,8 +286,7 @@ private:
  * a name.
  *
  * Methods are inherited. If parent reflection already contains a method with specific name, it is overridden by a
- * child method. But keep in mind, if two parent objects have methods with the same name,
- * it is an assertion failure.
+ * child method. But keep in mind, if two parent objects have methods with the same name, an assertion error will occur.
  */
 class Reflection::Method {
 public:
