@@ -16,5 +16,7 @@
 #include <EASTL/string_view.h>
 
 namespace kw {
+template <typename T>
+using BasicStringView = eastl::basic_string_view<T>;
 using StringView = eastl::string_view;
 } // namespace kw
