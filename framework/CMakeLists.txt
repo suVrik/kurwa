@@ -49,10 +49,11 @@ set_target_properties(framework PROPERTIES LINKER_LANGUAGE CXX)
 
 # Framework libraries
 target_link_library(framework eastl)
-target_link_library(framework sdl2)
 target_link_library(framework fmt)
-target_link_library(framework utf8)
 target_link_library(framework glew)
+target_link_library(framework imgui)
+target_link_library(framework sdl2)
+target_link_library(framework utf8)
 
 if(LINUX)
     set(THREADS_PREFER_PTHREAD_FLAG ON)

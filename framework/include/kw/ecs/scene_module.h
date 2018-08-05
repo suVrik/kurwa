@@ -13,10 +13,10 @@
 
 #pragma once
 
+#include <kw/base/queue.h>
 #include <kw/base/signal.h>
 #include <kw/base/string.h>
 #include <kw/base/types.h>
-#include <kw/base/queue.h>
 #include <kw/concurrency/atomic.h>
 #include <kw/concurrency/mutex.h>
 #include <kw/concurrency/semaphore.h>
@@ -39,9 +39,12 @@ public:
     explicit SceneModule(IGame* game) noexcept;
     SceneModule(const SceneModule& original) = delete;
     SceneModule& operator=(const SceneModule& original) = delete;
+
+    Signal<void(SceneModule*)> on_populate_render_queue;
+
 private:
-    void on_init_listener(kw::IGame *game) noexcept;
-    void on_destroy_listener(kw::IGame *game) noexcept;
+    void on_init_listener(kw::IGame* game) noexcept;
+    void on_destroy_listener(kw::IGame* game) noexcept;
 
     Thread m_thread;
     Atomic<bool> is_update_thread_active = true;

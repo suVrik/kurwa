@@ -22,7 +22,7 @@ namespace kw {
 namespace i_game_details {
 void death_signal(int signum) {
     const String stacktrace = kw::Stacktrace::get_stacktrace(1, 2);
-    const String message    = fmt::format("Segmentation fault!\n\nStacktrace:\n{}\n", stacktrace.c_str());
+    const String message = fmt::format("Segmentation fault!\n\nStacktrace:\n{}\n", stacktrace.c_str());
 
     fprintf(stderr, "%s", message.c_str()); // For developers. Sometimes the message box is not even shown.
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Runtime error", message.c_str(), nullptr);
@@ -36,7 +36,7 @@ IGame::IGame() noexcept {
     // Safety first.
     signal(SIGSEGV, i_game_details::death_signal);
 
-    is_initialized = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_HAPTIC | SDL_INIT_GAMECONTROLLER) == 0;
+    is_initialized = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_HAPTIC | SDL_INIT_GAMECONTROLLER | SDL_INIT_TIMER) == 0;
     if (!is_initialized) {
         message_box(fmt::format("Failed to initialize SDL2!\nThe error message: {}", SDL_GetError()));
     }

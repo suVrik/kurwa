@@ -13,34 +13,46 @@
 
 #pragma once
 
-#include "rendering_backend.h"
+#include <SDL2/SDL_mouse.h>
 #include <imgui/imgui.h>
+#include <kw/base/queue.h>
+#include <kw/base/signal.h>
+#include <kw/base/string.h>
+#include <kw/base/types.h>
+#include <kw/concurrency/atomic.h>
+#include <kw/concurrency/mutex.h>
+#include <kw/concurrency/semaphore.h>
+#include <kw/concurrency/thread.h>
+#include <kw/render/commands.h>
 
-struct SDL_Cursor;
 union SDL_Event;
+struct SDL_Window;
 
 namespace kw {
+class IGame;
+
+class SceneModule;
+
 class RenderModule;
-namespace render {
+
+class RenderingBackend;
 
 /**
- * BackendOpenGL is a class that implements OpenGL rendering backend.
+ * Scene module creates an update loop, records and stores the commands to be sent to a rendering backend.
  */
-class BackendOpenGL : public RenderingBackend {
+class ImguiModule : public SignalListener {
 public:
-    explicit BackendOpenGL(kw::IGame* game) noexcept;
-    BackendOpenGL(const BackendOpenGL& original) = delete;
-    BackendOpenGL& operator=(const BackendOpenGL& original) = delete;
-
-    /**
-     * Execute the commands in a command buffer and present the resulting image to the screen.
-     */
-    void process_command_buffer(CommandBuffer&& command_buffer) noexcept override;
+    explicit ImguiModule(IGame* game) noexcept;
+    ImguiModule(const ImguiModule& original) = delete;
+    ImguiModule& operator=(const ImguiModule& original) = delete;
 
 private:
-    void on_init_listener(kw::IGame* game) noexcept(false) override;
-    // void on_event_listener(SDL_Event& event) noexcept;
-    void on_init_finished_listener(RenderModule* game) noexcept(false);
+    void on_init_listener(IGame* game) noexcept;
+    void on_destroy_listener(IGame* game) noexcept;
+    void on_populate_render_queue_listener(SceneModule* scene_module) noexcept;
+    // kw::Function<void (render::CommandBuffer&& command_buffer)> m_push_command_buffer;
+    void on_event_listener(SDL_Event& event) noexcept;
+    RenderModule* m_render_module;
 
     uint64 g_Time;
     SDL_Cursor* g_MouseCursors[ImGuiMouseCursor_COUNT] = { 0 };
@@ -52,7 +64,7 @@ private:
     unsigned int g_AttribLocationPosition = 0, g_AttribLocationUV = 0, g_AttribLocationColor = 0;
     unsigned int vao_handle = 0;
     unsigned int g_VboHandle = 0, g_ElementsHandle = 0;
-};
 
-} // namespace render
+    SDL_Window* m_window;
+};
 } // namespace kw
