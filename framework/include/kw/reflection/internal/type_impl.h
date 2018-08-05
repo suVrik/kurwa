@@ -235,5 +235,7 @@ Type::Type(const T* dummy) noexcept
     } else {
         m_without_pointer = nullptr;
     }
+
+    m_container_type = type_details::container_type<T>::get(m_template_arguments);
 }
 } // namespace kw

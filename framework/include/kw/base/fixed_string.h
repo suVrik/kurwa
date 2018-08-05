@@ -16,6 +16,8 @@
 #include <EASTL/fixed_string.h>
 
 namespace kw {
+template <typename T, size_t N>
+using FixedBasicString = eastl::fixed_string<T, N>;
 template <size_t N>
-using FixedString = eastl::fixed_string<char, N>;
+using FixedString = FixedBasicString<char, N>;
 } // namespace kw

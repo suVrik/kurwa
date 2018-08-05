@@ -46,6 +46,14 @@ Type::hash_t Type::get_hash() const noexcept {
     return m_hash;
 }
 
+Type::Container Type::get_container() const noexcept {
+    return m_container_type;
+}
+
+const Vector<const Type*>& Type::get_template_arguments() const noexcept {
+    return m_template_arguments;
+}
+
 bool Type::is_small_object() const noexcept {
     return m_size < sizeof(void*);
 }

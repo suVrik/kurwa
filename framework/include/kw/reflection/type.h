@@ -30,8 +30,8 @@ namespace kw {
  * objects available, it is enough to just compare these `Type`s.
  *
  * Type also stores inheritance information, destructor, default constructor and comparator. Keep in mind though,
- * that it is very difficult to understand right away what kind of functionality is needed for Type (is_array, is_const
- * maybe something else?), so feel free to add or propose whatever you need.
+ * that it is very difficult to understand right away what kind of functionality is needed for Type (`is_array`,
+ * `is_const` or maybe something else?), so feel free to add or propose whatever you need.
  */
 class Type final {
 public:
@@ -41,6 +41,54 @@ public:
     struct Parent {
         const Type* type; /// Type of the base class.
         uintptr_t offset; /// Offset of the base class relatively to the child (for multiple inheritance).
+    };
+
+    /**
+     * The following structure lists all supported container types. To check if a specific type is a container,
+     * please use `get_container` method. To get `Type` of its template arguments, please use
+     * `get_template_arguments` method.
+     */
+    enum class Container {
+        NONE,
+        ARRAY,
+        BASIC_STRING,
+        BASIC_STRING_VIEW,
+        BITSET,
+        BITVECTOR,
+        DEQUE,
+        FIXED_BASIC_STRING,
+        FIXED_HASH_MAP,
+        FIXED_HASH_SET,
+        FIXED_LIST,
+        FIXED_MAP,
+        FIXED_MULTIMAP,
+        FIXED_MULTISET,
+        FIXED_SET,
+        FIXED_SLIST,
+        FIXED_VECTOR,
+        HASH_MAP,
+        HASH_SET,
+        LIST,
+        MAP,
+        OPTIONAL,
+        PAIR,
+        PRIORITY_QUEUE,
+        QUEUE,
+        RING_BUFFER,
+        SET,
+        SHARED_PTR,
+        SLIST,
+        STACK,
+        STRING_HASH_MAP,
+        STRING_MAP,
+        TUPLE,
+        UNIQUE_PTR,
+        VARIANT,
+        VECTOR,
+        VECTOR_MAP,
+        VECTOR_MULTIMAP,
+        VECTOR_MULTISET,
+        VECTOR_SET,
     };
 
     /**
@@ -154,7 +202,20 @@ public:
     hash_t get_hash() const noexcept;
 
     /**
-     * Return true if Any containing an object of this type must use small object optimization. Otherwise return false.
+     * Return container type.
+     */
+    Container get_container() const noexcept;
+
+    /**
+     * Return the set of template arguments, if they are present. Otherwise return an empty set.
+     *
+     * Works only for `Container` types!
+     */
+    const Vector<const Type*>& get_template_arguments() const noexcept;
+
+    /**
+     * Return true if `Any` containing an object of this type must use small object optimization.
+     * Otherwise return false.
      */
     bool is_small_object() const noexcept;
 
@@ -207,8 +268,10 @@ private:
     explicit Type(const T* dummy) noexcept;
 
     Vector<Parent> m_parents;
+    Vector<const Type*> m_template_arguments;
     const std::type_info& m_type_info;
     const Type* m_without_pointer;
+    Container m_container_type;
     size_t m_size;
 
     default_constructor_t m_default_constructor;
@@ -218,4 +281,5 @@ private:
 };
 } // namespace kw
 
+#include <kw/reflection/internal/type_containers.h>
 #include <kw/reflection/internal/type_impl.h>
