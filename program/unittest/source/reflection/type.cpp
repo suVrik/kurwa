@@ -11,6 +11,9 @@
  *  See the License for the specific language governing permissions and limitations under the License.
  */
 
+#include <kw/base/array.h>
+#include <kw/base/map.h>
+#include <kw/base/tuple.h>
 #include <kw/reflection/type.h>
 
 #include <gmock/gmock.h>
@@ -205,4 +208,38 @@ TEST(type, reference) {
     EXPECT_TRUE(type_b->is_pointer());
     EXPECT_NE(type_b->remove_pointer(), nullptr);
     EXPECT_EQ(type_a, type_b->remove_pointer());
+}
+
+TEST(type, containers) {
+    using namespace kw;
+
+    EXPECT_EQ(Type::of<uint32>()->get_container(), Type::Container::NONE);
+    EXPECT_EQ(Type::of<String>()->get_container(), Type::Container::BASIC_STRING);
+    EXPECT_EQ(Type::of<Vector<String>>()->get_container(), Type::Container::VECTOR);
+    EXPECT_EQ(Type::of<Vector<uint32>>()->get_container(), Type::Container::VECTOR);
+    EXPECT_EQ(Type::of<Vector<uint32*>>()->get_container(), Type::Container::VECTOR);
+    EXPECT_EQ((Type::of<Map<String, uint32>>()->get_container()), Type::Container::MAP);
+    EXPECT_EQ((Type::of<Array<uint32, 3>>()->get_container()), Type::Container::ARRAY);
+    EXPECT_EQ((Type::of<Tuple<uint64, uint32, uint16, uint8>>()->get_container()), Type::Container::TUPLE);
+
+    EXPECT_TRUE(Type::of<uint32>()->get_template_arguments().empty());
+    EXPECT_FALSE(Type::of<String>()->get_template_arguments().empty());
+    EXPECT_FALSE(Type::of<Vector<String>>()->get_template_arguments().empty());
+    EXPECT_FALSE(Type::of<Vector<uint32>>()->get_template_arguments().empty());
+    EXPECT_FALSE(Type::of<Vector<uint32*>>()->get_template_arguments().empty());
+    EXPECT_EQ((Type::of<Map<String, uint32>>()->get_template_arguments().size()), 2);
+    EXPECT_EQ((Type::of<Array<uint32, 3>>()->get_template_arguments().size()), 1);
+    EXPECT_EQ((Type::of<Tuple<uint64, uint32, uint16, uint8>>()->get_template_arguments().size()), 4);
+
+    EXPECT_EQ(Type::of<String>()->get_template_arguments().front(), Type::of<char>());
+    EXPECT_EQ(Type::of<Vector<String>>()->get_template_arguments().front(), Type::of<String>());
+    EXPECT_EQ(Type::of<Vector<uint32>>()->get_template_arguments().front(), Type::of<uint32>());
+    EXPECT_EQ(Type::of<Vector<uint32*>>()->get_template_arguments().front(), Type::of<uint32*>());
+    EXPECT_EQ((Type::of<Map<String, uint32>>()->get_template_arguments().front()), Type::of<String>());
+    EXPECT_EQ((Type::of<Map<String, uint32>>()->get_template_arguments()[1]), Type::of<uint32>());
+    EXPECT_EQ((Type::of<Array<uint32, 3>>()->get_template_arguments().front()), Type::of<uint32>());
+    EXPECT_EQ((Type::of<Tuple<uint64, uint32, uint16, uint8>>()->get_template_arguments()[0]), Type::of<uint64>());
+    EXPECT_EQ((Type::of<Tuple<uint64, uint32, uint16, uint8>>()->get_template_arguments()[1]), Type::of<uint32>());
+    EXPECT_EQ((Type::of<Tuple<uint64, uint32, uint16, uint8>>()->get_template_arguments()[2]), Type::of<uint16>());
+    EXPECT_EQ((Type::of<Tuple<uint64, uint32, uint16, uint8>>()->get_template_arguments()[3]), Type::of<uint8>());
 }
