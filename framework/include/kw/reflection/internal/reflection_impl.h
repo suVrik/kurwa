@@ -66,6 +66,15 @@ template <typename T>
 Reflection::Field* Reflection::add_field(const FastName& name, uintptr_t offset) noexcept {
     const Type* type = Type::of<eastl::add_pointer_t<eastl::decay_t<T>>>();
     Field* field = reflection_details::add_field(type, name, offset);
+
+    // Override field with the name, if such field exists.
+    for (size_t i = 0; i < m_fields.size(); i++) {
+        if (m_fields[i]->get_name() == name) {
+            m_fields[i] = field;
+            return field;
+        }
+    }
+
     m_fields.push_back(field);
     return field;
 }
