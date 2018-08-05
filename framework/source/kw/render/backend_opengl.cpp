@@ -17,46 +17,41 @@
 
 #include <GL/glew.h>
 
+#include <SDL2/SDL_events.h>
+#include <SDL2/SDL_mouse.h>
+#include <SDL2/SDL_scancode.h>
+#include <SDL2/SDL_timer.h>
 #include <SDL2/SDL_video.h>
 #include <imgui/imgui.h>
-#include <SDL2/SDL_timer.h>
-#include <SDL2/SDL_scancode.h>
-#include <SDL2/SDL_mouse.h>
-#include <SDL2/SDL_events.h>
 
 namespace kw {
 namespace render {
 
 BackendOpenGL::BackendOpenGL(kw::IGame* game) noexcept {
     game->on_init.connect(this, &BackendOpenGL::on_init_listener);
-    //game->on_event.connect(this, &BackendOpenGL::on_event_listener);
+    // game->on_event.connect(this, &BackendOpenGL::on_event_listener);
     RenderingBackend::on_init_listener(game);
 
     SDL_GL_CreateContext(m_window);
     SDL_GL_SetSwapInterval(1);
 
     glewExperimental = GL_TRUE;
-    GLenum err = glewInit();
+    GLenum err       = glewInit();
     if (err != GLEW_OK) {
         throw RuntimeError(fmt::format("Failed to initialize GLEW!\nThe error message: {}", glewGetErrorString(err)));
     }
 };
 
 void BackendOpenGL::on_init_listener(kw::IGame* game) noexcept(false) {
-
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
 
-
     // Setup back-end capabilities flags
-    ImGuiIO& io = ImGui::GetIO();
+    ImGuiIO& io                            = ImGui::GetIO();
     g_MouseCursors[ImGuiMouseCursor_Arrow] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
-
 
     // Setup style
     ImGui::StyleColorsDark();
-
-
 
     // Backup GL state
     GLint last_texture, last_array_buffer, last_vertex_array;
@@ -66,54 +61,52 @@ void BackendOpenGL::on_init_listener(kw::IGame* game) noexcept(false) {
 
     glCreateShader(GL_VERTEX_SHADER);
 
-    const GLchar* vertex_shader_glsl_410_core =
-            "#version 330 core\n"
-            "layout (location = 0) in vec2 Position;\n"
-            "layout (location = 1) in vec2 UV;\n"
-            "layout (location = 2) in vec4 Color;\n"
-            "uniform mat4 ProjMtx;\n"
-            "out vec2 Frag_UV;\n"
-            "out vec4 Frag_Color;\n"
-            "void main()\n"
-            "{\n"
-            "    Frag_UV = UV;\n"
-            "    Frag_Color = Color;\n"
-            "    gl_Position = ProjMtx * vec4(Position.xy,0,1);\n"
-            "}\n";
+    const GLchar* vertex_shader_glsl_410_core = "#version 330 core\n"
+                                                "layout (location = 0) in vec2 Position;\n"
+                                                "layout (location = 1) in vec2 UV;\n"
+                                                "layout (location = 2) in vec4 Color;\n"
+                                                "uniform mat4 ProjMtx;\n"
+                                                "out vec2 Frag_UV;\n"
+                                                "out vec4 Frag_Color;\n"
+                                                "void main()\n"
+                                                "{\n"
+                                                "    Frag_UV = UV;\n"
+                                                "    Frag_Color = Color;\n"
+                                                "    gl_Position = ProjMtx * vec4(Position.xy,0,1);\n"
+                                                "}\n";
 
-    const GLchar* fragment_shader_glsl_410_core =
-            "#version 330 core\n"
-            "in vec2 Frag_UV;\n"
-            "in vec4 Frag_Color;\n"
-            "uniform sampler2D Texture;\n"
-            "layout (location = 0) out vec4 Out_Color;\n"
-            "void main()\n"
-            "{\n"
-            "    Out_Color = Frag_Color * texture(Texture, Frag_UV.st);\n"
-            "}\n";
+    const GLchar* fragment_shader_glsl_410_core = "#version 330 core\n"
+                                                  "in vec2 Frag_UV;\n"
+                                                  "in vec4 Frag_Color;\n"
+                                                  "uniform sampler2D Texture;\n"
+                                                  "layout (location = 0) out vec4 Out_Color;\n"
+                                                  "void main()\n"
+                                                  "{\n"
+                                                  "    Out_Color = Frag_Color * texture(Texture, Frag_UV.st);\n"
+                                                  "}\n";
 
     // Create shaders
     g_VertHandle = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(g_VertHandle, 1, &vertex_shader_glsl_410_core, nullptr);
     glCompileShader(g_VertHandle);
-    //CheckShader(g_VertHandle, "vertex shader");
+    // CheckShader(g_VertHandle, "vertex shader");
 
     g_FragHandle = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(g_FragHandle, 1, &fragment_shader_glsl_410_core, nullptr);
     glCompileShader(g_FragHandle);
-    //CheckShader(g_FragHandle, "fragment shader");
+    // CheckShader(g_FragHandle, "fragment shader");
 
     g_ShaderHandle = glCreateProgram();
     glAttachShader(g_ShaderHandle, g_VertHandle);
     glAttachShader(g_ShaderHandle, g_FragHandle);
     glLinkProgram(g_ShaderHandle);
-    //CheckProgram(g_ShaderHandle, "shader program");
+    // CheckProgram(g_ShaderHandle, "shader program");
 
-    g_AttribLocationTex = glGetUniformLocation(g_ShaderHandle, "Texture");
-    g_AttribLocationProjMtx = glGetUniformLocation(g_ShaderHandle, "ProjMtx");
-    g_AttribLocationPosition = (unsigned) glGetAttribLocation(g_ShaderHandle, "Position");
-    g_AttribLocationUV = (unsigned) glGetAttribLocation(g_ShaderHandle, "UV");
-    g_AttribLocationColor = (unsigned) glGetAttribLocation(g_ShaderHandle, "Color");
+    g_AttribLocationTex      = glGetUniformLocation(g_ShaderHandle, "Texture");
+    g_AttribLocationProjMtx  = glGetUniformLocation(g_ShaderHandle, "ProjMtx");
+    g_AttribLocationPosition = (unsigned)glGetAttribLocation(g_ShaderHandle, "Position");
+    g_AttribLocationUV       = (unsigned)glGetAttribLocation(g_ShaderHandle, "UV");
+    g_AttribLocationColor    = (unsigned)glGetAttribLocation(g_ShaderHandle, "Color");
 
     glUseProgram(g_ShaderHandle);
     glUniform1i(g_AttribLocationTex, 0);
@@ -121,10 +114,6 @@ void BackendOpenGL::on_init_listener(kw::IGame* game) noexcept(false) {
     // Create buffers
     glGenBuffers(1, &g_VboHandle);
     glGenBuffers(1, &g_ElementsHandle);
-
-
-
-
 
     // Build texture atlas
     unsigned char* pixels;
@@ -144,16 +133,12 @@ void BackendOpenGL::on_init_listener(kw::IGame* game) noexcept(false) {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 
     // Store our identifier
-    io.Fonts->TexID = (void *)(intptr_t)g_FontTexture;
-
-
-    // Create buffers
-    //glGenBuffers(1, &g_VboHandle);
-    //glGenBuffers(1, &g_ElementsHandle);
+    io.Fonts->TexID = (void*)(intptr_t)g_FontTexture;
 
     // Recreate the VAO every time
     // (This is to easily allow multiple GL contexts.
-    // VAO are not shared among GL contexts, and we don't track creation/deletion of windows so we don't have an obvious key to use to cache them.)
+    // VAO are not shared among GL contexts, and we don't track creation/deletion of windows so we don't have an obvious
+    // key to use to cache them.)
     glGenVertexArrays(1, &vao_handle);
     glBindVertexArray(vao_handle);
     glBindBuffer(GL_ARRAY_BUFFER, g_VboHandle);
@@ -165,7 +150,6 @@ void BackendOpenGL::on_init_listener(kw::IGame* game) noexcept(false) {
     glVertexAttribPointer(g_AttribLocationColor, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(ImDrawVert), (GLvoid*)IM_OFFSETOF(ImDrawVert, col));
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-
 
     // Restore modified GL state
     /*glBindTexture(GL_TEXTURE_2D, (unsigned) last_texture);
@@ -200,17 +184,15 @@ void BackendOpenGL::process_command_buffer(CommandBuffer&& command_buffer) noexc
 
 
 
-    // Set OS mouse position if requested (rarely used, only when ImGuiConfigFlags_NavEnableSetMousePos is enabled by user)
-    if (io.WantSetMousePos)
-        SDL_WarpMouseInWindow(m_window, (int)io.MousePos.x, (int)io.MousePos.y);
-    else
-        io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
+    // Set OS mouse position if requested (rarely used, only when ImGuiConfigFlags_NavEnableSetMousePos is enabled by
+    user) if (io.WantSetMousePos) SDL_WarpMouseInWindow(m_window, (int)io.MousePos.x, (int)io.MousePos.y); else io.MousePos
+    = ImVec2(-FLT_MAX, -FLT_MAX);
 
     int mx, my;
     Uint32 mouse_buttons = SDL_GetMouseState(&mx, &my);
-    // If a mouse press event came, always pass it as "mouse held this frame", so we don't miss click-release events that are shorter than 1 frame.
-    io.MouseDown[0] = g_MousePressed || (mouse_buttons & SDL_BUTTON(SDL_BUTTON_LEFT)) != 0;
-    g_MousePressed = false;
+    // If a mouse press event came, always pass it as "mouse held this frame", so we don't miss click-release events
+    that are shorter than 1 frame. io.MouseDown[0] = g_MousePressed || (mouse_buttons & SDL_BUTTON(SDL_BUTTON_LEFT)) !=
+    0; g_MousePressed = false;
 
     if (SDL_GetWindowFlags(m_window) & SDL_WINDOW_INPUT_FOCUS) {
         io.MousePos = ImVec2((float) mx, (float) my);
@@ -227,11 +209,9 @@ void BackendOpenGL::process_command_buffer(CommandBuffer&& command_buffer) noexc
 
 
     ImDrawData* draw_data = ImGui::GetDrawData();
-    // Avoid rendering when minimized, scale coordinates for retina displays (screen coordinates != framebuffer coordinates)
-    int fb_width = (int)(draw_data->DisplaySize.x * io.DisplayFramebufferScale.x);
-    int fb_height = (int)(draw_data->DisplaySize.y * io.DisplayFramebufferScale.y);
-    if (fb_width <= 0 || fb_height <= 0)
-        return;
+    // Avoid rendering when minimized, scale coordinates for retina displays (screen coordinates != framebuffer
+    coordinates) int fb_width = (int)(draw_data->DisplaySize.x * io.DisplayFramebufferScale.x); int fb_height =
+    (int)(draw_data->DisplaySize.y * io.DisplayFramebufferScale.y); if (fb_width <= 0 || fb_height <= 0) return;
     draw_data->ScaleClipRects(io.DisplayFramebufferScale);*/
 
     // Backup GL state
@@ -266,7 +246,8 @@ void BackendOpenGL::process_command_buffer(CommandBuffer&& command_buffer) noexc
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     // Setup viewport, orthographic projection matrix
-    // Our visible imgui space lies from draw_data->DisplayPps (top left) to draw_data->DisplayPos+data_data->DisplaySize (bottom right). DisplayMin is typically (0,0) for single viewport apps.
+    // Our visible imgui space lies from draw_data->DisplayPps (top left) to
+    draw_data->DisplayPos+data_data->DisplaySize (bottom right). DisplayMin is typically (0,0) for single viewport apps.
     //glViewport(0, 0, (GLsizei)fb_width, (GLsizei)fb_height);
     float L = draw_data->DisplayPos.x;
     float R = draw_data->DisplayPos.x + draw_data->DisplaySize.x;
@@ -331,7 +312,6 @@ void BackendOpenGL::process_command_buffer(CommandBuffer&& command_buffer) noexc
         }
     }
 
-
     // Draw
     /*ImVec2 pos = draw_data->DisplayPos;
     for (int n = 0; n < draw_data->CmdListsCount; n++)
@@ -340,10 +320,12 @@ void BackendOpenGL::process_command_buffer(CommandBuffer&& command_buffer) noexc
         const ImDrawIdx* idx_buffer_offset = nullptr;
 
         glBindBuffer(GL_ARRAY_BUFFER, g_VboHandle);
-        glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)cmd_list->VtxBuffer.Size * sizeof(ImDrawVert), (const GLvoid*)cmd_list->VtxBuffer.Data, GL_STREAM_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)cmd_list->VtxBuffer.Size * sizeof(ImDrawVert), (const
+    GLvoid*)cmd_list->VtxBuffer.Data, GL_STREAM_DRAW);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_ElementsHandle);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr)cmd_list->IdxBuffer.Size * sizeof(ImDrawIdx), (const GLvoid*)cmd_list->IdxBuffer.Data, GL_STREAM_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr)cmd_list->IdxBuffer.Size * sizeof(ImDrawIdx), (const
+    GLvoid*)cmd_list->IdxBuffer.Data, GL_STREAM_DRAW);
 
         for (int cmd_i = 0; cmd_i < cmd_list->CmdBuffer.Size; cmd_i++)
         {
@@ -355,11 +337,13 @@ void BackendOpenGL::process_command_buffer(CommandBuffer&& command_buffer) noexc
             }
             else
             {
-                ImVec4 clip_rect = ImVec4(pcmd->ClipRect.x - pos.x, pcmd->ClipRect.y - pos.y, pcmd->ClipRect.z - pos.x, pcmd->ClipRect.w - pos.y);
-                if (clip_rect.x < fb_width && clip_rect.y < fb_height && clip_rect.z >= 0.0f && clip_rect.w >= 0.0f)
+                ImVec4 clip_rect = ImVec4(pcmd->ClipRect.x - pos.x, pcmd->ClipRect.y - pos.y, pcmd->ClipRect.z - pos.x,
+    pcmd->ClipRect.w - pos.y); if (clip_rect.x < fb_width && clip_rect.y < fb_height && clip_rect.z >= 0.0f &&
+    clip_rect.w >= 0.0f)
                 {
                     // Apply scissor/clipping rectangle
-                    //glScissor((int)clip_rect.x, (int)(fb_height - clip_rect.w), (int)(clip_rect.z - clip_rect.x), (int)(clip_rect.w - clip_rect.y));
+                    //glScissor((int)clip_rect.x, (int)(fb_height - clip_rect.w), (int)(clip_rect.z - clip_rect.x),
+    (int)(clip_rect.w - clip_rect.y));
 
                     // Bind texture, Draw
                     glBindTexture(GL_TEXTURE_2D, (GLuint)(intptr_t)pcmd->TextureId);
@@ -387,8 +371,6 @@ void BackendOpenGL::process_command_buffer(CommandBuffer&& command_buffer) noexc
     glPolygonMode(GL_FRONT_AND_BACK, (GLenum)last_polygon_mode[0]);
     glViewport(last_viewport[0], last_viewport[1], (GLsizei)last_viewport[2], (GLsizei)last_viewport[3]);
     glScissor(last_scissor_box[0], last_scissor_box[1], (GLsizei)last_scissor_box[2], (GLsizei)last_scissor_box[3]);*/
-
-
 
     SDL_GL_SwapWindow(m_window);
 }
