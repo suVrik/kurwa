@@ -35,10 +35,22 @@ public:
     SceneModule& operator=(const SceneModule& original) = delete;
 
     /**
-     * Emitted before SceneModule submits command buffers to the RenderModule,
-     * so every subscribed to this signal module can add their command buffer to the render queue.
+     * Emitted right after the update thread starts,
+     * so every module subscribed to this signal can add their init command buffer to the render queue.
      */
-    Signal<void(SceneModule*)> on_populate_render_queue;
+    Signal<void(SceneModule*)> on_init;
+
+    /**
+     * Emitted before a SceneModule submits command buffers to a RenderModule,
+     * so every module subscribed to this signal can add their command buffer to the render queue.
+     */
+    Signal<void(SceneModule*)> on_update;
+
+    /**
+     * Emitted right before the update thread is destroyed,
+     * so every module subscribed to this signal can do any cleanup they need to do.
+     */
+    Signal<void(SceneModule*)> on_destroy;
 
 private:
     void on_init_listener(IGame* game) noexcept;

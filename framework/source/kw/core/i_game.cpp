@@ -36,7 +36,7 @@ IGame::IGame() noexcept {
     // Safety first.
     signal(SIGSEGV, i_game_details::death_signal);
 
-    is_initialized = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_HAPTIC | SDL_INIT_GAMECONTROLLER | SDL_INIT_TIMER) == 0;
+    is_initialized = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_HAPTIC | SDL_INIT_GAMECONTROLLER) == 0;
     if (!is_initialized) {
         message_box(fmt::format("Failed to initialize SDL2!\nThe error message: {}", SDL_GetError()));
     }

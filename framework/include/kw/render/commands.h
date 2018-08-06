@@ -15,6 +15,7 @@
 
 #include <kw/base/types.h>
 #include <kw/base/vector.h>
+#include <kw/render/types.h>
 
 namespace kw {
 namespace render {
@@ -41,7 +42,9 @@ enum class CommandType {
     CREATE_VERTEX_ATTRIBUTE,
     GET_UNIFORM_LOCATION,
     UPDATE_UNIFORM_MATRIX_4F,
-    INIT_IMGUI,
+    INIT_2D,
+    SCISSOR,
+    SWITCH_CAPABILITY_STATUS,
 };
 
 struct CommandClear {
@@ -52,8 +55,8 @@ struct CommandClear {
 };
 
 struct CommandCreateVertexBuffer {
-    uint32* vao_id;
-    uint32* vbo_id;
+    VertexArrayHandle* vao_id;
+    VertexBufferHandle* vbo_id;
 };
 
 struct CommandUpdateVertexBuffer {
@@ -62,12 +65,12 @@ struct CommandUpdateVertexBuffer {
 };
 
 struct CommandBindVertexBuffer {
-    uint32* vao_id;
-    uint32* vbo_id;
+    VertexArrayHandle* vao_id;
+    VertexBufferHandle* vbo_id;
 };
 
 struct CommandCreateIndexBuffer {
-    uint32* id;
+    IndexBufferHandle* id;
 };
 
 struct CommandUpdateIndexBuffer {
@@ -76,36 +79,50 @@ struct CommandUpdateIndexBuffer {
 };
 
 struct CommandBindIndexBuffer {
-    uint32* id;
+    IndexBufferHandle* id;
+};
+
+enum class TextureParameter {
+    LINEAR,
+    NEAREST,
+};
+
+enum class PixelDataType {
+    RGBA,
 };
 
 struct CommandCreateTexture {
-    uint32* id;
+    TextureHandle* id;
     uint32 width;
     uint32 height;
     unsigned char* pixels;
+    TextureParameter texture_parameter;
+    PixelDataType pixel_data_type;
 };
 
 struct CommandBindTexture {
-    uint32 id;
+    TextureHandle* id;
 };
 
 struct CommandCreateProgram {
-    uint32* shader_program_id;
-    uint32* vertex_shader_id;
+    ShaderProgramHandle* shader_program_id;
+    ShaderHandle* vertex_shader_id;
     const char* vertex_shader_code;
-    uint32* fragment_shader_id;
+    ShaderHandle* fragment_shader_id;
     const char* fragment_shader_code;
 };
 
 struct CommandBindProgram {
-    uint32* id;
+    ShaderProgramHandle* id;
 };
 
-enum class AttributeType { FLOAT, UNSIGNED_BYTE };
+enum class AttributeType {
+    FLOAT,
+    UNSIGNED_BYTE,
+};
 
 struct CommandCreateVertexAttribute {
-    uint32* shader_program_id;
+    ShaderProgramHandle* shader_program_id;
     AttributeType type;
     const char* name;
     uint32 size;
@@ -114,13 +131,13 @@ struct CommandCreateVertexAttribute {
 };
 
 struct CommandGetUniformLocation {
-    uint32* id;
-    uint32* shader_program_id;
+    UniformLocationHandle* id;
+    ShaderProgramHandle* shader_program_id;
     const char* name;
 };
 
 struct CommandUpdateUniformMatrix4f {
-    uint32* id;
+    UniformLocationHandle* id;
     Vector<float> matrix;
 };
 
@@ -129,51 +146,34 @@ struct CommandDrawIndexed {
     const void* data;
 };
 
+struct CommandScissor {
+    uint32 x;
+    uint32 y;
+    uint32 width;
+    uint32 height;
+};
+
+enum class Capability {
+    SCISSOR_TEST,
+};
+
+struct CommandSwitchCapabilityStatus {
+    Capability capability;
+    bool enable;
+};
+
 struct Command {
-    Command() noexcept {
-    }
+    Command() noexcept;
 
     Command(const Command& original) = delete;
     Command& operator=(const Command& original) = delete;
 
-    Command(Command&& original) noexcept
-        : type(original.type) {
-        switch (type) {
-            case CommandType::UPDATE_INDEX_BUFFER:
-                update_index_buffer = eastl::move(original.update_index_buffer);
-                break;
-            case CommandType::UPDATE_VERTEX_BUFFER:
-                update_vertex_buffer = eastl::move(original.update_vertex_buffer);
-                break;
-            case CommandType::UPDATE_UNIFORM_MATRIX_4F:
-                update_uniform_matrix_4f = eastl::move(original.update_uniform_matrix_4f);
-                break;
-            default:
-                memcpy(this, &original, sizeof(Command));
-        }
-        original.type = CommandType::CLEAR;
-    }
-
+    Command(Command&& original) noexcept;
     Command& operator=(Command&& original) = delete;
 
-    ~Command() {
-        switch (type) {
-            case CommandType::UPDATE_INDEX_BUFFER:
-                update_index_buffer.~CommandUpdateIndexBuffer();
-                break;
-            case CommandType::UPDATE_VERTEX_BUFFER:
-                update_vertex_buffer.~CommandUpdateVertexBuffer();
-                break;
-            case CommandType::UPDATE_UNIFORM_MATRIX_4F:
-                update_uniform_matrix_4f.~CommandUpdateUniformMatrix4f();
-                break;
-            default:
-                // Other command structures do not require destruction.
-                break;
-        }
-    }
+    ~Command();
 
-    CommandType type = CommandType::CLEAR;
+    CommandType type;
 
     union {
         CommandClear clear;
@@ -197,6 +197,8 @@ struct Command {
         CommandCreateVertexAttribute create_vertex_attribute;
         CommandGetUniformLocation get_uniform_location;
         CommandUpdateUniformMatrix4f update_uniform_matrix_4f;
+        CommandScissor scissor;
+        CommandSwitchCapabilityStatus switch_capability_status;
     };
 };
 

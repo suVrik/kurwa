@@ -16,6 +16,7 @@
 #include <kw/base/signal.h>
 #include <kw/base/unique_ptr.h>
 #include <kw/concurrency/semaphore.h>
+#include <kw/concurrency/thread.h>
 #include <kw/render/rendering_backend.h>
 #include <kw/render/update_queue.h>
 
@@ -23,7 +24,9 @@ struct SDL_Window;
 
 namespace kw {
 
-enum class RenderingBackendType { OPENGL };
+enum class RenderingBackendType {
+    OPENGL,
+};
 
 class IGame;
 
@@ -68,6 +71,7 @@ private:
     RenderingBackendType m_renderer_type = RenderingBackendType::OPENGL;
     static constexpr uint32 COMMAND_BUFFER_QUEUE_SIZE = 2;
 
+    const Thread::id m_main_thread_id;
     Semaphore m_render_semaphore;
     Semaphore m_update_semaphore;
     render::UpdateQueue m_update_queue;

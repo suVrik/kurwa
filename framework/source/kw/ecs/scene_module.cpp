@@ -26,9 +26,15 @@ void SceneModule::on_init_listener(IGame* game) noexcept {
     auto& render_module = game->get<RenderModule>();
     m_thread = Thread([&render_module, this]() {
         float red = 0.0f;
+        render::CommandBuffer command_buffer;
+        render::Command command;
+
+        command.type = render::CommandType::INIT_2D;
+        command_buffer.commands.push_back(eastl::move(command));
+
+        on_init.emit(this);
+
         while (is_update_thread_active) {
-            render::CommandBuffer command_buffer;
-            render::Command command{};
             command.type = render::CommandType::CLEAR;
             command.clear.r = 0.9f * red;
             command.clear.g = 0.9f;
@@ -38,7 +44,7 @@ void SceneModule::on_init_listener(IGame* game) noexcept {
 
             render_module.push_command_buffer(eastl::move(command_buffer));
 
-            on_populate_render_queue.emit(this);
+            on_update.emit(this);
 
             render_module.submit_command_buffers();
 
@@ -47,6 +53,7 @@ void SceneModule::on_init_listener(IGame* game) noexcept {
             else
                 red += 0.01f;
         }
+        on_destroy.emit(this);
     });
 }
 

@@ -13,9 +13,19 @@
 
 #pragma once
 
-#include <thread>
+#include <kw/base/types.h>
 
 namespace kw {
-using Thread = std::thread;
-namespace this_thread = std::this_thread;
+namespace render {
+typedef uint32 Handle;
+typedef Handle ShaderHandle;
+typedef Handle ShaderProgramHandle;
+typedef Handle TextureHandle;
+typedef Handle VertexArrayHandle;
+typedef Handle VertexBufferHandle;
+typedef Handle IndexBufferHandle;
+typedef Handle UniformLocationHandle;
+
+inline TextureHandle NO_BUFFER = 0;
+} // namespace render
 } // namespace kw

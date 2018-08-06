@@ -15,16 +15,16 @@
 
 #include <kw/base/signal.h>
 #include <kw/base/types.h>
+#include <kw/render/types.h>
 
 union SDL_Event;
 struct SDL_Window;
 
 namespace kw {
 class IGame;
-
 class SceneModule;
-
 class RenderModule;
+class WindowModule;
 
 /**
  * Imgui module creates everything needed to create and manage GUI using "Dear ImGui" library.
@@ -37,18 +37,24 @@ public:
 
 private:
     void on_init_listener(IGame* game) noexcept;
-    void on_populate_render_queue_listener(SceneModule* scene_module) noexcept;
+    void on_scene_init_listener(SceneModule* scene_module) noexcept(false);
+    void on_scene_update_listener(SceneModule* scene_module) noexcept;
     void on_event_listener(SDL_Event& event) noexcept;
-    void imgui_setup_frame();
+    void imgui_setup_frame() noexcept(false);
 
     RenderModule* m_render_module;
-    SDL_Window* m_window;
+    WindowModule* m_window_module;
 
     bool is_left_click_pressed = false;
     uint64 m_time;
-    uint32 m_font_texture_id = 0;
-    uint32 m_shader_program_id = 0, m_vertex_shader_id = 0, m_fragment_shader_id = 0;
-    uint32 m_attribution_texture_id = 0, m_attribution_projection_matrix = 0;
-    uint32 m_vao_id = 0, m_vbo_id = 0, m_index_buffer_id = 0;
+    render::TextureHandle m_font_texture_id = 0;
+    render::ShaderProgramHandle m_shader_program_id = 0;
+    render::ShaderHandle m_vertex_shader_id = 0;
+    render::ShaderHandle m_fragment_shader_id = 0;
+    render::UniformLocationHandle m_attribution_texture_id = 0;
+    render::UniformLocationHandle m_attribution_projection_matrix = 0;
+    render::VertexArrayHandle m_vao_id = 0;
+    render::VertexBufferHandle m_vbo_id = 0;
+    render::IndexBufferHandle m_index_buffer_id = 0;
 };
 } // namespace kw
