@@ -44,7 +44,7 @@ static void check_shader_compilation_status(GLuint handle) {
     if (success == 0) {
         GLint log_length;
         glGetShaderiv(handle, GL_INFO_LOG_LENGTH, &log_length);
-        std::vector<char> log(static_cast<unsigned>(log_length));
+        Vector<char> log(static_cast<uint32>(log_length));
         glGetShaderInfoLog(handle, log_length, nullptr, log.data());
         throw RuntimeError(fmt::format("Shader compilation failed!\nThe error message: {}", log.data()));
     }
@@ -56,9 +56,9 @@ static void check_program_link_status(GLuint handle) {
     if (success == 0) {
         GLint log_length;
         glGetProgramiv(handle, GL_INFO_LOG_LENGTH, &log_length);
-        std::vector<char> log(static_cast<unsigned>(log_length));
+        Vector<char> log(static_cast<uint32>(log_length));
         glGetProgramInfoLog(handle, log_length, nullptr, log.data());
-        throw std::runtime_error("ERROR: Shader linking failed!\n" + std::string(log.data()) + "\n");
+        throw RuntimeError(fmt::format("Failed to link a shader!\nThe error message: {}", log.data()));
     }
 }
 
