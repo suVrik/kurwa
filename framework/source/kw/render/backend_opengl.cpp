@@ -20,7 +20,6 @@
 
 namespace kw {
 namespace render {
-
 BackendOpenGL::BackendOpenGL(IGame* game) noexcept {
     game->on_init.connect(this, &BackendOpenGL::on_init_listener);
 };
@@ -77,7 +76,7 @@ void BackendOpenGL::process_command_buffer(CommandBuffer&& command_buffer) noexc
                 glBufferData(GL_ARRAY_BUFFER, command.update_vertex_buffer.size, command.update_vertex_buffer.data.data(), GL_STREAM_DRAW);
                 break;
             case CommandType::BIND_VERTEX_BUFFER:
-                KW_ASSERT(command.bind_vertex_buffer.vao_id != nullptr || command.bind_vertex_buffer.vbo_id != nullptr, "You forgot to attach a vertex buffer index!");
+                KW_ASSERT(command.bind_vertex_buffer.vao_id != nullptr || command.bind_vertex_buffer.vbo_id != nullptr, "You forgot to attach a vertex buffer handle!");
                 glBindVertexArray(*command.bind_vertex_buffer.vao_id);
                 glBindBuffer(GL_ARRAY_BUFFER, *command.bind_vertex_buffer.vbo_id);
                 break;
@@ -88,38 +87,36 @@ void BackendOpenGL::process_command_buffer(CommandBuffer&& command_buffer) noexc
                 glBufferData(GL_ELEMENT_ARRAY_BUFFER, command.update_index_buffer.size, command.update_index_buffer.data.data(), GL_STREAM_DRAW);
                 break;
             case CommandType::BIND_INDEX_BUFFER:
-                KW_ASSERT(command.bind_index_buffer.id != nullptr, "You forgot to attach an `index buffer` index!");
+                KW_ASSERT(command.bind_index_buffer.id != nullptr, "You forgot to attach an index buffer handle!");
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *command.bind_index_buffer.id);
                 break;
             case CommandType::CREATE_TEXTURE: {
                 glGenTextures(1, command.create_texture.id);
                 glBindTexture(GL_TEXTURE_2D, *command.create_texture.id);
-                GLint param = 0;
-                switch (command.create_texture.texture_parameter) {
-                    case TextureParameter::NEAREST:
+                GLint param;
+                switch (command.create_texture.texture_filtering) {
+                    case TextureFiltering::NEAREST:
                         param = GL_NEAREST;
                         break;
-                    case TextureParameter::LINEAR:
+                    case TextureFiltering::LINEAR:
                         param = GL_LINEAR;
                         break;
                 }
-                KW_ASSERT(param > 0, "You passed the wrong texture parameter!");
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, param);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, param);
                 glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-                GLint pixel_data_type = 0;
+                GLint pixel_data_type;
                 switch (command.create_texture.pixel_data_type) {
                     case PixelDataType::RGBA:
                         pixel_data_type = GL_RGBA;
                         break;
                 }
-                KW_ASSERT(param > 0, "You passed the wrong pixel data type!");
                 glTexImage2D(GL_TEXTURE_2D, 0, pixel_data_type, command.create_texture.width, command.create_texture.height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
                              command.create_texture.pixels);
                 break;
             }
             case CommandType::BIND_TEXTURE:
-                KW_ASSERT(command.bind_texture.id != nullptr, "You forgot to attach a texture index!");
+                KW_ASSERT(command.bind_texture.id != nullptr, "You forgot to attach a texture handle!");
                 glBindTexture(GL_TEXTURE_2D, *command.bind_texture.id);
                 break;
             case CommandType::CREATE_PROGRAM: {
@@ -141,7 +138,7 @@ void BackendOpenGL::process_command_buffer(CommandBuffer&& command_buffer) noexc
                 break;
             }
             case CommandType::BIND_PROGRAM:
-                KW_ASSERT(command.bind_program.id != nullptr, "You forgot to attach a shader program index!");
+                KW_ASSERT(command.bind_program.id != nullptr, "You forgot to attach a shader program handle!");
                 glUseProgram(*command.bind_program.id);
                 break;
             case CommandType::DRAW_INDEXED:
@@ -151,7 +148,7 @@ void BackendOpenGL::process_command_buffer(CommandBuffer&& command_buffer) noexc
                 auto m_attribute_position = static_cast<uint32>(glGetAttribLocation(
                     *command.create_vertex_attribute.shader_program_id, command.create_vertex_attribute.name));
                 glEnableVertexAttribArray(m_attribute_position);
-                GLenum type = 0;
+                GLenum type;
                 switch (command.create_vertex_attribute.type) {
                     case AttributeType::FLOAT:
                         type = GL_FLOAT;
@@ -160,7 +157,6 @@ void BackendOpenGL::process_command_buffer(CommandBuffer&& command_buffer) noexc
                         type = GL_UNSIGNED_BYTE;
                         break;
                 }
-                KW_ASSERT(type > 0, "You passed the wrong vertex attribute type!");
                 glVertexAttribPointer(m_attribute_position, command.create_vertex_attribute.size, type, GL_TRUE,
                                       command.create_vertex_attribute.stride,
                                       reinterpret_cast<const void*>(command.create_vertex_attribute.offset));
@@ -168,12 +164,12 @@ void BackendOpenGL::process_command_buffer(CommandBuffer&& command_buffer) noexc
             }
             case CommandType::GET_UNIFORM_LOCATION:
                 KW_ASSERT(command.get_uniform_location.shader_program_id != nullptr, "You forgot to attach a shader "
-                                                                                     "program index!");
+                                                                                     "program handle!");
                 *command.get_uniform_location.id = static_cast<uint32>(
                     glGetUniformLocation(*command.get_uniform_location.shader_program_id, command.get_uniform_location.name));
                 break;
             case CommandType::UPDATE_UNIFORM_MATRIX_4F:
-                KW_ASSERT(command.update_uniform_matrix_4f.id != nullptr, "You forgot to attach a uniform index!");
+                KW_ASSERT(command.update_uniform_matrix_4f.id != nullptr, "You forgot to attach a uniform handle!");
                 glUniformMatrix4fv(
                     *command.update_uniform_matrix_4f.id, 1, GL_FALSE, command.update_uniform_matrix_4f.matrix.data());
                 break;
@@ -189,13 +185,12 @@ void BackendOpenGL::process_command_buffer(CommandBuffer&& command_buffer) noexc
                 glScissor(command.scissor.x, command.scissor.y, command.scissor.width, command.scissor.height);
                 break;
             case CommandType::SWITCH_CAPABILITY_STATUS: {
-                GLenum capability = 0;
+                GLenum capability;
                 switch (command.switch_capability_status.capability) {
                     case Capability::SCISSOR_TEST:
                         capability = GL_SCISSOR_TEST;
                         break;
                 }
-                KW_ASSERT(capability > 0, "There is no such capability in OpenGL!");
                 if (command.switch_capability_status.enable) {
                     glEnable(capability);
                 } else {
@@ -210,6 +205,5 @@ void BackendOpenGL::process_command_buffer(CommandBuffer&& command_buffer) noexc
 
     SDL_GL_SwapWindow(m_window);
 }
-
 } // namespace render
 } // namespace kw

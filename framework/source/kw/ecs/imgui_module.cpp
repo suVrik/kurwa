@@ -70,9 +70,9 @@ void ImguiModule::on_event_listener(SDL_Event& event) noexcept {
 
 void ImguiModule::on_init_listener(IGame* game) noexcept {
     m_render_module = &game->get<RenderModule>();
+    m_window_module = &game->get<WindowModule>();
     game->get<SceneModule>().on_init.connect(this, &ImguiModule::on_scene_init_listener);
     game->get<SceneModule>().on_update.connect(this, &ImguiModule::on_scene_update_listener);
-    m_window_module = &game->get<WindowModule>();
 }
 
 void ImguiModule::on_scene_init_listener(SceneModule* scene_module) noexcept(false) {
@@ -133,7 +133,7 @@ void ImguiModule::on_scene_init_listener(SceneModule* scene_module) noexcept(fal
     command.create_texture.width = static_cast<uint32>(width);
     command.create_texture.height = static_cast<uint32>(height);
     command.create_texture.pixels = pixels;
-    command.create_texture.texture_parameter = render::TextureParameter::LINEAR;
+    command.create_texture.texture_filtering = render::TextureFiltering::LINEAR;
     command.create_texture.pixel_data_type = render::PixelDataType::RGBA;
     command_buffer.commands.push_back(eastl::move(command));
 
@@ -195,8 +195,8 @@ void ImguiModule::on_scene_init_listener(SceneModule* scene_module) noexcept(fal
     command_buffer.commands.push_back(eastl::move(command));
 
     command.type = render::CommandType::BIND_VERTEX_BUFFER;
-    command.bind_vertex_buffer.vao_id = &render::NO_BUFFER;
-    command.bind_vertex_buffer.vbo_id = &render::NO_BUFFER;
+    command.bind_vertex_buffer.vao_id = &render::NO_VERTEX_ARRAY;
+    command.bind_vertex_buffer.vbo_id = &render::NO_VERTEX_BUFFER;
     command_buffer.commands.push_back(eastl::move(command));
 
     m_render_module->push_command_buffer(eastl::move(command_buffer));

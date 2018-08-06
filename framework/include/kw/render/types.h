@@ -26,6 +26,12 @@ typedef Handle VertexBufferHandle;
 typedef Handle IndexBufferHandle;
 typedef Handle UniformLocationHandle;
 
-inline TextureHandle NO_BUFFER = 0;
+inline ShaderHandle NO_SHADER = 0;
+inline ShaderProgramHandle NO_SHADER_PROGRAM = 0;
+inline TextureHandle NO_TEXTURE = 0;
+inline VertexArrayHandle NO_VERTEX_ARRAY = 0;
+inline VertexBufferHandle NO_VERTEX_BUFFER = 0;
+inline IndexBufferHandle NO_INDEX_BUFFER = 0;
+inline UniformLocationHandle NO_UNIFORM_LOCATION = 0;
 } // namespace render
 } // namespace kw

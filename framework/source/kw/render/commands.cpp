@@ -37,7 +37,7 @@ Command::Command(Command&& original) noexcept
     original.type = CommandType::CLEAR;
 }
 
-Command::~Command() {
+Command::~Command() noexcept {
     switch (type) {
         case CommandType::UPDATE_INDEX_BUFFER:
             update_index_buffer.~CommandUpdateIndexBuffer();

@@ -82,7 +82,7 @@ struct CommandBindIndexBuffer {
     IndexBufferHandle* id;
 };
 
-enum class TextureParameter {
+enum class TextureFiltering {
     LINEAR,
     NEAREST,
 };
@@ -96,7 +96,7 @@ struct CommandCreateTexture {
     uint32 width;
     uint32 height;
     unsigned char* pixels;
-    TextureParameter texture_parameter;
+    TextureFiltering texture_filtering;
     PixelDataType pixel_data_type;
 };
 
@@ -171,7 +171,7 @@ struct Command {
     Command(Command&& original) noexcept;
     Command& operator=(Command&& original) = delete;
 
-    ~Command();
+    ~Command() noexcept;
 
     CommandType type;
 
