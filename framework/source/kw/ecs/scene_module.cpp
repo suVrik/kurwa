@@ -22,14 +22,14 @@ SceneModule::SceneModule(IGame* game) noexcept
     game->on_destroy.connect(this, &SceneModule::on_destroy_listener);
 }
 
-void SceneModule::on_init_listener(kw::IGame* game) noexcept {
+void SceneModule::on_init_listener(IGame* game) noexcept {
     auto& render_module = game->get<RenderModule>();
     m_thread = Thread([&render_module, this]() {
         float red = 0.0f;
         while (is_update_thread_active) {
             render::CommandBuffer command_buffer;
             render::Command command{};
-            command.type = kw::render::CommandType::CLEAR;
+            command.type = render::CommandType::CLEAR;
             command.clear.r = 0.9f * red;
             command.clear.g = 0.9f;
             command.clear.b = 0.9f;
@@ -50,7 +50,7 @@ void SceneModule::on_init_listener(kw::IGame* game) noexcept {
     });
 }
 
-void SceneModule::on_destroy_listener(kw::IGame* game) noexcept {
+void SceneModule::on_destroy_listener(IGame* game) noexcept {
     is_update_thread_active = false;
     m_thread.detach();
 }

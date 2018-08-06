@@ -16,8 +16,8 @@
 #include <kw/render/rendering_backend.h>
 
 namespace kw {
-void RenderingBackend::on_init_listener(kw::IGame* game) {
-    auto& window_module = game->get<kw::WindowModule>();
+void RenderingBackend::on_init_listener(IGame* game) {
+    auto& window_module = game->get<WindowModule>();
     m_window = window_module.get_window();
 }
 } // namespace kw

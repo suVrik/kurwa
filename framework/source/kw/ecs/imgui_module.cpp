@@ -102,7 +102,7 @@ void ImguiModule::on_init_listener(IGame* game) noexcept {
     render::CommandBuffer command_buffer;
 
     render::Command command_create_shader_program{};
-    command_create_shader_program.type = kw::render::CommandType::CREATE_PROGRAM;
+    command_create_shader_program.type = render::CommandType::CREATE_PROGRAM;
     command_create_shader_program.create_program.shader_program_id = &m_shader_program_id;
     command_create_shader_program.create_program.vertex_shader_id = &m_vertex_shader_id;
     command_create_shader_program.create_program.vertex_shader_code = vertex_shader_glsl_410_core;
@@ -111,7 +111,7 @@ void ImguiModule::on_init_listener(IGame* game) noexcept {
     command_buffer.commands.push_back(eastl::move(command_create_shader_program));
 
     render::Command command_bind_shader_program{};
-    command_bind_shader_program.type = kw::render::CommandType::BIND_PROGRAM;
+    command_bind_shader_program.type = render::CommandType::BIND_PROGRAM;
     command_bind_shader_program.bind_program.id = &m_shader_program_id;
     command_buffer.commands.push_back(eastl::move(command_bind_shader_program));
 
@@ -126,7 +126,7 @@ void ImguiModule::on_init_listener(IGame* game) noexcept {
     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
 
     render::Command command_create_texture{};
-    command_create_texture.type = kw::render::CommandType::CREATE_TEXTURE;
+    command_create_texture.type = render::CommandType::CREATE_TEXTURE;
     command_create_texture.create_texture.id = &m_font_texture_id;
     command_create_texture.create_texture.width = static_cast<uint32>(width);
     command_create_texture.create_texture.height = static_cast<uint32>(height);
@@ -138,31 +138,31 @@ void ImguiModule::on_init_listener(IGame* game) noexcept {
 
     // Create buffers
     render::Command command_create_index_buffer{};
-    command_create_index_buffer.type = kw::render::CommandType::CREATE_INDEX_BUFFER;
+    command_create_index_buffer.type = render::CommandType::CREATE_INDEX_BUFFER;
     command_create_index_buffer.create_index_buffer.id = &m_index_buffer_id;
     command_buffer.commands.push_back(eastl::move(command_create_index_buffer));
 
     render::Command command_create_vertex_buffer{};
-    command_create_vertex_buffer.type = kw::render::CommandType::CREATE_VERTEX_BUFFER;
+    command_create_vertex_buffer.type = render::CommandType::CREATE_VERTEX_BUFFER;
     command_create_vertex_buffer.create_vertex_buffer.vao_id = &m_vao_id;
     command_create_vertex_buffer.create_vertex_buffer.vbo_id = &m_vbo_id;
     command_buffer.commands.push_back(eastl::move(command_create_vertex_buffer));
 
     render::Command command_bind_vertex_buffer1{};
-    command_bind_vertex_buffer1.type = kw::render::CommandType::BIND_VERTEX_BUFFER;
+    command_bind_vertex_buffer1.type = render::CommandType::BIND_VERTEX_BUFFER;
     command_bind_vertex_buffer1.bind_vertex_buffer.vao_id = &m_vao_id;
     command_bind_vertex_buffer1.bind_vertex_buffer.vbo_id = &m_vbo_id;
     command_buffer.commands.push_back(eastl::move(command_bind_vertex_buffer1));
 
     render::Command command_get_uniform_location1{};
-    command_get_uniform_location1.type = kw::render::CommandType::GET_UNIFORM_LOCATION;
+    command_get_uniform_location1.type = render::CommandType::GET_UNIFORM_LOCATION;
     command_get_uniform_location1.get_uniform_location.shader_program_id = &m_shader_program_id;
     command_get_uniform_location1.get_uniform_location.id = &m_attribution_texture_id;
     command_get_uniform_location1.get_uniform_location.name = "Texture";
     command_buffer.commands.push_back(eastl::move(command_get_uniform_location1));
 
     render::Command command_get_uniform_location2{};
-    command_get_uniform_location2.type = kw::render::CommandType::GET_UNIFORM_LOCATION;
+    command_get_uniform_location2.type = render::CommandType::GET_UNIFORM_LOCATION;
     command_get_uniform_location2.get_uniform_location.shader_program_id = &m_shader_program_id;
     command_get_uniform_location2.get_uniform_location.id = &m_attribution_projection_matrix;
     command_get_uniform_location2.get_uniform_location.name = "ProjMtx";
@@ -189,7 +189,7 @@ void ImguiModule::on_init_listener(IGame* game) noexcept {
     command_buffer.commands.push_back(eastl::move(command_create_vertex_attribute2));
 
     render::Command command_create_vertex_attribute3{};
-    command_create_vertex_attribute3.type = kw::render::CommandType::CREATE_VERTEX_ATTRIBUTE;
+    command_create_vertex_attribute3.type = render::CommandType::CREATE_VERTEX_ATTRIBUTE;
     command_create_vertex_attribute3.create_vertex_attribute.shader_program_id = &m_shader_program_id;
     command_create_vertex_attribute3.create_vertex_attribute.name = "Color";
     command_create_vertex_attribute3.create_vertex_attribute.type = render::AttributeType::UNSIGNED_BYTE;
@@ -199,7 +199,7 @@ void ImguiModule::on_init_listener(IGame* game) noexcept {
     command_buffer.commands.push_back(eastl::move(command_create_vertex_attribute3));
 
     render::Command command_bind_vertex_buffer2{};
-    command_bind_vertex_buffer2.type = kw::render::CommandType::BIND_VERTEX_BUFFER;
+    command_bind_vertex_buffer2.type = render::CommandType::BIND_VERTEX_BUFFER;
     command_bind_vertex_buffer2.bind_vertex_buffer.vao_id = nullptr;
     command_bind_vertex_buffer2.bind_vertex_buffer.vbo_id = nullptr;
     command_buffer.commands.push_back(eastl::move(command_bind_vertex_buffer2));
@@ -261,7 +261,7 @@ void ImguiModule::on_populate_render_queue_listener(SceneModule* scene_module) n
     draw_data->ScaleClipRects(io.DisplayFramebufferScale);
 
     render::Command command_imgui_init{};
-    command_imgui_init.type = kw::render::CommandType::INIT_IMGUI;
+    command_imgui_init.type = render::CommandType::INIT_IMGUI;
     command_buffer.commands.push_back(eastl::move(command_imgui_init));
 
     float L = draw_data->DisplayPos.x;
@@ -276,19 +276,19 @@ void ImguiModule::on_populate_render_queue_listener(SceneModule* scene_module) n
     };
 
     render::Command command_bind_shader_program{};
-    command_bind_shader_program.type = kw::render::CommandType::BIND_PROGRAM;
+    command_bind_shader_program.type = render::CommandType::BIND_PROGRAM;
     command_bind_shader_program.bind_program.id = &m_shader_program_id;
     command_buffer.commands.push_back(eastl::move(command_bind_shader_program));
 
     render::Command command_update_uniform_matrix{};
-    command_update_uniform_matrix.type = kw::render::CommandType::UPDATE_UNIFORM_MATRIX_4F;
+    command_update_uniform_matrix.type = render::CommandType::UPDATE_UNIFORM_MATRIX_4F;
     command_update_uniform_matrix.update_uniform_matrix_4f.id = &m_attribution_projection_matrix;
     // TODO redo this after LD
     new (&command_update_uniform_matrix.update_uniform_matrix_4f.matrix) Vector<float>(&ortho_projection[0][0], &ortho_projection[0][0] + 16);
     command_buffer.commands.push_back(eastl::move(command_update_uniform_matrix));
 
     render::Command command_bind_vertex_buffer{};
-    command_bind_vertex_buffer.type = kw::render::CommandType::BIND_VERTEX_BUFFER;
+    command_bind_vertex_buffer.type = render::CommandType::BIND_VERTEX_BUFFER;
     command_bind_vertex_buffer.bind_vertex_buffer.vao_id = &m_vao_id;
     command_bind_vertex_buffer.bind_vertex_buffer.vbo_id = &m_vbo_id;
     command_buffer.commands.push_back(eastl::move(command_bind_vertex_buffer));
@@ -299,7 +299,7 @@ void ImguiModule::on_populate_render_queue_listener(SceneModule* scene_module) n
         const ImDrawIdx* idx_buffer_offset = nullptr;
 
         render::Command command_update_vertex_buffer{};
-        command_update_vertex_buffer.type = kw::render::CommandType::UPDATE_VERTEX_BUFFER;
+        command_update_vertex_buffer.type = render::CommandType::UPDATE_VERTEX_BUFFER;
         command_update_vertex_buffer.update_vertex_buffer.size = cmd_list->VtxBuffer.Size * sizeof(ImDrawVert);
         // TODO redo this after LD
         auto* vertex_data = reinterpret_cast<float*>(cmd_list->VtxBuffer.Data);
@@ -308,12 +308,12 @@ void ImguiModule::on_populate_render_queue_listener(SceneModule* scene_module) n
         command_buffer.commands.push_back(eastl::move(command_update_vertex_buffer));
 
         render::Command command_bind_index_buffer{};
-        command_bind_index_buffer.type = kw::render::CommandType::BIND_INDEX_BUFFER;
+        command_bind_index_buffer.type = render::CommandType::BIND_INDEX_BUFFER;
         command_bind_index_buffer.bind_index_buffer.id = &m_index_buffer_id;
         command_buffer.commands.push_back(eastl::move(command_bind_index_buffer));
 
         render::Command command_update_index_buffer{};
-        command_update_index_buffer.type = kw::render::CommandType::UPDATE_INDEX_BUFFER;
+        command_update_index_buffer.type = render::CommandType::UPDATE_INDEX_BUFFER;
         command_update_index_buffer.update_index_buffer.size = cmd_list->IdxBuffer.Size * sizeof(ImDrawIdx);
         // TODO redo this after LD
         new (&command_update_index_buffer.update_index_buffer.data)
@@ -330,12 +330,12 @@ void ImguiModule::on_populate_render_queue_listener(SceneModule* scene_module) n
                     ImVec4(pcmd->ClipRect.x - pos.x, pcmd->ClipRect.y - pos.y, pcmd->ClipRect.z - pos.x, pcmd->ClipRect.w - pos.y);
                 if (clip_rect.x < fb_width && clip_rect.y < fb_height && clip_rect.z >= 0.0f && clip_rect.w >= 0.0f) {
                     render::Command command_bind_texture{};
-                    command_bind_texture.type = kw::render::CommandType::BIND_TEXTURE;
+                    command_bind_texture.type = render::CommandType::BIND_TEXTURE;
                     command_bind_texture.bind_texture.id = (uint32)(intptr_t)pcmd->TextureId;
                     command_buffer.commands.push_back(eastl::move(command_bind_texture));
 
                     render::Command command_draw{};
-                    command_draw.type = kw::render::CommandType::DRAW_INDEXED;
+                    command_draw.type = render::CommandType::DRAW_INDEXED;
                     command_draw.draw_indexed.size = (uint32)pcmd->ElemCount;
                     command_draw.draw_indexed.data = idx_buffer_offset;
                     command_buffer.commands.push_back(eastl::move(command_draw));

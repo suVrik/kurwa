@@ -13,15 +13,9 @@
 
 #pragma once
 
-#include <kw/base/queue.h>
 #include <kw/base/signal.h>
-#include <kw/base/string.h>
-#include <kw/base/types.h>
 #include <kw/concurrency/atomic.h>
-#include <kw/concurrency/mutex.h>
-#include <kw/concurrency/semaphore.h>
 #include <kw/concurrency/thread.h>
-#include <kw/render/commands.h>
 
 union SDL_Event;
 struct SDL_Window;
@@ -40,11 +34,15 @@ public:
     SceneModule(const SceneModule& original) = delete;
     SceneModule& operator=(const SceneModule& original) = delete;
 
+    /**
+     * Emitted before SceneModule submits command buffers to the RenderModule,
+     * so every subscribed to this signal module can add their command buffer to the render queue.
+     */
     Signal<void(SceneModule*)> on_populate_render_queue;
 
 private:
-    void on_init_listener(kw::IGame* game) noexcept;
-    void on_destroy_listener(kw::IGame* game) noexcept;
+    void on_init_listener(IGame* game) noexcept;
+    void on_destroy_listener(IGame* game) noexcept;
 
     Thread m_thread;
     Atomic<bool> is_update_thread_active = true;

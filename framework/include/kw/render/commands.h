@@ -13,7 +13,6 @@
 
 #pragma once
 
-#include <kw/base/string.h>
 #include <kw/base/types.h>
 #include <kw/base/vector.h>
 

@@ -21,11 +21,11 @@
 namespace kw {
 namespace render {
 
-BackendOpenGL::BackendOpenGL(kw::IGame* game) noexcept {
+BackendOpenGL::BackendOpenGL(IGame* game) noexcept {
     game->on_init.connect(this, &BackendOpenGL::on_init_listener);
 };
 
-void BackendOpenGL::on_init_listener(kw::IGame* game) noexcept(false) {
+void BackendOpenGL::on_init_listener(IGame* game) noexcept(false) {
     RenderingBackend::on_init_listener(game);
 
     SDL_GL_CreateContext(m_window);

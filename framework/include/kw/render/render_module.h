@@ -35,21 +35,19 @@ public:
     /**
      * Construct a render module using the given 'game' instance.
      */
-    explicit RenderModule(kw::IGame* game) noexcept;
+    explicit RenderModule(IGame* game) noexcept;
     RenderModule(const RenderModule& original) = delete;
     RenderModule& operator=(const RenderModule& original) = delete;
 
     /**
      * Push a specified command buffer content into a local command buffer.
      */
-
-    // TODO noexcept
-    void push_command_buffer(render::CommandBuffer&& command_buffer);
+    void push_command_buffer(render::CommandBuffer&& command_buffer) noexcept;
 
     /**
      * Submit a local command buffer to the update queue.
      */
-    void submit_command_buffers();
+    void submit_command_buffers() noexcept;
 
     /**
      * Return a renderer instance.
@@ -62,7 +60,7 @@ public:
     const RenderingBackendType get_rendering_backend_type() noexcept;
 
 private:
-    void on_init_listener(kw::IGame* game) noexcept(false);
+    void on_init_listener(IGame* game) noexcept(false);
     void on_update_listener() noexcept(false);
 
     UniquePtr<RenderingBackend> m_renderer;
