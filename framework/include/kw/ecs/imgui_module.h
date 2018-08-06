@@ -13,17 +13,8 @@
 
 #pragma once
 
-#include <SDL2/SDL_mouse.h>
-#include <imgui/imgui.h>
-#include <kw/base/queue.h>
 #include <kw/base/signal.h>
-#include <kw/base/string.h>
 #include <kw/base/types.h>
-#include <kw/concurrency/atomic.h>
-#include <kw/concurrency/mutex.h>
-#include <kw/concurrency/semaphore.h>
-#include <kw/concurrency/thread.h>
-#include <kw/render/commands.h>
 
 union SDL_Event;
 struct SDL_Window;
@@ -35,10 +26,8 @@ class SceneModule;
 
 class RenderModule;
 
-class RenderingBackend;
-
 /**
- * Scene module creates an update loop, records and stores the commands to be sent to a rendering backend.
+ * Imgui module creates everything needed to create and manage GUI using "Dear ImGui" library.
  */
 class ImguiModule : public SignalListener {
 public:
@@ -48,23 +37,18 @@ public:
 
 private:
     void on_init_listener(IGame* game) noexcept;
-    void on_destroy_listener(IGame* game) noexcept;
     void on_populate_render_queue_listener(SceneModule* scene_module) noexcept;
-    // kw::Function<void (render::CommandBuffer&& command_buffer)> m_push_command_buffer;
     void on_event_listener(SDL_Event& event) noexcept;
+    void imgui_setup_frame();
+
     RenderModule* m_render_module;
-
-    uint64 g_Time;
-    SDL_Cursor* g_MouseCursors[ImGuiMouseCursor_COUNT] = { 0 };
-    bool g_MousePressed = false;
-
-    unsigned int g_FontTexture = 0;
-    unsigned int g_ShaderHandle = 0, g_VertHandle = 0, g_FragHandle = 0;
-    int g_AttribLocationTex = 0, g_AttribLocationProjMtx = 0;
-    unsigned int g_AttribLocationPosition = 0, g_AttribLocationUV = 0, g_AttribLocationColor = 0;
-    unsigned int vao_handle = 0;
-    unsigned int g_VboHandle = 0, g_ElementsHandle = 0;
-
     SDL_Window* m_window;
+
+    bool is_left_click_pressed = false;
+    uint64 m_time;
+    uint32 m_font_texture_id = 0;
+    uint32 m_shader_program_id = 0, m_vertex_shader_id = 0, m_fragment_shader_id = 0;
+    uint32 m_attribution_texture_id = 0, m_attribution_projection_matrix = 0;
+    uint32 m_vao_id = 0, m_vbo_id = 0, m_index_buffer_id = 0;
 };
 } // namespace kw

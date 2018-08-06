@@ -14,7 +14,6 @@
 #pragma once
 
 #include "rendering_backend.h"
-#include <imgui/imgui.h>
 
 struct SDL_Cursor;
 union SDL_Event;
@@ -39,19 +38,6 @@ public:
 
 private:
     void on_init_listener(kw::IGame* game) noexcept(false) override;
-    // void on_event_listener(SDL_Event& event) noexcept;
-    void on_init_finished_listener(RenderModule* game) noexcept(false);
-
-    uint64 g_Time;
-    SDL_Cursor* g_MouseCursors[ImGuiMouseCursor_COUNT] = { 0 };
-    bool g_MousePressed = false;
-
-    unsigned int g_FontTexture = 0;
-    unsigned int g_ShaderHandle = 0, g_VertHandle = 0, g_FragHandle = 0;
-    int g_AttribLocationTex = 0, g_AttribLocationProjMtx = 0;
-    unsigned int g_AttribLocationPosition = 0, g_AttribLocationUV = 0, g_AttribLocationColor = 0;
-    unsigned int vao_handle = 0;
-    unsigned int g_VboHandle = 0, g_ElementsHandle = 0;
 };
 
 } // namespace render

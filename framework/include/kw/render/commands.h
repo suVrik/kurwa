@@ -13,6 +13,7 @@
 
 #pragma once
 
+#include <kw/base/string.h>
 #include <kw/base/types.h>
 #include <kw/base/vector.h>
 
@@ -26,18 +27,22 @@ enum class CommandType {
     UPDATE_VERTEX_BUFFER,
     BIND_VERTEX_BUFFER,
 
+    CREATE_INDEX_BUFFER,
     UPDATE_INDEX_BUFFER,
     BIND_INDEX_BUFFER,
 
+    CREATE_TEXTURE,
     BIND_TEXTURE,
+
+    CREATE_PROGRAM,
     BIND_PROGRAM,
 
     DRAW_INDEXED,
 
-    UPDATE_UNIFORM_MATRIX_4f,
-
+    CREATE_VERTEX_ATTRIBUTE,
+    GET_UNIFORM_LOCATION,
+    UPDATE_UNIFORM_MATRIX_4F,
     INIT_IMGUI,
-
 };
 
 struct CommandClear {
@@ -47,10 +52,10 @@ struct CommandClear {
     float a;
 };
 
-// TODO remove type ???
-struct CommandCreateVertexBuffer {};
-
-struct CommandInitImgui {};
+struct CommandCreateVertexBuffer {
+    uint32* vao_id;
+    uint32* vbo_id;
+};
 
 struct CommandUpdateVertexBuffer {
     uint32 size;
@@ -58,11 +63,13 @@ struct CommandUpdateVertexBuffer {
 };
 
 struct CommandBindVertexBuffer {
-    uint32 vao_id;
-    uint32 vbo_id;
+    uint32* vao_id;
+    uint32* vbo_id;
 };
 
-struct CommandCreateIndexBuffer {};
+struct CommandCreateIndexBuffer {
+    uint32* id;
+};
 
 struct CommandUpdateIndexBuffer {
     uint32 size;
@@ -70,7 +77,52 @@ struct CommandUpdateIndexBuffer {
 };
 
 struct CommandBindIndexBuffer {
+    uint32* id;
+};
+
+struct CommandCreateTexture {
+    uint32* id;
+    uint32 width;
+    uint32 height;
+    unsigned char* pixels;
+};
+
+struct CommandBindTexture {
     uint32 id;
+};
+
+struct CommandCreateProgram {
+    uint32* shader_program_id;
+    uint32* vertex_shader_id;
+    const char* vertex_shader_code;
+    uint32* fragment_shader_id;
+    const char* fragment_shader_code;
+};
+
+struct CommandBindProgram {
+    uint32* id;
+};
+
+enum class AttributeType { FLOAT, UNSIGNED_BYTE };
+
+struct CommandCreateVertexAttribute {
+    uint32* shader_program_id;
+    AttributeType type;
+    const char* name;
+    uint32 size;
+    uint32 stride;
+    size_t offset;
+};
+
+struct CommandGetUniformLocation {
+    uint32* id;
+    uint32* shader_program_id;
+    const char* name;
+};
+
+struct CommandUpdateUniformMatrix4f {
+    uint32* id;
+    Vector<float> matrix;
 };
 
 struct CommandDrawIndexed {
@@ -78,28 +130,14 @@ struct CommandDrawIndexed {
     const void* data;
 };
 
-struct CommandBindProgram {
-    uint32 id;
-};
-
-struct CommandBindTexture {
-    uint32 id;
-};
-
-// TODO to uniform buffer
-struct CommandUpdateUniformMatrix4f {
-    uint32 id;
-    Vector<float> matrix;
-};
-
 struct Command {
-    Command() {
+    Command() noexcept {
     }
 
     Command(const Command& original) = delete;
     Command& operator=(const Command& original) = delete;
 
-    Command(Command&& original)
+    Command(Command&& original) noexcept
         : type(original.type) {
         switch (type) {
             case CommandType::UPDATE_INDEX_BUFFER:
@@ -108,7 +146,7 @@ struct Command {
             case CommandType::UPDATE_VERTEX_BUFFER:
                 update_vertex_buffer = eastl::move(original.update_vertex_buffer);
                 break;
-            case CommandType::UPDATE_UNIFORM_MATRIX_4f:
+            case CommandType::UPDATE_UNIFORM_MATRIX_4F:
                 update_uniform_matrix_4f = eastl::move(original.update_uniform_matrix_4f);
                 break;
             default:
@@ -127,7 +165,7 @@ struct Command {
             case CommandType::UPDATE_VERTEX_BUFFER:
                 update_vertex_buffer.~CommandUpdateVertexBuffer();
                 break;
-            case CommandType::UPDATE_UNIFORM_MATRIX_4f:
+            case CommandType::UPDATE_UNIFORM_MATRIX_4F:
                 update_uniform_matrix_4f.~CommandUpdateUniformMatrix4f();
                 break;
             default:
@@ -150,10 +188,16 @@ struct Command {
         CommandBindIndexBuffer bind_index_buffer;
 
         CommandDrawIndexed draw_indexed;
+
+        CommandCreateProgram create_program;
         CommandBindProgram bind_program;
+
+        CommandCreateTexture create_texture;
         CommandBindTexture bind_texture;
+
+        CommandCreateVertexAttribute create_vertex_attribute;
+        CommandGetUniformLocation get_uniform_location;
         CommandUpdateUniformMatrix4f update_uniform_matrix_4f;
-        CommandInitImgui init_imgui;
     };
 };
 
