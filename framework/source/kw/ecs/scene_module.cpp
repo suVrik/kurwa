@@ -27,15 +27,13 @@ void SceneModule::on_init_listener(IGame* game) noexcept {
     m_thread = Thread([&render_module, this]() {
         render::CommandBuffer command_buffer;
         render::Command command;
-
         command.type = render::CommandType::INIT_2D;
         command_buffer.commands.push_back(eastl::move(command));
+        render_module.push_command_buffer(eastl::move(command_buffer));
 
         on_init.emit(this);
 
         while (is_update_thread_active) {
-            render_module.push_command_buffer(eastl::move(command_buffer));
-
             on_update.emit(this);
 
             render_module.submit_command_buffers();
