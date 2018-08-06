@@ -13,23 +13,22 @@
 
 #include <kw/core/i_game.h>
 #include <kw/core/window_module.h>
-#include <kw/ecs/scene_module.h>
-#include <kw/render/render_module.h>
-#include <kw/render/rendering_backend.h>
 #include <kw/render/backend_opengl.h>
+#include <kw/render/render_module.h>
 
 #include <SDL2/SDL_video.h>
 
 namespace kw {
 
-RenderModule::RenderModule(kw::IGame* game) noexcept
-    : m_render_semaphore(COMMAND_BUFFER_QUEUE_SIZE) {
+RenderModule::RenderModule(IGame* game) noexcept
+    : m_render_semaphore(COMMAND_BUFFER_QUEUE_SIZE)
+    , m_main_thread_id(this_thread::get_id()) {
     game->on_init.connect(this, &RenderModule::on_init_listener);
     game->on_update.connect(this, &RenderModule::on_update_listener);
 }
 
-void RenderModule::on_init_listener(kw::IGame* game) noexcept(false) {
-    auto& window_module = game->get<kw::WindowModule>();
+void RenderModule::on_init_listener(IGame* game) noexcept(false) {
+    auto& window_module = game->get<WindowModule>();
     m_window = window_module.get_window();
     switch (m_renderer_type) {
         case RenderingBackendType::OPENGL:
@@ -42,14 +41,21 @@ void RenderModule::on_init_listener(kw::IGame* game) noexcept(false) {
 
 void RenderModule::on_update_listener() noexcept(false) {
     m_update_semaphore.wait();
-    kw::render::CommandBuffer buffer = m_update_queue.pop();
+    render::CommandBuffer buffer = m_update_queue.pop();
     m_render_semaphore.post();
     m_renderer->process_command_buffer(eastl::move(buffer));
 }
 
-void RenderModule::push_command_buffer(kw::render::CommandBuffer&& command_buffer) {
+void RenderModule::push_command_buffer(render::CommandBuffer&& command_buffer) noexcept {
+    KW_ASSERT(this_thread::get_id() != m_main_thread_id, "You are trying to push command buffers from a wrong thread!");
+    for (render::Command& command : command_buffer.commands) {
+        m_command_buffer.commands.push_back(eastl::move(command));
+    }
+}
+
+void RenderModule::submit_command_buffers() noexcept {
     m_render_semaphore.wait();
-    m_update_queue.push(eastl::move(command_buffer));
+    m_update_queue.push(eastl::move(m_command_buffer));
     m_update_semaphore.post();
 }
 

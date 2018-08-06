@@ -16,33 +16,33 @@
 #include <kw/render/render_module.h>
 
 namespace kw {
-SceneModule::SceneModule(IGame* game) noexcept : is_update_thread_active(true) {
+SceneModule::SceneModule(IGame* game) noexcept
+    : is_update_thread_active(true) {
     game->on_init.connect(this, &SceneModule::on_init_listener);
     game->on_destroy.connect(this, &SceneModule::on_destroy_listener);
 }
 
-void SceneModule::on_init_listener(kw::IGame *game) noexcept {
+void SceneModule::on_init_listener(IGame* game) noexcept {
     auto& render_module = game->get<RenderModule>();
     m_thread = Thread([&render_module, this]() {
-        float red = 0.0f;
+        render::CommandBuffer command_buffer;
+        render::Command command;
+        command.type = render::CommandType::INIT_2D;
+        command_buffer.commands.push_back(eastl::move(command));
+        render_module.push_command_buffer(eastl::move(command_buffer));
+
+        on_init.emit(this);
+
         while (is_update_thread_active) {
-            render::CommandBuffer command_buffer;
-            render::Command command {};
-            command.clear.type = kw::render::CommandType::CLEAR;
-            command.clear.r = 0.9f * red;
-            command.clear.g = 0.9f;
-            command.clear.b = 0.9f;
-            command.clear.a = 1.f;
-            command_buffer.commands.push_back(command);
+            on_update.emit(this);
 
-            render_module.push_command_buffer(eastl::move(command_buffer));
-
-            if (red > 1.f) red = 0.f; else red += 0.01f;
+            render_module.submit_command_buffers();
         }
+        on_destroy.emit(this);
     });
 }
 
-void SceneModule::on_destroy_listener(kw::IGame *game) noexcept {
+void SceneModule::on_destroy_listener(IGame* game) noexcept {
     is_update_thread_active = false;
     m_thread.detach();
 }

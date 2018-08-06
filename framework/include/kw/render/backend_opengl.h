@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "rendering_backend.h"
+#include <kw/render/rendering_backend.h>
 
 namespace kw {
 namespace render {
@@ -23,7 +23,7 @@ namespace render {
  */
 class BackendOpenGL : public RenderingBackend {
 public:
-    explicit BackendOpenGL(kw::IGame* game) noexcept;
+    explicit BackendOpenGL(IGame* game) noexcept;
     BackendOpenGL(const BackendOpenGL& original) = delete;
     BackendOpenGL& operator=(const BackendOpenGL& original) = delete;
 
@@ -31,8 +31,9 @@ public:
      * Execute the commands in a command buffer and present the resulting image to the screen.
      */
     void process_command_buffer(CommandBuffer&& command_buffer) noexcept override;
+
 private:
-    void on_init_listener(kw::IGame* game) noexcept(false) override;
+    void on_init_listener(IGame* game) noexcept(false) override;
 };
 
 } // namespace render

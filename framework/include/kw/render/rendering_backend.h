@@ -35,10 +35,11 @@ public:
      * Execute the commands in a command buffer and present the resulting image.
      */
     virtual void process_command_buffer(render::CommandBuffer&& command_buffer) = 0;
+
 protected:
     RenderingBackend() = default;
 
-    virtual void on_init_listener(kw::IGame* game) noexcept(false);
+    virtual void on_init_listener(IGame* game) noexcept(false);
 
     SDL_Window* m_window;
 };

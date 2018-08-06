@@ -17,4 +17,5 @@
 
 namespace kw {
 using Thread = std::thread;
+namespace this_thread = std::this_thread;
 } // namespace kw

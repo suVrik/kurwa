@@ -11,22 +11,27 @@
  *  See the License for the specific language governing permissions and limitations under the License.
  */
 
-#include <kw/render/update_queue.h>
+#pragma once
+
+#include <kw/base/types.h>
 
 namespace kw {
 namespace render {
+typedef uint32 Handle;
+typedef Handle ShaderHandle;
+typedef Handle ShaderProgramHandle;
+typedef Handle TextureHandle;
+typedef Handle VertexArrayHandle;
+typedef Handle VertexBufferHandle;
+typedef Handle IndexBufferHandle;
+typedef Handle UniformLocationHandle;
 
-CommandBuffer UpdateQueue::pop() {
-    LockGuard<Mutex> lock(m_mutex);
-    CommandBuffer command_buffer = eastl::move(m_queue.front());
-    m_queue.pop();
-    return command_buffer;
-}
-
-void UpdateQueue::push(CommandBuffer&& command_buffer) {
-    LockGuard<Mutex> lock(m_mutex);
-    m_queue.push(eastl::move(command_buffer));
-}
-
+inline ShaderHandle NO_SHADER = 0;
+inline ShaderProgramHandle NO_SHADER_PROGRAM = 0;
+inline TextureHandle NO_TEXTURE = 0;
+inline VertexArrayHandle NO_VERTEX_ARRAY = 0;
+inline VertexBufferHandle NO_VERTEX_BUFFER = 0;
+inline IndexBufferHandle NO_INDEX_BUFFER = 0;
+inline UniformLocationHandle NO_UNIFORM_LOCATION = 0;
 } // namespace render
 } // namespace kw

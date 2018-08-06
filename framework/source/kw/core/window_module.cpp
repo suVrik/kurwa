@@ -102,10 +102,13 @@ bool WindowModule::is_restored() const noexcept {
     return m_is_restored;
 }
 
-void WindowModule::on_init_listener(kw::IGame *game) noexcept(false) {
+void WindowModule::on_init_listener(IGame* game) noexcept(false) {
     Uint32 flags = SDL_WINDOW_SHOWN;
-    switch (game->get<kw::RenderModule>().get_rendering_backend_type()) {
+    switch (game->get<RenderModule>().get_rendering_backend_type()) {
         case RenderingBackendType::OPENGL:
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
             flags |= SDL_WINDOW_OPENGL;
             break;
         default:
