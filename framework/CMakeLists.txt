@@ -61,9 +61,11 @@ if(LINUX)
     target_link_libraries(framework PRIVATE Threads::Threads)
 endif()
 
-# Required by 'kw/debug/stacktrace'
 if(WIN32)
+    # Required by 'kw/debug/stacktrace'
     target_link_libraries(framework PRIVATE $<$<CONFIG:Debug>:Dbghelp>)
+    # Required by filesystem
+    target_link_libraries(framework PRIVATE Shlwapi)
 endif()
 
 # KW_DEBUG must be defined on debug configuration.
