@@ -17,7 +17,6 @@ before_build:
   - cmd: mkdir build
   - cmd: cd build
   - cmd: cmake -G"Visual Studio 15 2017 Win64" ..
-  - cmd: dir
 
 build:
   project: build\all.sln
@@ -25,9 +24,7 @@ build:
   verbosity: normal
 
 test_script:
-  - cmd: cd bin
-  - cmd: dir
-  - cmd: cd Release
-  - cmd: dir
+  # Temporary Workaround, as DLLs are in the wrong directory, must be done via CMake.
+  - cmd: copy bin/*.dll bin/Release >nul
+  - cmd: cd bin/Release
   - cmd: unittest.exe
-
