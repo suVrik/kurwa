@@ -46,8 +46,8 @@ TEST(filesystem, is_absolute) {
 TEST(filesystem, join_resolve) {
 #if defined(KW_WINDOWS)
     EXPECT_EQ(kw::FilesystemUtils::join("C:\\work", "kurwa"), "C:\\work\\kurwa");
-    EXPECT_EQ(kw::FilesystemUtils::join("C:\\work", "D:\\Program Files\\Game\\"),
-              "C:\\work\\D:\\Program Files\\Game\\");
+    EXPECT_EQ(kw::FilesystemUtils::join("C:\\work", "D:\\Program Files\\Game\\"), "C:\\work\\D:\\Program "
+                                                                                  "Files\\Game\\");
     EXPECT_EQ(kw::FilesystemUtils::join("D:\\", "E:\\"), "D:\\E:\\");
     EXPECT_EQ(kw::FilesystemUtils::join("D:\\", "foo\\boo"), "D:\\foo\\boo");
 
@@ -56,15 +56,15 @@ TEST(filesystem, join_resolve) {
     EXPECT_EQ(kw::FilesystemUtils::resolve("D:\\", "E:\\"), "E:\\");
     EXPECT_EQ(kw::FilesystemUtils::resolve("D:\\", "foo\\boo"), "D:\\foo\\boo");
 #else
-    EXPECT_EQ(kw::FilesystemUtils::join("/work", "kurwa"), "/work/kurwa/");
+    EXPECT_EQ(kw::FilesystemUtils::join("/work", "kurwa"), "/work/kurwa");
     EXPECT_EQ(kw::FilesystemUtils::join("/work", "/Program Files/Game/"), "/work/Program Files/Game/");
     EXPECT_EQ(kw::FilesystemUtils::join("work", "/"), "work/");
-    EXPECT_EQ(kw::FilesystemUtils::join("doo", "foo/boo"), "doo/foo/boo/");
+    EXPECT_EQ(kw::FilesystemUtils::join("doo", "foo/boo"), "doo/foo/boo");
 
-    EXPECT_EQ(kw::FilesystemUtils::resolve("/work", "kurwa"), "/work/kurwa/");
+    EXPECT_EQ(kw::FilesystemUtils::resolve("/work", "kurwa"), "/work/kurwa");
     EXPECT_EQ(kw::FilesystemUtils::resolve("/work", "/Program Files/Game/"), "/Program Files/Game/");
     EXPECT_EQ(kw::FilesystemUtils::resolve("/", "/"), "/");
-    EXPECT_EQ(kw::FilesystemUtils::resolve("/", "foo/boo"), "/foo/boo/");
+    EXPECT_EQ(kw::FilesystemUtils::resolve("/", "foo/boo"), "/foo/boo");
 #endif
 }
 
@@ -124,6 +124,5 @@ TEST(filesystem, create_directory) {
 
     Vector<String> files = FilesystemUtils::list(my_directory);
     EXPECT_EQ(files.size(), 2);
-    EXPECT_EQ(files[0], my_file_a);
-    EXPECT_EQ(files[1], my_file_b);
+    EXPECT_TRUE((files[0] == my_file_a && files[1] == my_file_b) || (files[0] == my_file_b && files[1] == my_file_a));
 }

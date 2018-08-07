@@ -104,7 +104,7 @@ public:
     /**
      * Return list of files and directories in the given `directory`.
      */
-    static Vector<String> list(String directory) noexcept;
+    static Vector<String> list(const String& directory) noexcept;
 
     FilesystemUtils() = delete;
 };

@@ -11,13 +11,21 @@
  *  See the License for the specific language governing permissions and limitations under the License.
  */
 
-#include <kw/filesystem/filesystem_utils.h>
 #include <kw/debug/runtime_error.h>
+#include <kw/filesystem/filesystem_utils.h>
 
 #include <SDL2/SDL_filesystem.h>
 
 #if defined(KW_WINDOWS)
 #include <shlwapi.h>
+#elif defined(KW_OSX)
+#include <dirent.h>
+#include <mach-o/dyld.h>
+#include <sys/stat.h>
+#elif defined(KW_LINUX)
+#include <dirent.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #endif
 
 namespace kw {
@@ -30,6 +38,49 @@ char PLATFORM_SEPARATOR = '\\';
 #else
 char PLATFORM_SEPARATOR = '/';
 #endif
+
+#if !defined(KW_WINDOWS)
+// No time to refactor this. It works and I'm fine about it.
+// https://stackoverflow.com/questions/2256945/removing-a-non-empty-directory-programmatically-in-c-or-c
+int remove_directory(const char* path) {
+    DIR* d = opendir(path);
+    size_t path_len = strlen(path);
+    int r = -1;
+    if (d != nullptr) {
+        struct dirent* p;
+        r = 0;
+        while (!r && (p = readdir(d))) {
+            int r2 = -1;
+            char* buf;
+            size_t len;
+            /* Skip the names "." and ".." as we don't want to recurse on them. */
+            if (!strcmp(p->d_name, ".") || !strcmp(p->d_name, "..")) {
+                continue;
+            }
+            len = path_len + strlen(p->d_name) + 2;
+            buf = static_cast<char*>(malloc(len));
+            if (buf) {
+                struct stat statbuf {};
+                snprintf(buf, len, "%s/%s", path, p->d_name);
+                if (!stat(buf, &statbuf)) {
+                    if (S_ISDIR(statbuf.st_mode)) {
+                        r2 = remove_directory(buf);
+                    } else {
+                        r2 = unlink(buf);
+                    }
+                }
+                free(buf);
+            }
+            r = r2;
+        }
+        closedir(d);
+    }
+    if (r == 0) {
+        r = rmdir(path);
+    }
+    return r;
+}
+#endif
 } // namespace filesystem_details
 
 String FilesystemUtils::get_executable_path() noexcept {
@@ -41,8 +92,22 @@ String FilesystemUtils::get_executable_path() noexcept {
         length = GetModuleFileNameA(nullptr, &result[0], MAX_PATH + 1);
     } while (length >= result.size());
     return result.c_str(); // Normalize string that may contain many `\0`
-#else
-    // TODO: Unix
+#elif defined(KW_OSX)
+    String buf;
+    buf.resize(PATH_MAX);
+    while (true) {
+        uint32_t size = static_cast<uint32_t>(buf.size());
+        if (_NSGetExecutablePath(&buf[0], &size) == 0) {
+            buf.resize(strlen(&buf[0]));
+            break;
+        }
+        buf.resize(size);
+    }
+    return buf;
+#elif defined(KW_LINUX)
+    char buf[PATH_MAX];
+    readlink("/proc/self/exe", buf, PATH_MAX);
+    return buf;
 #endif
 }
 
@@ -65,8 +130,8 @@ void FilesystemUtils::set_save_path(const String& organization, const String& ap
 
 String FilesystemUtils::get_save_path() noexcept(false) {
     static String result = []() {
-        char* pref_path_c_str = SDL_GetPrefPath(filesystem_details::organization_name.c_str(),
-                                                filesystem_details::application_name.c_str());
+        char* pref_path_c_str =
+            SDL_GetPrefPath(filesystem_details::organization_name.c_str(), filesystem_details::application_name.c_str());
         if (pref_path_c_str == nullptr) {
             throw RuntimeError("Failed to get preferences path!");
         }
@@ -77,7 +142,7 @@ String FilesystemUtils::get_save_path() noexcept(false) {
     return result;
 }
 
-bool FilesystemUtils::is_absolute(const String &path) noexcept {
+bool FilesystemUtils::is_absolute(const String& path) noexcept {
 #if defined(KW_WINDOWS)
     return PathIsRelativeA(path.c_str()) == FALSE;
 #else
@@ -85,7 +150,7 @@ bool FilesystemUtils::is_absolute(const String &path) noexcept {
 #endif
 }
 
-String FilesystemUtils::join(const String &a, const String &b) noexcept {
+String FilesystemUtils::join(const String& a, const String& b) noexcept {
     if (a.empty()) {
         return b;
     }
@@ -107,14 +172,14 @@ String FilesystemUtils::join(const String &a, const String &b) noexcept {
     }
 }
 
-String FilesystemUtils::resolve(const String &a, const String &b) noexcept {
+String FilesystemUtils::resolve(const String& a, const String& b) noexcept {
     if (is_absolute(b)) {
         return b;
     }
     return join(a, b);
 }
 
-String FilesystemUtils::get_filename(const String &path) noexcept {
+String FilesystemUtils::get_filename(const String& path) noexcept {
     size_t last_separator = path.find_last_of(filesystem_details::PLATFORM_SEPARATOR);
     if (last_separator != String::npos) {
         if (last_separator + 1 != path.size()) {
@@ -134,7 +199,7 @@ String FilesystemUtils::get_filename(const String &path) noexcept {
     return path;
 }
 
-String FilesystemUtils::get_base_filename(const String &path) noexcept {
+String FilesystemUtils::get_base_filename(const String& path) noexcept {
     String filename = get_filename(path);
     if (!is_directory(path)) {
         size_t first_period = filename.find_first_of('.');
@@ -145,28 +210,33 @@ String FilesystemUtils::get_base_filename(const String &path) noexcept {
     return filename;
 }
 
-bool FilesystemUtils::exists(const String &path) noexcept {
+bool FilesystemUtils::exists(const String& path) noexcept {
 #if defined(KW_WINDOWS)
     return GetFileAttributesA(path.c_str()) != INVALID_FILE_ATTRIBUTES;
 #else
-    // TODO: Unix
+    struct stat st {};
+    return stat(path.c_str(), &st) == 0;
 #endif
 }
 
-bool FilesystemUtils::is_directory(const String &path) noexcept {
+bool FilesystemUtils::is_directory(const String& path) noexcept {
 #if defined(KW_WINDOWS)
     const DWORD attributes = GetFileAttributesA(path.c_str());
     return attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
 #else
-    // TODO: Unix
+    struct stat st;
+    if (stat(path.c_str(), &st) == 0) {
+        return (st.st_mode & S_IFDIR) != 0;
+    }
+    return false;
 #endif
 }
 
-bool FilesystemUtils::create_directory(const String &path) noexcept {
+bool FilesystemUtils::create_directory(const String& path) noexcept {
 #if defined(KW_WINDOWS)
     return CreateDirectoryA(path.c_str(), nullptr) == TRUE;
 #else
-    // TODO: Unix
+    return mkdir(path.c_str(), S_IRWXU) == 0;
 #endif
 }
 
@@ -174,34 +244,40 @@ bool FilesystemUtils::remove_directory(const String& path) noexcept {
 #if defined(KW_WINDOWS)
     return RemoveDirectoryA(path.c_str()) == TRUE;
 #else
-    // TODO: Unix
+    return rmdir(path.c_str()) == 0;
 #endif
 }
 
 bool FilesystemUtils::remove_directory_recursive(const String& path) noexcept {
+#if defined(KW_WINDOWS)
     String target_path(path.size() + 1, '\0');
     eastl::copy_n(&path[0], path.size(), &target_path[0]);
-    SHFILEOPSTRUCTA file_op = { nullptr, FO_DELETE, target_path.c_str(), "",
-                                FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_SILENT, false, 0, "" };
+    SHFILEOPSTRUCTA file_op = {
+        nullptr, FO_DELETE, target_path.c_str(), "", FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_SILENT, false, 0, ""
+    };
     return SHFileOperationA(&file_op) == 0;
+#else
+    return filesystem_details::remove_directory(path.c_str()) == 0;
+#endif
 }
 
 bool FilesystemUtils::remove_file(const String& path) noexcept {
 #if defined(KW_WINDOWS)
     return DeleteFileA(path.c_str()) == TRUE;
 #else
-    // TODO: Unix
+    return unlink(path.c_str()) == 0;
 #endif
 }
 
-Vector<String> FilesystemUtils::list(String directory) noexcept {
-#if defined(KW_WINDOWS)
+Vector<String> FilesystemUtils::list(const String& directory_) noexcept {
     Vector<String> result;
 
-    if (!directory.empty() && directory.back() != '\\') {
-        directory.append(1, '\\');
+    String directory = directory_;
+    if (!directory.empty() && directory.back() != filesystem_details::PLATFORM_SEPARATOR) {
+        directory.append(1, filesystem_details::PLATFORM_SEPARATOR);
     }
 
+#if defined(KW_WINDOWS)
     WIN32_FIND_DATAA find_data;
     HANDLE find = FindFirstFileA((directory + "*").c_str(), &find_data);
     if (find != INVALID_HANDLE_VALUE) {
@@ -209,13 +285,22 @@ Vector<String> FilesystemUtils::list(String directory) noexcept {
             if (strcmp(find_data.cFileName, ".") != 0 && strcmp(find_data.cFileName, "..") != 0) {
                 result.push_back(directory + find_data.cFileName);
             }
-        } while(FindNextFile(find, &find_data) != 0);
+        } while (FindNextFile(find, &find_data) != 0);
         FindClose(find);
     }
+#else
+    DIR* dir = opendir(directory.c_str());
+    if (dir != nullptr) {
+        struct dirent* p;
+        while ((p = readdir(dir))) {
+            if (strcmp(p->d_name, ".") != 0 && strcmp(p->d_name, "..") != 0) {
+                result.push_back(directory + p->d_name);
+            }
+        }
+        closedir(dir);
+    }
+#endif
 
     return result;
-#else
-    // TODO: Unix
-#endif
 }
 } // namespace kw
