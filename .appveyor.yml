@@ -25,6 +25,6 @@ build:
 
 test_script:
   # Temporary Workaround, as DLLs are in the wrong directory, must be done via CMake.
-  - cmd: copy bin/*.dll bin/Release >nul
+  - ps: copy bin/*.dll bin/Release
   - cmd: cd bin/Release
   - cmd: unittest.exe
