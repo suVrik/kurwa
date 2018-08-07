@@ -22,6 +22,7 @@
 #include <dirent.h>
 #include <mach-o/dyld.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #elif defined(KW_LINUX)
 #include <dirent.h>
 #include <sys/stat.h>
