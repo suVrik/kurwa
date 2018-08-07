@@ -337,8 +337,8 @@ private:
 /**
  * A shortcut Reflection. You can use `kw` structures and types inside, as if there's `using namespace kw`
  * (there actually is).
- * By using this macros you never ask yourself anymore 'where do I add reflection for my class?' and simply use
- * this macros in your source file.
+ * By using this macro you never ask yourself anymore 'where do I add reflection for my class?' and simply use
+ * this macro in your source file.
  *
  * \code
  * REFLECTION_REGISTRATOR({
