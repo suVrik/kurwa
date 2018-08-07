@@ -17,6 +17,7 @@ before_build:
   - cmd: mkdir build
   - cmd: cd build
   - cmd: cmake -G"Visual Studio 15 2017 Win64" ..
+  - cmd: dir
 
 build:
   project: build\all.sln
@@ -24,6 +25,9 @@ build:
   verbosity: normal
 
 test_script:
-  - cmd: cd bin/Release
+  - cmd: cd bin
+  - cmd: dir
+  - cmd: cd Release
+  - cmd: dir
   - cmd: unittest.exe
 
