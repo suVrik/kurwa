@@ -333,3 +333,23 @@ private:
 } // namespace kw
 
 #include <kw/reflection/internal/reflection_impl.h>
+
+/**
+ * A shortcut Reflection. You can use `kw` structures and types inside, as if there's `using namespace kw`
+ * (there actually is).
+ * By using this macro you never ask yourself anymore 'where do I add reflection for my class?' and simply use
+ * this macro in your source file.
+ *
+ * \code
+ * REFLECTION_REGISTRATOR({
+ *    Reflection* reflection = Reflection::add<MyClass>();
+ *    reflection->add_field("field_name", offsetof(MyClass, field_name));
+ * });
+ * \endcode
+ */
+#define REFLECTION_REGISTRATOR(scope) \
+static int REFLECTION_##__COUNTER__ = [] { \
+    using namespace kw; \
+    scope \
+    return 0; \
+}();
