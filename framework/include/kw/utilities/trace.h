@@ -13,16 +13,25 @@
 
 #pragma once
 
-#include <fmt/format.h>
+#include <kw/base/string.h>
 
-#include <cstdio>
+#include <fmt/format.h>
+#include <fmt/ostream.h>
+
+#include <iostream>
 
 namespace kw {
 /**
  * Writes the formatted string 'format_str' to the standard output (stdout).
  */
 template <typename string, typename... Args>
-void trace(string format_str, const Args&... args);
+void tracef(const String& format_str, const Args&... args);
+
+/**
+ * Writes the given 'args' to the standard output (stdout) separated by a single space.
+ */
+template <typename... Args>
+void trace(const Args&... args);
 } // namespace kw
 
 #include <kw/utilities/internal/trace_impl.h>
