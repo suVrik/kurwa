@@ -11,8 +11,8 @@ script:
   - git lfs pull
   - mkdir build
   - cd build
-  - cmake -G Ninja .. -DCMAKE_BUILD_TYPE=Release
-  - cmake --build .
+  - cmake .. -DCMAKE_BUILD_TYPE=Release
+  - cmake --build . -- -j 2
   - cd bin
   - if [ `uname` = 'Darwin' ]; then
       ./unittest.app/Contents/MacOS/unittest;
@@ -27,7 +27,8 @@ matrix:
       compiler: clang-6.0
       addons:
         apt:
-          packages: [ clang-6.0, ninja-build ]
+          packages:
+            - clang-6.0
           sources:
             - sourceline: 'deb http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu trusty main'
             - sourceline: 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-6.0 main'
@@ -38,6 +39,6 @@ matrix:
     - os: osx
       osx_image: xcode9.4
       before_script:
-        - brew install git-lfs ninja
+        - brew install git-lfs
         - git lfs install
 
