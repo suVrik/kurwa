@@ -27,8 +27,7 @@ matrix:
       compiler: clang-6.0
       addons:
         apt:
-          packages:
-            - clang-6.0
+          packages: [ clang-6.0, ninja-build ]
           sources:
             - sourceline: 'deb http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu trusty main'
             - sourceline: 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-6.0 main'
@@ -39,6 +38,6 @@ matrix:
     - os: osx
       osx_image: xcode9.4
       before_script:
-        - brew install git-lfs
+        - brew install git-lfs ninja
         - git lfs install
 
