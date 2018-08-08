@@ -15,8 +15,7 @@
 
 #include <kw/base/types.h>
 
-namespace kw {
-namespace render {
+namespace kw::render {
 typedef uint32 Handle;
 typedef Handle ShaderHandle;
 typedef Handle ShaderProgramHandle;
@@ -33,5 +32,4 @@ inline VertexArrayHandle NO_VERTEX_ARRAY = 0;
 inline VertexBufferHandle NO_VERTEX_BUFFER = 0;
 inline IndexBufferHandle NO_INDEX_BUFFER = 0;
 inline UniformLocationHandle NO_UNIFORM_LOCATION = 0;
-} // namespace render
-} // namespace kw
+} // namespace kw::render

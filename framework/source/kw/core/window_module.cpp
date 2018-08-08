@@ -103,9 +103,10 @@ bool WindowModule::is_restored() const noexcept {
 }
 
 void WindowModule::on_init_listener(IGame* game) noexcept(false) {
+    // TODO: This must be done from RenderModule, WindowModule must not know about RenderModule.
     Uint32 flags = SDL_WINDOW_SHOWN;
     switch (game->get<RenderModule>().get_rendering_backend_type()) {
-        case RenderingBackendType::OPENGL:
+        case render::Backend::Type::OPENGL:
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
@@ -114,6 +115,7 @@ void WindowModule::on_init_listener(IGame* game) noexcept(false) {
         default:
             break;
     }
+
     m_window = SDL_CreateWindow(m_title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, m_width, m_height, flags);
     if (m_window == nullptr) {
         throw RuntimeError(fmt::format("Failed to initialize a window!\nThe error message: {}", SDL_GetError()));

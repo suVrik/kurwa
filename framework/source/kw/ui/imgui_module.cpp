@@ -13,9 +13,9 @@
 
 #include <kw/core/i_game.h>
 #include <kw/core/window_module.h>
-#include <kw/ecs/imgui_module.h>
 #include <kw/ecs/scene_module.h>
 #include <kw/render/render_module.h>
+#include <kw/ui/imgui_module.h>
 
 #include <imgui/imgui.h>
 
@@ -27,6 +27,8 @@ ImguiModule::ImguiModule(IGame* game) noexcept
     : m_time(0) {
     game->on_init.connect(this, &ImguiModule::on_init_listener);
     game->on_event.connect(this, &ImguiModule::on_event_listener);
+    game->on_update.connect(this, &ImguiModule::on_update_listener);
+    game->on_draw.connect(this, &ImguiModule::on_draw_listener);
 }
 
 void ImguiModule::on_event_listener(SDL_Event& event) noexcept {
@@ -71,11 +73,9 @@ void ImguiModule::on_event_listener(SDL_Event& event) noexcept {
 void ImguiModule::on_init_listener(IGame* game) noexcept {
     m_render_module = &game->get<RenderModule>();
     m_window_module = &game->get<WindowModule>();
-    game->get<SceneModule>().on_init.connect(this, &ImguiModule::on_scene_init_listener);
-    game->get<SceneModule>().on_update.connect(this, &ImguiModule::on_scene_update_listener);
-}
 
-void ImguiModule::on_scene_init_listener(SceneModule* scene_module) noexcept(false) {
+    // TODO: move the following to a separate method.
+
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
 
@@ -112,11 +112,11 @@ void ImguiModule::on_scene_init_listener(SceneModule* scene_module) noexcept(fal
     command.create_program.vertex_shader_code = vertex_shader_glsl_410_core;
     command.create_program.fragment_shader_id = &m_fragment_shader_id;
     command.create_program.fragment_shader_code = fragment_shader_glsl_410_core;
-    command_buffer.commands.push_back(eastl::move(command));
+    command_buffer.push_back(eastl::move(command));
 
     command.type = render::CommandType::BIND_PROGRAM;
     command.bind_program.id = &m_shader_program_id;
-    command_buffer.commands.push_back(eastl::move(command));
+    command_buffer.push_back(eastl::move(command));
 
     ImGuiIO& io = ImGui::GetIO();
     // Build texture atlas
@@ -135,7 +135,7 @@ void ImguiModule::on_scene_init_listener(SceneModule* scene_module) noexcept(fal
     command.create_texture.pixels = pixels;
     command.create_texture.texture_filtering = render::TextureFiltering::LINEAR;
     command.create_texture.pixel_data_type = render::PixelDataType::RGBA;
-    command_buffer.commands.push_back(eastl::move(command));
+    command_buffer.push_back(eastl::move(command));
 
     // Store our identifier
     io.Fonts->TexID = &m_font_texture_id;
@@ -143,29 +143,29 @@ void ImguiModule::on_scene_init_listener(SceneModule* scene_module) noexcept(fal
     // Create buffers
     command.type = render::CommandType::CREATE_INDEX_BUFFER;
     command.create_index_buffer.id = &m_index_buffer_id;
-    command_buffer.commands.push_back(eastl::move(command));
+    command_buffer.push_back(eastl::move(command));
 
     command.type = render::CommandType::CREATE_VERTEX_BUFFER;
     command.create_vertex_buffer.vao_id = &m_vao_id;
     command.create_vertex_buffer.vbo_id = &m_vbo_id;
-    command_buffer.commands.push_back(eastl::move(command));
+    command_buffer.push_back(eastl::move(command));
 
     command.type = render::CommandType::BIND_VERTEX_BUFFER;
     command.bind_vertex_buffer.vao_id = &m_vao_id;
     command.bind_vertex_buffer.vbo_id = &m_vbo_id;
-    command_buffer.commands.push_back(eastl::move(command));
+    command_buffer.push_back(eastl::move(command));
 
     command.type = render::CommandType::GET_UNIFORM_LOCATION;
     command.get_uniform_location.shader_program_id = &m_shader_program_id;
     command.get_uniform_location.id = &m_attribution_texture_id;
     command.get_uniform_location.name = "Texture";
-    command_buffer.commands.push_back(eastl::move(command));
+    command_buffer.push_back(eastl::move(command));
 
     command.type = render::CommandType::GET_UNIFORM_LOCATION;
     command.get_uniform_location.shader_program_id = &m_shader_program_id;
     command.get_uniform_location.id = &m_attribution_projection_matrix;
     command.get_uniform_location.name = "ProjMtx";
-    command_buffer.commands.push_back(eastl::move(command));
+    command_buffer.push_back(eastl::move(command));
 
     command.type = render::CommandType::CREATE_VERTEX_ATTRIBUTE;
     command.create_vertex_attribute.shader_program_id = &m_shader_program_id;
@@ -174,7 +174,7 @@ void ImguiModule::on_scene_init_listener(SceneModule* scene_module) noexcept(fal
     command.create_vertex_attribute.size = 2;
     command.create_vertex_attribute.stride = sizeof(ImDrawVert);
     command.create_vertex_attribute.offset = IM_OFFSETOF(ImDrawVert, pos);
-    command_buffer.commands.push_back(eastl::move(command));
+    command_buffer.push_back(eastl::move(command));
 
     command.type = render::CommandType::CREATE_VERTEX_ATTRIBUTE;
     command.create_vertex_attribute.shader_program_id = &m_shader_program_id;
@@ -183,7 +183,7 @@ void ImguiModule::on_scene_init_listener(SceneModule* scene_module) noexcept(fal
     command.create_vertex_attribute.size = 2;
     command.create_vertex_attribute.stride = sizeof(ImDrawVert);
     command.create_vertex_attribute.offset = IM_OFFSETOF(ImDrawVert, uv);
-    command_buffer.commands.push_back(eastl::move(command));
+    command_buffer.push_back(eastl::move(command));
 
     command.type = render::CommandType::CREATE_VERTEX_ATTRIBUTE;
     command.create_vertex_attribute.shader_program_id = &m_shader_program_id;
@@ -192,17 +192,17 @@ void ImguiModule::on_scene_init_listener(SceneModule* scene_module) noexcept(fal
     command.create_vertex_attribute.size = 4;
     command.create_vertex_attribute.stride = sizeof(ImDrawVert);
     command.create_vertex_attribute.offset = IM_OFFSETOF(ImDrawVert, col);
-    command_buffer.commands.push_back(eastl::move(command));
+    command_buffer.push_back(eastl::move(command));
 
     command.type = render::CommandType::BIND_VERTEX_BUFFER;
     command.bind_vertex_buffer.vao_id = &render::NO_VERTEX_ARRAY;
     command.bind_vertex_buffer.vbo_id = &render::NO_VERTEX_BUFFER;
-    command_buffer.commands.push_back(eastl::move(command));
+    command_buffer.push_back(eastl::move(command));
 
     m_render_module->push_command_buffer(eastl::move(command_buffer));
 }
 
-void ImguiModule::imgui_setup_frame() noexcept(false) {
+void ImguiModule::on_update_listener() noexcept {
     ImGuiIO& io = ImGui::GetIO();
     // Font atlas needs to be built, call renderer _NewFrame() function e.g. ImGui_ImplOpenGL3_NewFrame()
     IM_ASSERT(io.Fonts->IsBuilt());
@@ -234,13 +234,11 @@ void ImguiModule::imgui_setup_frame() noexcept(false) {
 
     ImGui::NewFrame();
 
-    bool show_demo_window = true;
-    ImGui::ShowDemoWindow(&show_demo_window);
+    bool show_demo_window = true;             // TODO: REMOVE
+    ImGui::ShowDemoWindow(&show_demo_window); // TODO: REMOVE
 }
 
-void ImguiModule::on_scene_update_listener(SceneModule* scene_module) noexcept {
-    imgui_setup_frame();
-
+void ImguiModule::on_draw_listener() noexcept {
     ImGui::Render();
 
     ImDrawData* draw_data = ImGui::GetDrawData();
@@ -259,7 +257,7 @@ void ImguiModule::on_scene_update_listener(SceneModule* scene_module) noexcept {
     command.type = render::CommandType::SWITCH_CAPABILITY_STATUS;
     command.switch_capability_status.capability = render::Capability::SCISSOR_TEST;
     command.switch_capability_status.enable = true;
-    command_buffer.commands.push_back(eastl::move(command));
+    command_buffer.push_back(eastl::move(command));
 
     float L = draw_data->DisplayPos.x;
     float R = draw_data->DisplayPos.x + draw_data->DisplaySize.x;
@@ -274,18 +272,18 @@ void ImguiModule::on_scene_update_listener(SceneModule* scene_module) noexcept {
 
     command.type = render::CommandType::BIND_PROGRAM;
     command.bind_program.id = &m_shader_program_id;
-    command_buffer.commands.push_back(eastl::move(command));
+    command_buffer.push_back(eastl::move(command));
 
     command.type = render::CommandType::UPDATE_UNIFORM_MATRIX_4F;
     command.update_uniform_matrix_4f.id = &m_attribution_projection_matrix;
     // TODO redo this after LD
     new (&command.update_uniform_matrix_4f.matrix) Vector<float>(&ortho_projection[0][0], &ortho_projection[0][0] + 16);
-    command_buffer.commands.push_back(eastl::move(command));
+    command_buffer.push_back(eastl::move(command));
 
     command.type = render::CommandType::BIND_VERTEX_BUFFER;
     command.bind_vertex_buffer.vao_id = &m_vao_id;
     command.bind_vertex_buffer.vbo_id = &m_vbo_id;
-    command_buffer.commands.push_back(eastl::move(command));
+    command_buffer.push_back(eastl::move(command));
 
     ImVec2 pos = draw_data->DisplayPos;
     for (int n = 0; n < draw_data->CmdListsCount; n++) {
@@ -298,18 +296,18 @@ void ImguiModule::on_scene_update_listener(SceneModule* scene_module) noexcept {
         auto* vertex_data = reinterpret_cast<float*>(cmd_list->VtxBuffer.Data);
         size_t vertex_size = cmd_list->VtxBuffer.Size * sizeof(ImDrawVert) / sizeof(float);
         new (&command.update_vertex_buffer.data) Vector<float>(vertex_data, vertex_data + vertex_size);
-        command_buffer.commands.push_back(eastl::move(command));
+        command_buffer.push_back(eastl::move(command));
 
         command.type = render::CommandType::BIND_INDEX_BUFFER;
         command.bind_index_buffer.id = &m_index_buffer_id;
-        command_buffer.commands.push_back(eastl::move(command));
+        command_buffer.push_back(eastl::move(command));
 
         command.type = render::CommandType::UPDATE_INDEX_BUFFER;
         command.update_index_buffer.size = cmd_list->IdxBuffer.Size * sizeof(ImDrawIdx);
         // TODO redo this after LD
         new (&command.update_index_buffer.data)
             Vector<uint16>(cmd_list->IdxBuffer.Data, cmd_list->IdxBuffer.Data + cmd_list->IdxBuffer.Size);
-        command_buffer.commands.push_back(eastl::move(command));
+        command_buffer.push_back(eastl::move(command));
 
         for (int cmd_i = 0; cmd_i < cmd_list->CmdBuffer.Size; cmd_i++) {
             const ImDrawCmd* pcmd = &cmd_list->CmdBuffer[cmd_i];
@@ -326,16 +324,16 @@ void ImguiModule::on_scene_update_listener(SceneModule* scene_module) noexcept {
                     command.scissor.y = static_cast<uint32>(fb_height - clip_rect.w);
                     command.scissor.width = static_cast<uint32>(clip_rect.z - clip_rect.x);
                     command.scissor.height = static_cast<uint32>(clip_rect.w - clip_rect.y);
-                    command_buffer.commands.push_back(eastl::move(command));
+                    command_buffer.push_back(eastl::move(command));
 
                     command.type = render::CommandType::BIND_TEXTURE;
                     command.bind_texture.id = static_cast<uint32*>(pcmd->TextureId);
-                    command_buffer.commands.push_back(eastl::move(command));
+                    command_buffer.push_back(eastl::move(command));
 
                     command.type = render::CommandType::DRAW_INDEXED;
                     command.draw_indexed.size = (uint32)pcmd->ElemCount;
                     command.draw_indexed.data = idx_buffer_offset;
-                    command_buffer.commands.push_back(eastl::move(command));
+                    command_buffer.push_back(eastl::move(command));
                 }
             }
             idx_buffer_offset += pcmd->ElemCount;
@@ -345,7 +343,7 @@ void ImguiModule::on_scene_update_listener(SceneModule* scene_module) noexcept {
     command.type = render::CommandType::SWITCH_CAPABILITY_STATUS;
     command.switch_capability_status.capability = render::Capability::SCISSOR_TEST;
     command.switch_capability_status.enable = false;
-    command_buffer.commands.push_back(eastl::move(command));
+    command_buffer.push_back(eastl::move(command));
 
     m_render_module->push_command_buffer(eastl::move(command_buffer));
 }

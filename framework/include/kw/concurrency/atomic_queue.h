@@ -13,28 +13,38 @@
 
 #pragma once
 
-#include <kw/render/rendering_backend.h>
+#include <kw/base/queue.h>
+#include <kw/concurrency/mutex.h>
+#include <kw/debug/assert.h>
 
 namespace kw {
-namespace render {
-
 /**
- * BackendOpenGL is a class that implements OpenGL rendering backend.
+ * AtomicQueue is a thread-safe wrapper around a Queue.
  */
-class BackendOpenGL : public RenderingBackend {
+template <typename T>
+class AtomicQueue {
 public:
-    explicit BackendOpenGL(IGame* game) noexcept;
-    BackendOpenGL(const BackendOpenGL& original) = delete;
-    BackendOpenGL& operator=(const BackendOpenGL& original) = delete;
+    /**
+     * Pop the first value out of queue and return it.
+     *
+     * If the queue is empty, behaviour is undefined. Use `is_empty` to check if it's empty.
+     */
+    void pop(T& value) noexcept;
 
     /**
-     * Execute the commands in a command buffer and present the resulting image to the screen.
+     * Push the given `value` into the queue.
      */
-    void process_command_buffer(CommandBuffer&& command_buffer) noexcept override;
+    void push(T&& value) noexcept;
+
+    /**
+     * Return true if this queue is empty or false otherwise.
+     */
+    bool is_empty() const;
 
 private:
-    void on_init_listener(IGame* game) noexcept(false) override;
+    Queue<T> m_queue;
+    Mutex m_mutex;
 };
-
-} // namespace render
 } // namespace kw
+
+#include <kw/concurrency/internal/atomic_queue_impl.h>

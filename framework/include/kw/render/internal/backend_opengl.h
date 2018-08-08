@@ -13,34 +13,33 @@
 
 #pragma once
 
-#include <kw/base/array.h>
 #include <kw/base/signal.h>
-#include <kw/base/string.h>
-#include <kw/render/commands.h>
+#include <kw/render/internal/backend.h>
 
 struct SDL_Window;
 
 namespace kw {
 class IGame;
 
+namespace render {
 /**
- * RenderingBackend class provides methods to interact with GPU and to output visuals to the screen.
- * The class is abstract from any underlying platform-dependent graphics API.
+ * BackendOpenGL is a class that translates rendering API-agnostic `Command` into real OpenGL commands.
  */
-class RenderingBackend : public SignalListener {
+class BackendOpenGL : public Backend, public SignalListener {
 public:
-    virtual ~RenderingBackend() = default;
+    explicit BackendOpenGL(IGame* game) noexcept(false);
+    BackendOpenGL(const BackendOpenGL& original) = delete;
+    ~BackendOpenGL();
+    BackendOpenGL& operator=(const BackendOpenGL& original) = delete;
 
     /**
-     * Execute the commands in a command buffer and present the resulting image.
+     * Execute the commands in a command buffer and present the resulting image to the screen.
      */
-    virtual void process_command_buffer(render::CommandBuffer&& command_buffer) = 0;
+    void process_command_buffer(CommandBuffers& command_buffers) noexcept(false) override;
 
-protected:
-    RenderingBackend() = default;
-
-    virtual void on_init_listener(IGame* game) noexcept(false);
-
+private:
     SDL_Window* m_window;
+    void* m_context;
 };
+} // namespace render
 } // namespace kw

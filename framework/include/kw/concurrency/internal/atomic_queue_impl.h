@@ -13,26 +13,26 @@
 
 #pragma once
 
-#include <kw/base/queue.h>
-#include <kw/concurrency/mutex.h>
-#include <kw/render/commands.h>
+#include <kw/concurrency/atomic_queue.h>
 
 namespace kw {
-namespace render {
+template <typename T>
+void AtomicQueue<T>::pop(T& value) noexcept {
+    KW_ASSERT(!m_queue.empty(), "The queue is empty!");
 
-/**
- * UpdateQueue is a thread-safe wrapper around a Queue, which is used to prerecord updates for a rendering backend.
- */
-class UpdateQueue {
-public:
-    CommandBuffer pop();
+    LockGuard<Mutex> lock(m_mutex);
+    value = eastl::move(m_queue.front());
+    m_queue.pop();
+}
 
-    void push(CommandBuffer&& command_buffer);
+template <typename T>
+void AtomicQueue<T>::push(T&& value) noexcept {
+    LockGuard<Mutex> lock(m_mutex);
+    m_queue.push(eastl::move(value));
+}
 
-private:
-    Queue<CommandBuffer> m_queue;
-    Mutex m_mutex;
-};
-
-} // namespace render
+template <typename T>
+bool AtomicQueue<T>::is_empty() const {
+    return m_queue.empty();
+}
 } // namespace kw

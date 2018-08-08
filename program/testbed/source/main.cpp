@@ -13,14 +13,14 @@
 
 #include <kw/core/game.h>
 #include <kw/core/window_module.h>
-#include <kw/ecs/imgui_module.h>
 #include <kw/ecs/scene_module.h>
 #include <kw/input/input_module.h>
 #include <kw/math/math.h>
 #include <kw/render/render_module.h>
+#include <kw/ui/imgui_module.h>
 #include <kw/utilities/trace.h>
 
-class Game final : public kw::Game<kw::WindowModule, kw::InputModule, kw::RenderModule, kw::ImguiModule, kw::SceneModule>, public kw::SignalListener {
+class Game final : public kw::Game<kw::WindowModule, kw::InputModule, kw::SceneModule, kw::ImguiModule, kw::RenderModule>, public kw::SignalListener {
 public:
     Game();
 
@@ -39,11 +39,29 @@ void Game::on_init_listener(kw::IGame* game) {
     auto& input_module = get<kw::InputModule>();
     input_module.on_gamepad_added.connect(this, [](kw::Gamepad& gamepad) { kw::trace("Gamepad added!"); });
     input_module.on_gamepad_removed.connect(this, [](kw::Gamepad& gamepad) { kw::trace("Gamepad removed!"); });
+
+    kw::render::CommandBuffer command_buffer;
+    kw::render::Command command;
+    command.type = kw::render::CommandType::INIT_2D;
+    command_buffer.push_back(eastl::move(command));
+    auto& render_module = get<kw::RenderModule>();
+    render_module.push_command_buffer(eastl::move(command_buffer));
 }
 
 // There's no ImGui yet => No sane testbed yet
 void Game::on_update_listener() {
     test_input();
+
+    kw::render::CommandBuffer command_buffer;
+    kw::render::Command command;
+    command.type = kw::render::CommandType::CLEAR;
+    command.clear.a = 1.f;
+    command.clear.r = 0.f;
+    command.clear.g = 0.f;
+    command.clear.b = 0.f;
+    command_buffer.push_back(eastl::move(command));
+    auto& render_module = get<kw::RenderModule>();
+    render_module.push_command_buffer(eastl::move(command_buffer));
 }
 
 void Game::test_input() {

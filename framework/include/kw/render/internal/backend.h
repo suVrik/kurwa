@@ -11,22 +11,26 @@
  *  See the License for the specific language governing permissions and limitations under the License.
  */
 
-#include <kw/render/update_queue.h>
+#pragma once
 
-namespace kw {
-namespace render {
+#include <kw/render/internal/commands.h>
 
-CommandBuffer UpdateQueue::pop() {
-    LockGuard<Mutex> lock(m_mutex);
-    CommandBuffer command_buffer = eastl::move(m_queue.front());
-    m_queue.pop();
-    return command_buffer;
-}
+namespace kw::render {
+/**
+ * Backend class provides an interface to interact with GPU in rendering API agnostic way.
+ */
+class Backend {
+public:
+    /**
+     * Backend::Type represents all supported rendering backends.
+     */
+    enum class Type {
+        OPENGL,
+    };
 
-void UpdateQueue::push(CommandBuffer&& command_buffer) {
-    LockGuard<Mutex> lock(m_mutex);
-    m_queue.push(eastl::move(command_buffer));
-}
-
-} // namespace render
-} // namespace kw
+    /**
+     * Execute the given `command_buffers` and present the resulting image on the screen.
+     */
+    virtual void process_command_buffer(CommandBuffers& command_buffers) noexcept(false) = 0;
+};
+} // namespace kw::render

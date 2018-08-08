@@ -13,58 +13,70 @@
 
 #include <kw/core/i_game.h>
 #include <kw/core/window_module.h>
-#include <kw/render/backend_opengl.h>
+#include <kw/render/internal/backend_opengl.h>
 #include <kw/render/render_module.h>
 
 #include <SDL2/SDL_video.h>
 
 namespace kw {
+namespace render_module_details {
+constexpr uint32 COMMAND_BUFFER_QUEUE_SIZE = 2;
+} // namespace render_module_details
 
 RenderModule::RenderModule(IGame* game) noexcept
-    : m_render_semaphore(COMMAND_BUFFER_QUEUE_SIZE)
-    , m_main_thread_id(this_thread::get_id()) {
+    : m_render_semaphore(render_module_details::COMMAND_BUFFER_QUEUE_SIZE)
+    , is_thread_active(true) {
     game->on_init.connect(this, &RenderModule::on_init_listener);
-    game->on_update.connect(this, &RenderModule::on_update_listener);
+    game->on_destroy.connect(this, &RenderModule::on_destroy_listener);
+
+    // TODO: Here we do some crazy calculations to understand what backend we're going to run on.
+    m_backend_type = render::Backend::Type::OPENGL;
 }
+
+RenderModule::~RenderModule() = default;
 
 void RenderModule::on_init_listener(IGame* game) noexcept(false) {
-    auto& window_module = game->get<WindowModule>();
-    m_window = window_module.get_window();
-    switch (m_renderer_type) {
-        case RenderingBackendType::OPENGL:
-            m_renderer = eastl::make_unique<render::BackendOpenGL>(game);
-            break;
-        default:
-            break;
-    }
+    m_thread = Thread([this, game] {
+        // TODO: try-catch here
+        switch (m_backend_type) {
+            case render::Backend::Type::OPENGL:
+                m_backend = eastl::make_unique<render::BackendOpenGL>(game);
+                break;
+            default:
+                break;
+        }
+
+        while (is_thread_active) {
+            m_update_semaphore.wait();
+            render::CommandBuffers buffers;
+            if (!m_command_buffers_queue.is_empty()) {
+                m_command_buffers_queue.pop(buffers);
+            }
+            m_render_semaphore.post();
+            // TODO: try-catch here
+            m_backend->process_command_buffer(buffers);
+        }
+    });
 }
 
-void RenderModule::on_update_listener() noexcept(false) {
-    m_update_semaphore.wait();
-    render::CommandBuffer buffer = m_update_queue.pop();
-    m_render_semaphore.post();
-    m_renderer->process_command_buffer(eastl::move(buffer));
+void RenderModule::on_destroy_listener(IGame*) noexcept {
+    is_thread_active = false;
+    // We might be waiting for an update notification, which would never happen if we join the thread.
+    m_update_semaphore.post();
+    m_thread.join();
 }
 
 void RenderModule::push_command_buffer(render::CommandBuffer&& command_buffer) noexcept {
-    KW_ASSERT(this_thread::get_id() != m_main_thread_id, "You are trying to push command buffers from a wrong thread!");
-    for (render::Command& command : command_buffer.commands) {
-        m_command_buffer.commands.push_back(eastl::move(command));
-    }
+    m_command_buffers.push_back(eastl::move(command_buffer));
 }
 
 void RenderModule::submit_command_buffers() noexcept {
     m_render_semaphore.wait();
-    m_update_queue.push(eastl::move(m_command_buffer));
+    m_command_buffers_queue.push(eastl::move(m_command_buffers));
     m_update_semaphore.post();
 }
 
-RenderingBackend* const RenderModule::get_rendering_backend() const noexcept {
-    return m_renderer.get();
+const render::Backend::Type RenderModule::get_rendering_backend_type() noexcept {
+    return m_backend_type;
 }
-
-const RenderingBackendType RenderModule::get_rendering_backend_type() noexcept {
-    return m_renderer_type;
-}
-
 } // namespace kw

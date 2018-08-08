@@ -76,6 +76,7 @@ int32 IGame::run() noexcept {
                         }
                     }
                 }
+
                 try {
                     on_update.emit();
                 } catch (const RuntimeError& error) {
@@ -83,6 +84,16 @@ int32 IGame::run() noexcept {
                     return 1;
                 } catch (...) {
                     message_box("Runtime error in anonymous 'on_update' callback!");
+                    return 1;
+                }
+
+                try {
+                    on_draw.emit();
+                } catch (const RuntimeError& error) {
+                    message_box(error.what());
+                    return 1;
+                } catch (...) {
+                    message_box("Runtime error in anonymous 'on_draw' callback!");
                     return 1;
                 }
             }

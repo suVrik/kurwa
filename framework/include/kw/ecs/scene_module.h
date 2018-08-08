@@ -14,16 +14,13 @@
 #pragma once
 
 #include <kw/base/signal.h>
-#include <kw/concurrency/atomic.h>
-#include <kw/concurrency/thread.h>
 
 union SDL_Event;
 struct SDL_Window;
 
 namespace kw {
 class IGame;
-
-class RenderingBackend;
+class RenderModule;
 
 /**
  * Scene module creates an update loop, records and stores the commands to be sent to a rendering backend.
@@ -34,29 +31,10 @@ public:
     SceneModule(const SceneModule& original) = delete;
     SceneModule& operator=(const SceneModule& original) = delete;
 
-    /**
-     * Emitted right after the update thread starts,
-     * so every module subscribed to this signal can add their init command buffer to the render queue.
-     */
-    Signal<void(SceneModule*)> on_init;
-
-    /**
-     * Emitted before a SceneModule submits command buffers to a RenderModule,
-     * so every module subscribed to this signal can add their command buffer to the render queue.
-     */
-    Signal<void(SceneModule*)> on_update;
-
-    /**
-     * Emitted right before the update thread is destroyed,
-     * so every module subscribed to this signal can do any cleanup they need to do.
-     */
-    Signal<void(SceneModule*)> on_destroy;
-
 private:
     void on_init_listener(IGame* game) noexcept;
-    void on_destroy_listener(IGame* game) noexcept;
+    void on_update_listener() noexcept;
 
-    Thread m_thread;
-    Atomic<bool> is_update_thread_active = true;
+    RenderModule* m_render_module;
 };
 } // namespace kw
