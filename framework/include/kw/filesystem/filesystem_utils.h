@@ -33,7 +33,7 @@ public:
     static String get_resource_path() noexcept;
 
     /**
-     * Change default organization name and application name.
+     * Change organization name and application name.
      * Default value for `organization` is "kurwa" and for `application` is "game".
      */
     static void set_save_path(const String& organization, const String& application) noexcept;
