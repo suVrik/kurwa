@@ -11,27 +11,13 @@
  *  See the License for the specific language governing permissions and limitations under the License.
  */
 
-#pragma once
+#include <kw/core/message_box.h>
 
-#include <kw/base/string.h>
+#include <SDL2/SDL_messagebox.h>
 
-#include <fmt/format.h>
-#include <fmt/ostream.h>
-
-#include <iostream>
-
-namespace kw {
-/**
- * Writes the formatted string 'format_str' to the standard output (stdout).
- */
-template <typename... Args>
-void tracef(const String& format_str, const Args&... args);
-
-/**
- * Writes the given 'args' to the standard output (stdout) separated by a single space.
- */
-template <typename... Args>
-void trace(const Args&... args);
-} // namespace kw
-
-#include <kw/utilities/internal/trace_impl.h>
+namespace kw::message_box_details {
+void show_message_box(const String& message) {
+    fputs(message.c_str(), stderr); // For developers. Sometimes the message box is not even shown.
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Runtime error", message.c_str(), nullptr);
+}
+} // namespace kw::message_box_details

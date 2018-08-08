@@ -13,14 +13,13 @@
 
 #include <kw/core/game.h>
 #include <kw/core/window_module.h>
-#include <kw/ecs/scene_module.h>
 #include <kw/input/input_module.h>
 #include <kw/math/math.h>
 #include <kw/render/render_module.h>
 #include <kw/ui/imgui_module.h>
 #include <kw/utilities/trace.h>
 
-class Game final : public kw::Game<kw::WindowModule, kw::InputModule, kw::SceneModule, kw::ImguiModule, kw::RenderModule>, public kw::SignalListener {
+class Game final : public kw::Game<kw::WindowModule, kw::InputModule, kw::ImguiModule, kw::RenderModule>, public kw::SignalListener {
 public:
     Game();
 

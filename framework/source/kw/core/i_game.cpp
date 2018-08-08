@@ -12,6 +12,7 @@
  */
 
 #include <kw/core/i_game.h>
+#include <kw/core/message_box.h>
 #include <kw/debug/runtime_error.h>
 
 #include <SDL2/SDL.h>
@@ -38,7 +39,7 @@ IGame::IGame() noexcept {
 
     is_initialized = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_HAPTIC | SDL_INIT_GAMECONTROLLER) == 0;
     if (!is_initialized) {
-        message_box(fmt::format("Failed to initialize SDL2!\nThe error message: {}", SDL_GetError()));
+        message_box("Failed to initialize SDL2!\nThe error message: {}", SDL_GetError());
     }
 }
 
@@ -76,7 +77,6 @@ int32 IGame::run() noexcept {
                         }
                     }
                 }
-
                 try {
                     on_update.emit();
                 } catch (const RuntimeError& error) {
@@ -84,16 +84,6 @@ int32 IGame::run() noexcept {
                     return 1;
                 } catch (...) {
                     message_box("Runtime error in anonymous 'on_update' callback!");
-                    return 1;
-                }
-
-                try {
-                    on_draw.emit();
-                } catch (const RuntimeError& error) {
-                    message_box(error.what());
-                    return 1;
-                } catch (...) {
-                    message_box("Runtime error in anonymous 'on_draw' callback!");
                     return 1;
                 }
             }
@@ -120,11 +110,6 @@ void IGame::exit() noexcept {
     event.type = SDL_QUIT;
     // This one might fail, but we hope it will not.
     SDL_PushEvent(&event);
-}
-
-void IGame::message_box(const String& message) const noexcept {
-    fputs(message.c_str(), stderr); // For developers. Sometimes the message box is not even shown.
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Runtime error", message.c_str(), nullptr);
 }
 } // namespace kw
 

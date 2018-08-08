@@ -13,29 +13,18 @@
 
 #pragma once
 
-#include <kw/utilities/trace.h>
+#include <kw/base/string.h>
+
+#include <fmt/format.h>
 
 namespace kw {
-namespace trace_details {
-void trace() {
-    std::cout << std::endl;
-}
-
-template <typename Arg, typename... Args>
-void trace(const Arg& argument, const Args&... args) {
-    std::cout << argument << ' ';
-    trace(args...);
-}
-} // namespace trace_details
-
+/**
+ * Show message box with the formatted string 'format_str'.
+ * The message is also duplicated in stderr stream.
+ * Keep in mind this is a blocking call.
+ */
 template <typename... Args>
-void tracef(const String& format_str, const Args&... args) {
-    const String str = fmt::format(format_str, args...);
-    std::cout << str << std::endl;
-}
-
-template <typename... Args>
-void trace(const Args&... args) {
-    trace_details::trace(args...);
-}
+void message_box(const String& format_str, const Args&... args);
 } // namespace kw
+
+#include <kw/core/internal/message_box_impl.h>

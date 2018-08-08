@@ -13,29 +13,16 @@
 
 #pragma once
 
-#include <kw/utilities/trace.h>
+#include <kw/core/message_box.h>
 
 namespace kw {
-namespace trace_details {
-void trace() {
-    std::cout << std::endl;
-}
-
-template <typename Arg, typename... Args>
-void trace(const Arg& argument, const Args&... args) {
-    std::cout << argument << ' ';
-    trace(args...);
-}
-} // namespace trace_details
+namespace message_box_details {
+void show_message_box(const String& message);
+} // namespace message_box_details
 
 template <typename... Args>
-void tracef(const String& format_str, const Args&... args) {
+void message_box(const String& format_str, const Args&... args) {
     const String str = fmt::format(format_str, args...);
-    std::cout << str << std::endl;
-}
-
-template <typename... Args>
-void trace(const Args&... args) {
-    trace_details::trace(args...);
+    message_box_details::show_message_box(str);
 }
 } // namespace kw

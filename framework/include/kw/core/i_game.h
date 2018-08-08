@@ -109,12 +109,6 @@ public:
      */
     Signal<void()> on_update;
 
-    /**
-     * Emitted once a frame after emitting `on_update`.
-     * You can throw exceptions in your `on_draw` listeners and they will be handled the right way.
-     */
-    Signal<void()> on_draw;
-
 protected:
     /**
      * Construct all low-level and platform-dependent structures.
@@ -127,13 +121,6 @@ protected:
      * Keep in mind that modules are already destroyed here (in Game destructor).
      */
     ~IGame() noexcept;
-
-    /**
-     * Show an error message box with the given `error_description`.
-     * The message is also duplicated in stderr stream.
-     * Keep in mind this is a blocking call.
-     */
-    void message_box(const String& error_description) const noexcept;
 
     /**
      * The set of pointers to presented modules tied with their typeid.

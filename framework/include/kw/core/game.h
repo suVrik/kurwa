@@ -18,6 +18,7 @@
 #include <kw/base/tuple.h>
 #include <kw/base/types.h>
 #include <kw/core/i_game.h>
+#include <kw/core/message_box.h>
 #include <kw/debug/runtime_error.h>
 
 #include <cstdio>

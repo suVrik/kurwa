@@ -13,7 +13,6 @@
 
 #include <kw/core/i_game.h>
 #include <kw/core/window_module.h>
-#include <kw/ecs/scene_module.h>
 #include <kw/render/render_module.h>
 #include <kw/ui/imgui_module.h>
 
@@ -28,7 +27,6 @@ ImguiModule::ImguiModule(IGame* game) noexcept
     game->on_init.connect(this, &ImguiModule::on_init_listener);
     game->on_event.connect(this, &ImguiModule::on_event_listener);
     game->on_update.connect(this, &ImguiModule::on_update_listener);
-    game->on_draw.connect(this, &ImguiModule::on_draw_listener);
 }
 
 void ImguiModule::on_event_listener(SDL_Event& event) noexcept {
@@ -73,6 +71,8 @@ void ImguiModule::on_event_listener(SDL_Event& event) noexcept {
 void ImguiModule::on_init_listener(IGame* game) noexcept {
     m_render_module = &game->get<RenderModule>();
     m_window_module = &game->get<WindowModule>();
+
+    game->on_update.connect(this, &ImguiModule::on_draw_listener);
 
     // TODO: move the following to a separate method.
 

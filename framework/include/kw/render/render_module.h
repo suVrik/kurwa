@@ -43,14 +43,9 @@ public:
 
     /**
      * Push a specified `command buffer` into a temporary command buffers queue,
-     * which will be sent to rendering backend on `submit_command_buffers` call.
+     * which will be sent to rendering backend at the very end of `IGame`s `on_update` signal.
      */
     void push_command_buffer(render::CommandBuffer&& command_buffer) noexcept;
-
-    /**
-     * Send to GPU all command buffers pushed via `push_command_buffer` method.
-     */
-    void submit_command_buffers() noexcept;
 
     /**
      * Return a rendering backend type, that current RenderModule is running on.
@@ -60,6 +55,7 @@ public:
 private:
     void on_init_listener(IGame* game) noexcept(false);
     void on_destroy_listener(IGame*) noexcept;
+    void on_update_listener() noexcept;
 
     Thread m_thread;
     Semaphore m_render_semaphore;
