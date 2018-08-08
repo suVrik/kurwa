@@ -32,7 +32,7 @@ class Backend;
 class IGame;
 
 /**
- * Render module runs a rendering thread, that is synchronized with `submit_command_buffers` method.
+ * RenderModule runs a separate rendering thread and synchronizes it with a main thread's `on_update` signal.
  */
 class RenderModule final : public SignalListener {
 public:
