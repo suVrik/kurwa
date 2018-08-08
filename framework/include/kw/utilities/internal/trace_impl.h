@@ -16,9 +16,26 @@
 #include <kw/utilities/trace.h>
 
 namespace kw {
-template <typename string, typename... Args>
-void trace(string format_str, const Args&... args) {
+namespace trace_details {
+void trace() {
+    std::cout << std::endl;
+}
+
+template <typename Arg, typename... Args>
+void trace(const Arg& argument, const Args&... args) {
+    std::cout << argument << ' ';
+    trace(args...);
+}
+} // namespace trace_details
+
+template <typename... Args>
+void tracef(const String& format_str, const Args&... args) {
     const String str = fmt::format(format_str, args...);
-    puts(str.c_str());
+    std::cout << str.c_str() << std::endl;
+}
+
+template <typename... Args>
+void trace(const Args&... args) {
+    trace_details::trace(args...);
 }
 } // namespace kw
