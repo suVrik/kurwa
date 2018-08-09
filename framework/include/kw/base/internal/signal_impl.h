@@ -195,14 +195,7 @@ template <typename Result, typename... Arguments>
 template <typename Object>
 void Signal<Result(Arguments...)>::handle_signal_listener(CallbackData& callback_data, Object* object) noexcept {
     if constexpr (eastl::is_base_of<SignalListener, Object>::value) {
-        SignalListener* signal_listener = static_cast<SignalListener*>(object);
-#if defined(KW_DEBUG)
-        for (auto* signal : signal_listener->m_signals) {
-            KW_ASSERT(signal != this, "The same signal is added twice to the same object! "
-                                      "This is probably not what you want!");
-        }
-#endif
-        signal_listener->m_signals.push_back(this);
+        static_cast<SignalListener*>(object)->m_signals.push_back(this);
 
         callback_data.is_signal_listener = true;
         callback_data.object = static_cast<SignalListener*>(object);

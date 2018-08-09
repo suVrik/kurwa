@@ -11,28 +11,13 @@
  *  See the License for the specific language governing permissions and limitations under the License.
  */
 
-#pragma once
+#include <kw/core/message_box.h>
 
-#include <kw/base/queue.h>
-#include <kw/concurrency/mutex.h>
-#include <kw/render/commands.h>
+#include <SDL2/SDL_messagebox.h>
 
-namespace kw {
-namespace render {
-
-/**
- * UpdateQueue is a thread-safe wrapper around a Queue, which is used to prerecord updates for a rendering backend.
- */
-class UpdateQueue {
-public:
-    CommandBuffer pop();
-
-    void push(CommandBuffer&& command_buffer);
-
-private:
-    Queue<CommandBuffer> m_queue;
-    Mutex m_mutex;
-};
-
-} // namespace render
-} // namespace kw
+namespace kw::message_box_details {
+void show_message_box(const String& message) {
+    fputs(message.c_str(), stderr); // For developers. Sometimes the message box is not even shown.
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Runtime error", message.c_str(), nullptr);
+}
+} // namespace kw::message_box_details

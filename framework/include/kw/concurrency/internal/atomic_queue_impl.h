@@ -13,29 +13,26 @@
 
 #pragma once
 
-#include <kw/utilities/trace.h>
+#include <kw/concurrency/atomic_queue.h>
 
 namespace kw {
-namespace trace_details {
-void trace() {
-    std::cout << std::endl;
+template <typename T>
+void AtomicQueue<T>::pop(T& value) noexcept {
+    KW_ASSERT(!m_queue.empty(), "The queue is empty!");
+
+    LockGuard<Mutex> lock(m_mutex);
+    value = eastl::move(m_queue.front());
+    m_queue.pop();
 }
 
-template <typename Arg, typename... Args>
-void trace(const Arg& argument, const Args&... args) {
-    std::cout << argument << ' ';
-    trace(args...);
-}
-} // namespace trace_details
-
-template <typename... Args>
-void tracef(const String& format_str, const Args&... args) {
-    const String str = fmt::format(format_str, args...);
-    std::cout << str << std::endl;
+template <typename T>
+void AtomicQueue<T>::push(T&& value) noexcept {
+    LockGuard<Mutex> lock(m_mutex);
+    m_queue.push(eastl::move(value));
 }
 
-template <typename... Args>
-void trace(const Args&... args) {
-    trace_details::trace(args...);
+template <typename T>
+bool AtomicQueue<T>::is_empty() const {
+    return m_queue.empty();
 }
 } // namespace kw

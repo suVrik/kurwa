@@ -11,13 +11,26 @@
  *  See the License for the specific language governing permissions and limitations under the License.
  */
 
-#include <kw/core/i_game.h>
-#include <kw/core/window_module.h>
-#include <kw/render/rendering_backend.h>
+#pragma once
 
-namespace kw {
-void RenderingBackend::on_init_listener(IGame* game) {
-    auto& window_module = game->get<WindowModule>();
-    m_window = window_module.get_window();
-}
-} // namespace kw
+#include <kw/render/internal/commands.h>
+
+namespace kw::render {
+/**
+ * Backend class provides an interface to interact with GPU in rendering API agnostic way.
+ */
+class Backend {
+public:
+    /**
+     * Backend::Type represents all supported rendering backends.
+     */
+    enum class Type {
+        OPENGL,
+    };
+
+    /**
+     * Execute the given `command_buffers` and present the resulting image on the screen.
+     */
+    virtual void process_command_buffer(CommandBuffers& command_buffers) noexcept(false) = 0;
+};
+} // namespace kw::render

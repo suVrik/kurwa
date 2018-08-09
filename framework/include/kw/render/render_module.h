@@ -15,67 +15,57 @@
 
 #include <kw/base/signal.h>
 #include <kw/base/unique_ptr.h>
+#include <kw/concurrency/atomic.h>
+#include <kw/concurrency/atomic_queue.h>
 #include <kw/concurrency/semaphore.h>
 #include <kw/concurrency/thread.h>
-#include <kw/render/rendering_backend.h>
-#include <kw/render/update_queue.h>
+#include <kw/render/internal/backend.h>
+#include <kw/render/internal/commands.h>
 
 struct SDL_Window;
 
 namespace kw {
-
-enum class RenderingBackendType {
-    OPENGL,
-};
+namespace render {
+class Backend;
+} // namespace render
 
 class IGame;
 
 /**
- * Render module provides access to the render implementation.
+ * RenderModule runs a separate rendering thread and synchronizes it with a main thread's `on_update` signal.
  */
 class RenderModule final : public SignalListener {
 public:
-    /**
-     * Construct a render module using the given 'game' instance.
-     */
     explicit RenderModule(IGame* game) noexcept;
     RenderModule(const RenderModule& original) = delete;
+    ~RenderModule();
     RenderModule& operator=(const RenderModule& original) = delete;
 
     /**
-     * Push a specified command buffer content into a local command buffer.
+     * Push a specified `command buffer` into a temporary command buffers queue,
+     * which will be sent to rendering backend at the very end of `IGame`s `on_update` signal.
      */
     void push_command_buffer(render::CommandBuffer&& command_buffer) noexcept;
 
     /**
-     * Submit a local command buffer to the update queue.
+     * Return a rendering backend type, that current RenderModule is running on.
      */
-    void submit_command_buffers() noexcept;
-
-    /**
-     * Return a renderer instance.
-     */
-    RenderingBackend* const get_rendering_backend() const noexcept;
-
-    /**
-     * Return a specified renderer type.
-     */
-    const RenderingBackendType get_rendering_backend_type() noexcept;
+    const render::Backend::Type get_rendering_backend_type() noexcept;
 
 private:
     void on_init_listener(IGame* game) noexcept(false);
-    void on_update_listener() noexcept(false);
+    void on_destroy_listener(IGame*) noexcept;
+    void on_update_listener() noexcept;
 
-    UniquePtr<RenderingBackend> m_renderer;
-    SDL_Window* m_window;
-    RenderingBackendType m_renderer_type = RenderingBackendType::OPENGL;
-    static constexpr uint32 COMMAND_BUFFER_QUEUE_SIZE = 2;
-
-    const Thread::id m_main_thread_id;
+    Thread m_thread;
     Semaphore m_render_semaphore;
     Semaphore m_update_semaphore;
-    render::UpdateQueue m_update_queue;
-    render::CommandBuffer m_command_buffer;
+    Atomic<bool> is_thread_active;
+
+    UniquePtr<render::Backend> m_backend;
+    AtomicQueue<render::CommandBuffers> m_command_buffers_queue;
+    render::CommandBuffers m_command_buffers;
+    render::Backend::Type m_backend_type;
 };
 
 } // namespace kw

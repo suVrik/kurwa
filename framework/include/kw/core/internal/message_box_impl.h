@@ -13,25 +13,16 @@
 
 #pragma once
 
-#include <kw/base/types.h>
+#include <kw/core/message_box.h>
 
 namespace kw {
-namespace render {
-typedef uint32 Handle;
-typedef Handle ShaderHandle;
-typedef Handle ShaderProgramHandle;
-typedef Handle TextureHandle;
-typedef Handle VertexArrayHandle;
-typedef Handle VertexBufferHandle;
-typedef Handle IndexBufferHandle;
-typedef Handle UniformLocationHandle;
+namespace message_box_details {
+void show_message_box(const String& message);
+} // namespace message_box_details
 
-inline ShaderHandle NO_SHADER = 0;
-inline ShaderProgramHandle NO_SHADER_PROGRAM = 0;
-inline TextureHandle NO_TEXTURE = 0;
-inline VertexArrayHandle NO_VERTEX_ARRAY = 0;
-inline VertexBufferHandle NO_VERTEX_BUFFER = 0;
-inline IndexBufferHandle NO_INDEX_BUFFER = 0;
-inline UniformLocationHandle NO_UNIFORM_LOCATION = 0;
-} // namespace render
+template <typename... Args>
+void message_box(const String& format_str, const Args&... args) {
+    const String str = fmt::format(format_str, args...);
+    message_box_details::show_message_box(str);
+}
 } // namespace kw

@@ -24,7 +24,7 @@ namespace kw {
 /**
  * Writes the formatted string 'format_str' to the standard output (stdout).
  */
-template <typename string, typename... Args>
+template <typename... Args>
 void tracef(const String& format_str, const Args&... args);
 
 /**

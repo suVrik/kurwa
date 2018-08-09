@@ -15,7 +15,7 @@
 
 #include <kw/base/signal.h>
 #include <kw/base/types.h>
-#include <kw/render/types.h>
+#include <kw/render/internal/types.h>
 
 union SDL_Event;
 struct SDL_Window;
@@ -37,10 +37,9 @@ public:
 
 private:
     void on_init_listener(IGame* game) noexcept;
-    void on_scene_init_listener(SceneModule* scene_module) noexcept(false);
-    void on_scene_update_listener(SceneModule* scene_module) noexcept;
+    void on_update_listener() noexcept;
+    void on_draw_listener() noexcept;
     void on_event_listener(SDL_Event& event) noexcept;
-    void imgui_setup_frame() noexcept(false);
 
     RenderModule* m_render_module;
     WindowModule* m_window_module;

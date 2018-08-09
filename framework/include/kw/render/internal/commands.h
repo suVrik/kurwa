@@ -15,11 +15,9 @@
 
 #include <kw/base/types.h>
 #include <kw/base/vector.h>
-#include <kw/render/types.h>
+#include <kw/render/internal/types.h>
 
-namespace kw {
-namespace render {
-
+namespace kw::render {
 enum class CommandType {
     CLEAR,
 
@@ -167,11 +165,9 @@ struct Command {
 
     Command(const Command& original) = delete;
     Command& operator=(const Command& original) = delete;
-
-    Command(Command&& original) noexcept;
-    Command& operator=(Command&& original) = delete;
-
     ~Command() noexcept;
+    Command(Command&& original) noexcept;
+    Command& operator=(Command&& original) noexcept;
 
     CommandType type;
 
@@ -202,9 +198,6 @@ struct Command {
     };
 };
 
-struct CommandBuffer {
-    Vector<Command> commands;
-};
-
-} // namespace render
-} // namespace kw
+typedef Vector<Command> CommandBuffer;
+typedef Vector<CommandBuffer> CommandBuffers;
+} // namespace kw::render

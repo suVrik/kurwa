@@ -11,22 +11,20 @@
  *  See the License for the specific language governing permissions and limitations under the License.
  */
 
-#include <kw/render/update_queue.h>
+#pragma once
+
+#include <kw/base/string.h>
+
+#include <fmt/format.h>
 
 namespace kw {
-namespace render {
-
-CommandBuffer UpdateQueue::pop() {
-    LockGuard<Mutex> lock(m_mutex);
-    CommandBuffer command_buffer = eastl::move(m_queue.front());
-    m_queue.pop();
-    return command_buffer;
-}
-
-void UpdateQueue::push(CommandBuffer&& command_buffer) {
-    LockGuard<Mutex> lock(m_mutex);
-    m_queue.push(eastl::move(command_buffer));
-}
-
-} // namespace render
+/**
+ * Show message box with the formatted string 'format_str'.
+ * The message is also duplicated in stderr stream.
+ * Keep in mind this is a blocking call.
+ */
+template <typename... Args>
+void message_box(const String& format_str, const Args&... args);
 } // namespace kw
+
+#include <kw/core/internal/message_box_impl.h>

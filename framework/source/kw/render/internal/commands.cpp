@@ -11,10 +11,9 @@
  *  See the License for the specific language governing permissions and limitations under the License.
  */
 
-#include <kw/render/commands.h>
+#include <kw/render/internal/commands.h>
 
-namespace kw {
-namespace render {
+namespace kw::render {
 
 Command::Command() noexcept {
 }
@@ -53,5 +52,10 @@ Command::~Command() noexcept {
             break;
     }
 }
-} // namespace render
-} // namespace kw
+
+Command& Command::operator=(Command&& original) noexcept {
+    this->~Command();
+    new (this) Command(eastl::move(original));
+    return *this;
+}
+} // namespace kw::render
