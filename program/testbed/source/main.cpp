@@ -13,13 +13,18 @@
 
 #include <kw/core/game.h>
 #include <kw/core/window_module.h>
+#include <kw/filesystem/filesystem_utils.h>
 #include <kw/input/input_module.h>
 #include <kw/math/math.h>
 #include <kw/render/render_module.h>
+#include <kw/sound/sound.h>
+#include <kw/sound/sound_module.h>
 #include <kw/ui/imgui_module.h>
 #include <kw/utilities/trace.h>
 
-class Game final : public kw::Game<kw::WindowModule, kw::InputModule, kw::ImguiModule, kw::RenderModule>, public kw::SignalListener {
+#include <imgui/imgui.h>
+
+class Game final : public kw::Game<kw::WindowModule, kw::InputModule, kw::SoundModule, kw::ImguiModule, kw::RenderModule>, public kw::SignalListener {
 public:
     Game();
 
@@ -27,9 +32,16 @@ private:
     void on_init_listener(kw::IGame* game);
     void on_update_listener();
     void test_input();
+    void test_sound();
+
+    kw::Sound m_sound;
+    kw::SharedPtr<kw::SoundStream> m_sound_stream;
+    float sound_volume = 1.f;
+    float sound_panning = 0.f;
 };
 
-Game::Game() {
+Game::Game()
+    : m_sound(kw::FilesystemUtils::resolve(kw::FilesystemUtils::get_resource_path(), "test.ogg")) {
     on_init.connect(this, &Game::on_init_listener);
     on_update.connect(this, &Game::on_update_listener);
 }
@@ -48,8 +60,11 @@ void Game::on_init_listener(kw::IGame* game) {
 }
 
 // There's no ImGui yet => No sane testbed yet
+// Now there's ImGui, but still no sane testbed
+// TODO: sane testbed
 void Game::on_update_listener() {
     test_input();
+    test_sound();
 
     kw::render::CommandBuffer command_buffer;
     kw::render::Command command;
@@ -123,6 +138,30 @@ void Game::test_input() {
             }
         }
     }
+}
+
+void Game::test_sound() {
+    if (ImGui::Begin("Sound")) {
+        ImGui::Text("Sound Test");
+        ImGui::Text("Sound Duration: %f s", m_sound.get_duration());
+        ImGui::SliderFloat("Volume", &sound_volume, 0.f, 1.f);
+        ImGui::SliderFloat("Panning", &sound_panning, -1.f, 1.f);
+        if (ImGui::Button("Play Sound")) {
+            m_sound.play(0, false, sound_volume, sound_panning);
+        }
+        ImGui::Spacing();
+
+        ImGui::Text("Sound Stream Test");
+        ImGui::Text("Is Playing: %d", 0);
+        float position = 0.f;
+        ImGui::SliderFloat("Position", &position, 0.f, 1.f);
+        ImGui::SliderFloat("Volume", &sound_volume, 0.f, 1.f);
+        ImGui::SliderFloat("Panning", &sound_panning, -1.f, 1.f);
+        ImGui::Button("Play Sound");
+        ImGui::SameLine();
+        ImGui::Button("Pause Sound");
+    }
+    ImGui::End();
 }
 
 int main(int argc, char* argv[]) {

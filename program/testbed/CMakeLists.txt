@@ -31,6 +31,9 @@ target_set_bundle_information(testbed
         LONG_VERSION_STRING "${TESTBED_VERSION}"
         SHORT_VERSION_STRING "${TESTBED_VERSION}")
 
+file(GLOB_RECURSE TESTBED_RESOURCES "resource/*")
+target_add_resources(testbed "${TESTBED_RESOURCES}")
+
 target_link_library(testbed framework)
 
 finalize_executable(testbed)

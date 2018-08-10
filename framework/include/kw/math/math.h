@@ -13,8 +13,9 @@
 
 #pragma once
 
-namespace kw {
+#include <cmath>
 
+namespace kw {
 /**
  * The Math class contains common mathematical methods and constants.
  */

@@ -118,6 +118,9 @@ String FilesystemUtils::get_resource_path() noexcept {
     static String result = [] {
         char* base_path_c_str = SDL_GetBasePath();
         String base_path(base_path_c_str);
+#if !defined(KW_OSX)
+        base_path = resolve(base_path, "resources");
+#endif
         SDL_free(base_path_c_str);
         return base_path;
     }();

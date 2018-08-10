@@ -40,6 +40,7 @@ private:
     void on_update_listener() noexcept;
     void on_draw_listener() noexcept;
     void on_event_listener(SDL_Event& event) noexcept;
+    void init_imgui_resources() noexcept;
 
     RenderModule* m_render_module;
     WindowModule* m_window_module;

@@ -74,8 +74,10 @@ void ImguiModule::on_init_listener(IGame* game) noexcept {
 
     game->on_update.connect(this, &ImguiModule::on_draw_listener);
 
-    // TODO: move the following to a separate method.
+    init_imgui_resources();
+}
 
+void ImguiModule::init_imgui_resources() noexcept {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
 
@@ -233,9 +235,6 @@ void ImguiModule::on_update_listener() noexcept {
     }
 
     ImGui::NewFrame();
-
-    bool show_demo_window = true;             // TODO: REMOVE
-    ImGui::ShowDemoWindow(&show_demo_window); // TODO: REMOVE
 }
 
 void ImguiModule::on_draw_listener() noexcept {
