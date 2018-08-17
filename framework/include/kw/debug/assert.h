@@ -34,13 +34,13 @@
  * \endcode
  */
 #if defined(KW_DEBUG)
-#define KW_ASSERT(expr, ...)                                                                                           \
-    do {                                                                                                               \
-        if (!(expr)) {                                                                                                 \
-            kw::assert_impl(#expr, __FILE__, __LINE__, ##__VA_ARGS__);                                                 \
-            KW_RAISE_SIGTRAP();                                                                                        \
-        }                                                                                                              \
-    } while (false)
+#    define KW_ASSERT(expr, ...) \
+        do { \
+            if (!(expr)) { \
+                kw::assert_impl(#expr, __FILE__, __LINE__, ##__VA_ARGS__); \
+                KW_RAISE_SIGTRAP(); \
+            } \
+        } while (false)
 #else
-#define KW_ASSERT(expr, ...)
+#    define KW_ASSERT(expr, ...)
 #endif

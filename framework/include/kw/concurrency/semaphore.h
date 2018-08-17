@@ -42,6 +42,7 @@ public:
      * Wait until a semaphore has a positive value and then decrement it.
      */
     void wait() const noexcept;
+
 private:
     SDL_semaphore* sem;
 };

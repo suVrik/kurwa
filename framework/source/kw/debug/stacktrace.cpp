@@ -18,9 +18,9 @@
 
 #if defined(KW_DEBUG) && defined(KW_WINDOWS)
 
-#include <windows.h>
+#    include <windows.h>
 // DbgHelp.h must be included after windows.h
-#include <DbgHelp.h>
+#    include <DbgHelp.h>
 
 #endif
 

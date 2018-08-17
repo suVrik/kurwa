@@ -62,7 +62,10 @@ public:
     Pair<int32, int32> get_position() const noexcept;
 
 private:
-    enum class ButtonState : uint8 { NONE = 0b00U, DOWN = 0b01U, PRESSED = 0b11U, RELEASED = 0b10U };
+    enum class ButtonState : uint8 { NONE = 0b00U,
+                                     DOWN = 0b01U,
+                                     PRESSED = 0b11U,
+                                     RELEASED = 0b10U };
 
     void on_event_listener(SDL_Event& event) noexcept;
     void on_update_listener() noexcept;

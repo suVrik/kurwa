@@ -348,8 +348,7 @@ private:
  * \endcode
  */
 #define REFLECTION_REGISTRATOR(scope) \
-static int REFLECTION_##__COUNTER__ = [] { \
-    using namespace kw; \
-    scope \
-    return 0; \
-}();
+    static int REFLECTION_##__COUNTER__ = [] { \
+        using namespace kw; \
+        scope return 0; \
+    }();

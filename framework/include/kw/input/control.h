@@ -303,7 +303,9 @@ enum class Control : int32 {
 /**
  * Enumerates all possible devices controls can have.
  */
-enum class ControlDeviceType { KEYBOARD, MOUSE, GAMEPAD };
+enum class ControlDeviceType { KEYBOARD,
+                               MOUSE,
+                               GAMEPAD };
 
 /**
  * The following enum class provides utilities to work with Controls.
@@ -315,34 +317,29 @@ public:
      */
     static constexpr Control KEYBOARD_BEGIN = Control::KEY_A;
     static constexpr Control
-KEYBOARD_END
-= Control::KEY_APP2;
-static constexpr Control MOUSE_BEGIN = Control::BUTTON_LEFT;
-static constexpr Control
-MOUSE_END
-= Control::BUTTON_EXTRA_2;
-static constexpr Control GAMEPAD_BUTTONS_BEGIN = Control::CONTROL_A;
-static constexpr Control
-GAMEPAD_BUTTONS_END
-= Control::CONTROL_TRIGGER_RIGHT;
-static constexpr Control GAMEPAD_AXES_BEGIN = Control::AXIS_LEFT;
-static constexpr Control
-GAMEPAD_AXES_END
-= Control::AXIS_RIGHT;
+        KEYBOARD_END = Control::KEY_APP2;
+    static constexpr Control MOUSE_BEGIN = Control::BUTTON_LEFT;
+    static constexpr Control
+        MOUSE_END = Control::BUTTON_EXTRA_2;
+    static constexpr Control GAMEPAD_BUTTONS_BEGIN = Control::CONTROL_A;
+    static constexpr Control
+        GAMEPAD_BUTTONS_END = Control::CONTROL_TRIGGER_RIGHT;
+    static constexpr Control GAMEPAD_AXES_BEGIN = Control::AXIS_LEFT;
+    static constexpr Control
+        GAMEPAD_AXES_END = Control::AXIS_RIGHT;
 
-/**
+    /**
  * Return string representation of the given 'control'.
  * For example for Control::KEY_ESCAPE this function will return 'Escape'.
  */
-static String get_control_name(Control control) noexcept;
+    static String get_control_name(Control control) noexcept;
 
-/**
+    /**
  * Return device type of the given 'control'.
  * Please look at 'ControlDeviceType' enum.
  */
-static ControlDeviceType get_control_device_type(Control control) noexcept;
+    static ControlDeviceType get_control_device_type(Control control) noexcept;
 
-ControlUtils() = delete;
-}
-;
+    ControlUtils() = delete;
+};
 } // namespace kw

@@ -234,7 +234,7 @@ void ImguiModule::on_update_listener() noexcept {
 
     ImGui::NewFrame();
 
-    bool show_demo_window = true;             // TODO: REMOVE
+    bool show_demo_window = true; // TODO: REMOVE
     ImGui::ShowDemoWindow(&show_demo_window); // TODO: REMOVE
 }
 

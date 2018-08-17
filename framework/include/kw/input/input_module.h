@@ -65,8 +65,8 @@ public:
     Gamepad& get_gamepad(uint32 index) noexcept;
     const Gamepad& get_gamepad(uint32 index) const noexcept;
 
-    Signal<void(Gamepad&)> on_gamepad_added;    /// Emitted after adding a gamepad.
-    Signal<void(Gamepad&)> on_gamepad_removed;  /// Emitted before removing a gamepad.
+    Signal<void(Gamepad&)> on_gamepad_added; /// Emitted after adding a gamepad.
+    Signal<void(Gamepad&)> on_gamepad_removed; /// Emitted before removing a gamepad.
     Signal<void(Gamepad&)> on_gamepad_remapped; /// Emitted when gamepad mapping updated.
 
 private:

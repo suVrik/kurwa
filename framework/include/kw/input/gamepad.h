@@ -59,7 +59,10 @@ public:
     Pair<float, float> get_axis(Control control) const noexcept;
 
 private:
-    enum class ControlState : uint8 { NONE = 0b00U, DOWN = 0b01U, PRESSED = 0b11U, RELEASED = 0b10U };
+    enum class ControlState : uint8 { NONE = 0b00U,
+                                      DOWN = 0b01U,
+                                      PRESSED = 0b11U,
+                                      RELEASED = 0b10U };
 
     // TODO: This should be an option.
     static constexpr float TRIGGER_SENSITIVITY = 0.5f;
