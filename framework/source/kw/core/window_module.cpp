@@ -116,7 +116,9 @@ void WindowModule::on_init_listener(IGame* game) noexcept(false) {
             break;
     }
 
-    m_window = SDL_CreateWindow(m_title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, m_width, m_height, flags);
+    m_window = SDL_CreateWindow(m_title.c_str(),
+                                SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+                                m_width, m_height, flags);
     if (m_window == nullptr) {
         throw RuntimeError(fmt::format("Failed to initialize a window!\nThe error message: {}", SDL_GetError()));
     }

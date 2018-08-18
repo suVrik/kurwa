@@ -15,61 +15,61 @@
 
 #include <gmock/gmock.h>
 
-#define GENERATE_NUMERIC_METHOD(num, return_type, type_a, type_b, type_c)                                              \
-    return_type method##num(type_a a, type_b b, type_c c) {                                                            \
-        return static_cast<return_type>(a + b + c);                                                                    \
+#define GENERATE_NUMERIC_METHOD(num, return_type, type_a, type_b, type_c) \
+    return_type method##num(type_a a, type_b b, type_c c) { \
+        return static_cast<return_type>(a + b + c); \
     }
 
-#define GENERATE_POINTER_METHOD(num, return_type, type_a, type_b, type_c)                                              \
-    return_type* method##num(type_a* a, type_b* b, type_c* c) {                                                        \
-        value_##return_type = static_cast<return_type>(*a + *b + *c);                                                  \
-        return &value_##return_type;                                                                                   \
+#define GENERATE_POINTER_METHOD(num, return_type, type_a, type_b, type_c) \
+    return_type* method##num(type_a* a, type_b* b, type_c* c) { \
+        value_##return_type = static_cast<return_type>(*a + *b + *c); \
+        return &value_##return_type; \
     }
 
-#define GENERATE_REFERENCE_METHOD(num, return_type, type_a, type_b, type_c)                                            \
-    return_type& method##num(const type_a& a, const type_b& b, const type_c& c) {                                      \
-        value_##return_type = static_cast<return_type>(a + b + c);                                                     \
-        return value_##return_type;                                                                                    \
+#define GENERATE_REFERENCE_METHOD(num, return_type, type_a, type_b, type_c) \
+    return_type& method##num(const type_a& a, const type_b& b, const type_c& c) { \
+        value_##return_type = static_cast<return_type>(a + b + c); \
+        return value_##return_type; \
     }
 
-#define GENERATE_CONST_METHOD(num, return_type, type_a, type_b, type_c)                                                \
-    return_type method##num(type_a a, type_b b, type_c c) const {                                                      \
-        return static_cast<return_type>(a + b + c);                                                                    \
+#define GENERATE_CONST_METHOD(num, return_type, type_a, type_b, type_c) \
+    return_type method##num(type_a a, type_b b, type_c c) const { \
+        return static_cast<return_type>(a + b + c); \
     }
 
-#define GENERATE_VOID_METHOD(num, type_a, type_b, type_c)                                                              \
-    void method##num(const type_a& a, const type_b& b, const type_c& c) {                                              \
-        value_##type_a = static_cast<type_a>(a + b + c);                                                               \
+#define GENERATE_VOID_METHOD(num, type_a, type_b, type_c) \
+    void method##num(const type_a& a, const type_b& b, const type_c& c) { \
+        value_##type_a = static_cast<type_a>(a + b + c); \
     }
 
-#define GENERATE_NO_ARGUMENTS_METHOD(num, return_type)                                                                 \
-    return_type method##num() {                                                                                        \
-        return value_##return_type;                                                                                    \
+#define GENERATE_NO_ARGUMENTS_METHOD(num, return_type) \
+    return_type method##num() { \
+        return value_##return_type; \
     }
 
-#define GENERATE_VIRTUAL_METHOD(num, return_type)                                                                      \
-    virtual return_type method##num() {                                                                                \
-        return num;                                                                                                    \
+#define GENERATE_VIRTUAL_METHOD(num, return_type) \
+    virtual return_type method##num() { \
+        return num; \
     }
 
-#define CHECK_RESULT(any_value, required_type, required_result)                                                        \
-    {                                                                                                                  \
-        Any result = any_value;                                                                                        \
-        EXPECT_TRUE(result.is_same<required_type>());                                                                  \
-        EXPECT_EQ(*result.template cast<required_type>(), required_result);                                            \
+#define CHECK_RESULT(any_value, required_type, required_result) \
+    { \
+        Any result = any_value; \
+        EXPECT_TRUE(result.is_same<required_type>()); \
+        EXPECT_EQ(*result.template cast<required_type>(), required_result); \
     }
 
-#define CHECK_POINTER_RESULT(any_value, required_type, required_result)                                                \
-    {                                                                                                                  \
-        Any result = any_value;                                                                                        \
-        EXPECT_TRUE(result.is_same<required_type*>());                                                                 \
-        EXPECT_EQ(**result.template cast<required_type*>(), required_result);                                          \
+#define CHECK_POINTER_RESULT(any_value, required_type, required_result) \
+    { \
+        Any result = any_value; \
+        EXPECT_TRUE(result.is_same<required_type*>()); \
+        EXPECT_EQ(**result.template cast<required_type*>(), required_result); \
     }
 
-#define CHECK_VOID_RESULT(any_value, variable_type, required_result)                                                   \
-    {                                                                                                                  \
-        any_value;                                                                                                     \
-        EXPECT_EQ(object.template cast<Type>()->variable_type, required_result);                                       \
+#define CHECK_VOID_RESULT(any_value, variable_type, required_result) \
+    { \
+        any_value; \
+        EXPECT_EQ(object.template cast<Type>()->variable_type, required_result); \
     }
 
 namespace any_function_test_details {

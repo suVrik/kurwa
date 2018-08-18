@@ -29,7 +29,7 @@ class WindowModule;
 /**
  * Imgui module creates everything needed to create and manage GUI using "Dear ImGui" library.
  */
-class ImguiModule : public SignalListener {
+class ImguiModule final : public SignalListener {
 public:
     explicit ImguiModule(IGame* game) noexcept;
     ImguiModule(const ImguiModule& original) = delete;

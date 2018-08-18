@@ -26,7 +26,7 @@ class IGame;
 /**
  * Window module creates a window, stores its state and allows to tune it.
  */
-class WindowModule : public SignalListener {
+class WindowModule final : public SignalListener {
 public:
     /**
      * Create a window and subscribe to event messages from 'game'.
@@ -103,8 +103,8 @@ public:
     bool is_restored() const noexcept;
 
     Signal<void(uint32, uint32)> on_resize; /// Emitted when window is being resized.
-    Signal<void(bool)> on_focus_changed;    /// Emitted when window gains or loses focus.
-    Signal<void(bool)> on_state_changed;    /// Emitted when window is restored or minimized.
+    Signal<void(bool)> on_focus_changed; /// Emitted when window gains or loses focus.
+    Signal<void(bool)> on_state_changed; /// Emitted when window is restored or minimized.
 
 private:
     void on_init_listener(IGame* game) noexcept(false);

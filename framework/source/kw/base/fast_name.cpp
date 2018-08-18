@@ -23,10 +23,10 @@ namespace kw {
 namespace fast_name_details {
 const char* EMPTY_STRING = "";
 
-struct InternalHash {
+struct InternalHash final {
     size_t operator()(const FastName& value) const {
         // FNV-like string hash.
-        auto* ptr     = reinterpret_cast<const uint8*>(value.c_str());
+        auto* ptr = reinterpret_cast<const uint8*>(value.c_str());
         size_t result = 2166136261U;
         while (*ptr++ != 0) {
             result = (result * 16777619) ^ *ptr;
@@ -35,7 +35,7 @@ struct InternalHash {
     }
 };
 
-struct InternalEqualTo {
+struct InternalEqualTo final {
     bool operator()(const FastName& a, const FastName& b) const {
         return a.length() == b.length() && strcmp(a.c_str(), b.c_str()) == 0;
     }

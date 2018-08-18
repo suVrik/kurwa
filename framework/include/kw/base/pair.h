@@ -14,6 +14,7 @@
 #pragma once
 
 #include <EASTL/utility.h>
+
 #include <utility>
 
 namespace kw {

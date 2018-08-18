@@ -22,7 +22,7 @@ namespace kw {
  * AtomicQueue is a thread-safe wrapper around a Queue.
  */
 template <typename T>
-class AtomicQueue {
+class AtomicQueue final {
 public:
     /**
      * Pop the first value out of queue and return it.

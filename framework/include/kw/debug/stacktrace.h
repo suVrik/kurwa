@@ -20,7 +20,7 @@ namespace kw {
 /**
  * Please, look at 'get_stacktrace' static method for description.
  */
-class Stacktrace {
+class Stacktrace final {
 public:
     Stacktrace() = delete;
 

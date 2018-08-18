@@ -39,49 +39,6 @@ char PLATFORM_SEPARATOR = '\\';
 #else
 char PLATFORM_SEPARATOR = '/';
 #endif
-
-#if !defined(KW_WINDOWS)
-// No time to refactor this. It works and I'm fine about it.
-// https://stackoverflow.com/questions/2256945/removing-a-non-empty-directory-programmatically-in-c-or-c
-int remove_directory(const char* path) {
-    DIR* d = opendir(path);
-    size_t path_len = strlen(path);
-    int r = -1;
-    if (d != nullptr) {
-        struct dirent* p;
-        r = 0;
-        while (!r && (p = readdir(d))) {
-            int r2 = -1;
-            char* buf;
-            size_t len;
-            /* Skip the names "." and ".." as we don't want to recurse on them. */
-            if (!strcmp(p->d_name, ".") || !strcmp(p->d_name, "..")) {
-                continue;
-            }
-            len = path_len + strlen(p->d_name) + 2;
-            buf = static_cast<char*>(malloc(len));
-            if (buf) {
-                struct stat statbuf {};
-                snprintf(buf, len, "%s/%s", path, p->d_name);
-                if (!stat(buf, &statbuf)) {
-                    if (S_ISDIR(statbuf.st_mode)) {
-                        r2 = remove_directory(buf);
-                    } else {
-                        r2 = unlink(buf);
-                    }
-                }
-                free(buf);
-            }
-            r = r2;
-        }
-        closedir(d);
-    }
-    if (r == 0) {
-        r = rmdir(path);
-    }
-    return r;
-}
-#endif
 } // namespace filesystem_details
 
 String FilesystemUtils::get_executable_path() noexcept {
@@ -258,7 +215,38 @@ bool FilesystemUtils::remove_directory_recursive(const String& path) noexcept {
     };
     return SHFileOperationA(&file_op) == 0;
 #else
-    return filesystem_details::remove_directory(path.c_str()) == 0;
+    DIR* dir = opendir(path.c_str());
+    if (dir != nullptr) {
+        struct dirent* p;
+        while ((p = readdir(dir))) {
+            if (strcmp(p->d_name, ".") == 0 || strcmp(p->d_name, "..") == 0) {
+                continue;
+            }
+
+            String child_path;
+            if (!path.empty() && path.back() != filesystem_details::PLATFORM_SEPARATOR) {
+                child_path = path + filesystem_details::PLATFORM_SEPARATOR + p->d_name;
+            } else {
+                child_path = path + p->d_name;
+            }
+
+            struct stat child_stat {};
+            if (!stat(child_path.c_str(), &child_stat)) {
+                if (S_ISDIR(child_stat.st_mode)) {
+                    if (remove_directory(child_path.c_str()) != 0) {
+                        return false;
+                    }
+                } else {
+                    if (unlink(child_path.c_str()) != 0) {
+                        return false;
+                    }
+                }
+            }
+        }
+        closedir(dir);
+    }
+
+    return rmdir(path.c_str()) == 0;
 #endif
 }
 

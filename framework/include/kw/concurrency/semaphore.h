@@ -26,23 +26,25 @@ namespace kw {
  * If the count is greater than zero then the decrement happens, and the wait call returns.
  * If the count is zero then it cannot be decremented, so the wait call will block until another thread calls post.
  */
-class Semaphore {
+class Semaphore final {
 public:
     Semaphore() noexcept;
     explicit Semaphore(uint32 counter) noexcept;
-    ~Semaphore() noexcept;
     Semaphore(const Semaphore& original) = delete;
+    ~Semaphore() noexcept;
     Semaphore& operator=(const Semaphore& original) = delete;
 
     /**
      * Atomically increment a semaphore's value and wake waiting threads.
      */
     void post() const noexcept;
+
     /**
      * Wait until a semaphore has a positive value and then decrement it.
      */
     void wait() const noexcept;
+
 private:
-    SDL_semaphore* sem;
+    SDL_semaphore* m_semaphore;
 };
 } // namespace kw

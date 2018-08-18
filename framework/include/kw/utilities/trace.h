@@ -22,13 +22,13 @@
 
 namespace kw {
 /**
- * Writes the formatted string 'format_str' to the standard output (stdout).
+ * Writes the formatted string `format_str` to the standard output (stdout).
  */
 template <typename... Args>
 void tracef(const String& format_str, const Args&... args);
 
 /**
- * Writes the given 'args' to the standard output (stdout) separated by a single space.
+ * Writes the given `args` to the standard output (stdout) separated by a single space.
  */
 template <typename... Args>
 void trace(const Args&... args);

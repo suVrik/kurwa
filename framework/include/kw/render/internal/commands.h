@@ -45,38 +45,38 @@ enum class CommandType {
     SWITCH_CAPABILITY_STATUS,
 };
 
-struct CommandClear {
+struct CommandClear final {
     float r;
     float g;
     float b;
     float a;
 };
 
-struct CommandCreateVertexBuffer {
+struct CommandCreateVertexBuffer final {
     VertexArrayHandle* vao_id;
     VertexBufferHandle* vbo_id;
 };
 
-struct CommandUpdateVertexBuffer {
+struct CommandUpdateVertexBuffer final {
     uint32 size;
     Vector<float> data;
 };
 
-struct CommandBindVertexBuffer {
+struct CommandBindVertexBuffer final {
     VertexArrayHandle* vao_id;
     VertexBufferHandle* vbo_id;
 };
 
-struct CommandCreateIndexBuffer {
+struct CommandCreateIndexBuffer final {
     IndexBufferHandle* id;
 };
 
-struct CommandUpdateIndexBuffer {
+struct CommandUpdateIndexBuffer final {
     uint32 size;
     Vector<uint16> data;
 };
 
-struct CommandBindIndexBuffer {
+struct CommandBindIndexBuffer final {
     IndexBufferHandle* id;
 };
 
@@ -89,7 +89,7 @@ enum class PixelDataType {
     RGBA,
 };
 
-struct CommandCreateTexture {
+struct CommandCreateTexture final {
     TextureHandle* id;
     uint32 width;
     uint32 height;
@@ -98,11 +98,11 @@ struct CommandCreateTexture {
     PixelDataType pixel_data_type;
 };
 
-struct CommandBindTexture {
+struct CommandBindTexture final {
     TextureHandle* id;
 };
 
-struct CommandCreateProgram {
+struct CommandCreateProgram final {
     ShaderProgramHandle* shader_program_id;
     ShaderHandle* vertex_shader_id;
     const char* vertex_shader_code;
@@ -110,7 +110,7 @@ struct CommandCreateProgram {
     const char* fragment_shader_code;
 };
 
-struct CommandBindProgram {
+struct CommandBindProgram final {
     ShaderProgramHandle* id;
 };
 
@@ -119,7 +119,7 @@ enum class AttributeType {
     UNSIGNED_BYTE,
 };
 
-struct CommandCreateVertexAttribute {
+struct CommandCreateVertexAttribute final {
     ShaderProgramHandle* shader_program_id;
     AttributeType type;
     const char* name;
@@ -128,23 +128,23 @@ struct CommandCreateVertexAttribute {
     size_t offset;
 };
 
-struct CommandGetUniformLocation {
+struct CommandGetUniformLocation final {
     UniformLocationHandle* id;
     ShaderProgramHandle* shader_program_id;
     const char* name;
 };
 
-struct CommandUpdateUniformMatrix4f {
+struct CommandUpdateUniformMatrix4f final {
     UniformLocationHandle* id;
     Vector<float> matrix;
 };
 
-struct CommandDrawIndexed {
+struct CommandDrawIndexed final {
     uint32 size;
     const void* data;
 };
 
-struct CommandScissor {
+struct CommandScissor final {
     uint32 x;
     uint32 y;
     uint32 width;
@@ -155,12 +155,12 @@ enum class Capability {
     SCISSOR_TEST,
 };
 
-struct CommandSwitchCapabilityStatus {
+struct CommandSwitchCapabilityStatus final {
     Capability capability;
     bool enable;
 };
 
-struct Command {
+struct Command final {
     Command() noexcept;
 
     Command(const Command& original) = delete;

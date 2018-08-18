@@ -41,7 +41,7 @@ namespace kw {
  * But not necessary all the fields or methods are in the reflection, you can add specific fields and methods in
  * reflection of any type.
  */
-class Reflection {
+class Reflection final {
 public:
     /**
      * Reflection::Meta is just some information that can be stored in object, field or method reflection.
@@ -348,8 +348,7 @@ private:
  * \endcode
  */
 #define REFLECTION_REGISTRATOR(scope) \
-static int REFLECTION_##__COUNTER__ = [] { \
-    using namespace kw; \
-    scope \
-    return 0; \
-}();
+    static int REFLECTION_##__COUNTER__ = [] { \
+        using namespace kw; \
+        scope return 0; \
+    }();

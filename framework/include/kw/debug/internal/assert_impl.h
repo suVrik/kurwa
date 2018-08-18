@@ -24,15 +24,15 @@
 namespace kw {
 inline void assert_impl(const char* expression, const char* filename, uint32 line_number) noexcept {
     const String stacktrace = Stacktrace::get_stacktrace(1, 2);
-    fprintf(stderr, "Invalid assertion:\n  %s\nin file %s:%d\n\nStacktrace:\n%s\n", expression, filename, line_number,
-            stacktrace.c_str());
+    fprintf(stderr, "Invalid assertion:\n  %s\nin file %s:%d\n\nStacktrace:\n%s\n",
+            expression, filename, line_number, stacktrace.c_str());
 }
 
 template <typename... Args>
 void assert_impl(const char* expression, const char* filename, uint32 line_number, const String& message, const Args&... args) noexcept {
     const String stacktrace = Stacktrace::get_stacktrace(1, 2);
     const String full_message = fmt::format(message, args...);
-    fprintf(stderr, "Invalid assertion:\n  %s\nin file %s:%d\n\nMessage:\n  %s\n\nStacktrace:\n%s\n", expression, filename, line_number,
-            full_message.c_str(), stacktrace.c_str());
+    fprintf(stderr, "Invalid assertion:\n  %s\nin file %s:%d\n\nMessage:\n  %s\n\nStacktrace:\n%s\n",
+            expression, filename, line_number, full_message.c_str(), stacktrace.c_str());
 }
 } // namespace kw

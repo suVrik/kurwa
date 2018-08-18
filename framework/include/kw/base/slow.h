@@ -14,24 +14,23 @@
 #pragma once
 
 #include <kw/base/types.h>
-
 #include <kw/debug/assert.h>
 
 namespace kw {
 /**
- * Slow<T> is a structure that contains and gives access to the object of type 'T'.
- * The difference between 'T' and 'Slow<T>' is that 'Slow<T>' doesn't construct 'T' right away,
- * instead it waits for a 'construct' call.
+ * Slow<T> is a structure that contains and gives access to the object of type `T`.
+ * The difference between `T` and `Slow<T>` is that `Slow<T>` doesn't construct `T` right away,
+ * instead it waits for a `construct` call.
  * Why not use unique_ptr? Slow<T> allocates memory in place which is convenient for arrays and tuples
  * (i.e. you can iterate over them faster, due to the fact the objects themselves lay each after each).
  */
 template <typename T>
-class Slow {
+class Slow final {
 public:
     typedef T value_type;
 
     /**
-     * 'T' is not constructed. The attempt to access it leads to undefined behaviour.
+     * `T` is not constructed. The attempt to access it leads to undefined behaviour.
      */
     Slow() = default;
 
@@ -42,7 +41,7 @@ public:
     Slow& operator=(Slow&& original) noexcept;
 
     /**
-     * Construct an object of type 'T' using the given 'Arguments'.
+     * Construct an object of type `T` using the given `Arguments`.
      */
     template <typename... Arguments>
     void construct(Arguments&&... args) noexcept(eastl::is_nothrow_constructible<T>::value);
@@ -56,7 +55,7 @@ public:
     const T& operator->() const noexcept;
 
     /**
-     * Return true if 'construct' was already called. If not, return false.
+     * Return true if `construct` was already called. If not, return false.
      */
     bool is_constructed() const noexcept;
 
