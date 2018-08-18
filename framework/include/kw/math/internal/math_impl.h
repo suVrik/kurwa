@@ -52,13 +52,13 @@ constexpr float Math::atan(T x) noexcept {
 }
 
 template <class T1, class T2>
-constexpr float atan2(T1 y, T2 x) noexcept {
+constexpr float Math::atan2(T1 y, T2 x) noexcept {
     return atan2f(static_cast<float>(y), static_cast<float>(x));
 }
 
 template <class T>
-constexpr int Math::ceil(T x) noexcept {
-    return static_cast<int>(ceilf(static_cast<float>(x)));
+constexpr int32 Math::ceil(T x) noexcept {
+    return static_cast<int32>(ceilf(static_cast<float>(x)));
 }
 
 template <class T>
@@ -98,23 +98,22 @@ constexpr float Math::exp(T x) noexcept {
 }
 
 template <class T>
-constexpr int Math::floor(T x) noexcept {
-    return static_cast<int>(floorf(static_cast<float>(x)));
+constexpr int32 Math::floor(T x) noexcept {
+    return static_cast<int32>(floorf(static_cast<float>(x)));
 }
 
 template <class T>
 constexpr bool Math::is_power_of_two(T value) noexcept {
-    for (unsigned i = 0; i < 32; i++) {
-        if (value == (1U << i)) {
-            return true;
-        }
-    }
-    return false;
+    static_assert(eastl::is_integral<T>::value, "Integral type is required!");
+
+    return value > 0 && (value & (value - 1)) == 0;
 }
 
 template <class T>
 constexpr T Math::next_power_of_two(T value) noexcept {
-    for (unsigned int i = 0; i < 32; i++) {
+    static_assert(eastl::is_integral<T>::value, "Integral type is required!");
+
+    for (uint32 i = 0; i < sizeof(T) * 8; i++) {
         if (value <= (1U << i)) {
             return static_cast<T>(1U << i);
         }
@@ -135,6 +134,18 @@ constexpr float Math::mod(T1 x, T2 y) noexcept {
 template <class T>
 constexpr float Math::log(T x) noexcept {
     return logf(static_cast<float>(x));
+}
+
+constexpr uint32 Math::fast_log2(uint32 x) noexcept {
+#ifdef __GNUC__
+    return __builtin_ctz(x);
+#else
+    static const int32 multiply_DeBruijn_bit_position2[32] = {
+        0, 1, 28, 2, 29, 14, 24, 3, 30, 22, 20, 15, 25, 17, 4, 8,
+        31, 27, 13, 23, 21, 19, 16, 7, 26, 12, 18, 6, 11, 5, 10, 9
+    };
+    return multiply_DeBruijn_bit_position2[(x * 0x077CB531U) >> 27];
+#endif
 }
 
 template <class T1, class T2>
@@ -158,17 +169,17 @@ constexpr float Math::rad(T deg) noexcept {
 }
 
 template <class T>
-constexpr int Math::round(T x) noexcept {
-    return static_cast<int>(roundf(static_cast<float>(x)));
+constexpr int32 Math::round(T x) noexcept {
+    return static_cast<int32>(roundf(static_cast<float>(x)));
 }
 
 template <class T>
-constexpr int Math::sign(T value) noexcept {
+constexpr int32 Math::sign(T value) noexcept {
     return value < 0 ? -1 : 1;
 }
 
 template <class T>
-constexpr int Math::sign0(T value) noexcept {
+constexpr int32 Math::sign0(T value) noexcept {
     return value < 0 ? -1 : (value > 0 ? 1 : 0);
 }
 

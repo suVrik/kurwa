@@ -34,7 +34,9 @@ Game<Modules...>::Game() noexcept {
     // If IGame failed to initialize, we can omit initializing modules.
     if (is_initialized) {
         try {
-            game_details::construct_slow_tuple<decltype(m_modules), decltype(this), Slow<Modules>...>(m_modules, this, modules_pointers);
+            using namespace game_details;
+
+            construct_slow_tuple<decltype(m_modules), Game*, Slow<Modules>...>(m_modules, this, modules_pointers);
         } catch (const RuntimeError& error) {
             message_box(error.what());
             is_initialized = false;

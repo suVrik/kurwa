@@ -21,7 +21,7 @@ namespace kw {
 /**
  * The instance of AnyFunction contains a pointer to a member function with any arguments and any return value type.
  */
-class AnyFunction {
+class AnyFunction final {
 public:
     AnyFunction() = default;
 

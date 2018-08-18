@@ -14,6 +14,7 @@
 #pragma once
 
 #include <EASTL/array.h>
+
 #include <utility>
 
 namespace kw {

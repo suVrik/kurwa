@@ -7,24 +7,31 @@ branches:
   only:
     - master
 
-script:
-  - git lfs pull
-  - mkdir build
-  - cd build
-  - cmake .. -DCMAKE_BUILD_TYPE=Release
-  - cmake --build . -- -j 2
-  - cd bin
-  - if [ `uname` = 'Darwin' ]; then
-      ./unittest.app/Contents/MacOS/unittest;
-    else
-      ./unittest;
-    fi
+jobs:
+  include:
+    - stage: 'codeformat'
+      os: linux
+      script:
+        - python script/codeformat/check_style.py
+    - stage: 'build & unittest'
+      script:
+        - git lfs pull
+        - mkdir build
+        - cd build
+        - cmake .. -DCMAKE_BUILD_TYPE=Release
+        - cmake --build . -- -j 2
+        - cd bin
+        - if [ `uname` = 'Darwin' ]; then
+          ./unittest.app/Contents/MacOS/unittest;
+          else
+          ./unittest;
+          fi
 
 matrix:
   fast_finish: true
   include:
     - os: linux
-      compiler: clang-6.0
+      compiler: clang
       addons:
         apt:
           packages:
@@ -41,4 +48,3 @@ matrix:
       before_script:
         - brew install git-lfs
         - git lfs install
-

@@ -57,32 +57,12 @@ void process_command(Command& command) noexcept(false) {
             glGenBuffers(1, command.create_vertex_buffer.vbo_id);
             break;
         case CommandType::UPDATE_VERTEX_BUFFER:
-            glBufferData(GL_ARRAY_BUFFER, command.update_vertex_buffer.size, command.update_vertex_buffer.data.data(), GL_STREAM_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, command.update_vertex_buffer.size, command.update_vertex_buffer.data.data(),
+                         GL_STREAM_DRAW);
             break;
         case CommandType::BIND_VERTEX_BUFFER:
-            KW_ASSERT(command.bind_vertex_buffer.vao_id != nullptr || command.bind_vertex_buffer.vbo_id != nullptr, "Yo"
-                                                                                                                    "u "
-                                                                                                                    "fo"
-                                                                                                                    "rg"
-                                                                                                                    "ot"
-                                                                                                                    " t"
-                                                                                                                    "o "
-                                                                                                                    "at"
-                                                                                                                    "ta"
-                                                                                                                    "ch"
-                                                                                                                    " a"
-                                                                                                                    " v"
-                                                                                                                    "er"
-                                                                                                                    "te"
-                                                                                                                    "x "
-                                                                                                                    "bu"
-                                                                                                                    "ff"
-                                                                                                                    "er"
-                                                                                                                    " h"
-                                                                                                                    "an"
-                                                                                                                    "dl"
-                                                                                                                    "e"
-                                                                                                                    "!");
+            KW_ASSERT(command.bind_vertex_buffer.vao_id != nullptr || command.bind_vertex_buffer.vbo_id != nullptr,
+                      "You forgot to attach a vertex buffer handle!");
             glBindVertexArray(*command.bind_vertex_buffer.vao_id);
             glBindBuffer(GL_ARRAY_BUFFER, *command.bind_vertex_buffer.vbo_id);
             break;
@@ -90,7 +70,8 @@ void process_command(Command& command) noexcept(false) {
             glGenBuffers(1, command.create_index_buffer.id);
             break;
         case CommandType::UPDATE_INDEX_BUFFER:
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, command.update_index_buffer.size, command.update_index_buffer.data.data(), GL_STREAM_DRAW);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, command.update_index_buffer.size,
+                         command.update_index_buffer.data.data(), GL_STREAM_DRAW);
             break;
         case CommandType::BIND_INDEX_BUFFER:
             KW_ASSERT(command.bind_index_buffer.id != nullptr, "You forgot to attach an index buffer handle!");
@@ -117,8 +98,8 @@ void process_command(Command& command) noexcept(false) {
                     pixel_data_type = GL_RGBA;
                     break;
             }
-            glTexImage2D(GL_TEXTURE_2D, 0, pixel_data_type, command.create_texture.width, command.create_texture.height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                         command.create_texture.pixels);
+            glTexImage2D(GL_TEXTURE_2D, 0, pixel_data_type, command.create_texture.width, command.create_texture.height,
+                         0, GL_RGBA, GL_UNSIGNED_BYTE, command.create_texture.pixels);
             break;
         }
         case CommandType::BIND_TEXTURE:
@@ -152,7 +133,8 @@ void process_command(Command& command) noexcept(false) {
             break;
         case CommandType::CREATE_VERTEX_ATTRIBUTE: {
             auto m_attribute_position = static_cast<uint32>(
-                glGetAttribLocation(*command.create_vertex_attribute.shader_program_id, command.create_vertex_attribute.name));
+                glGetAttribLocation(*command.create_vertex_attribute.shader_program_id,
+                                    command.create_vertex_attribute.name));
             glEnableVertexAttribArray(m_attribute_position);
             GLenum type;
             switch (command.create_vertex_attribute.type) {
@@ -169,10 +151,11 @@ void process_command(Command& command) noexcept(false) {
             break;
         }
         case CommandType::GET_UNIFORM_LOCATION:
-            KW_ASSERT(command.get_uniform_location.shader_program_id != nullptr, "You forgot to attach a shader "
-                                                                                 "program handle!");
+            KW_ASSERT(command.get_uniform_location.shader_program_id != nullptr,
+                      "You forgot to attach a shader program handle!");
             *command.get_uniform_location.id = static_cast<uint32>(
-                glGetUniformLocation(*command.get_uniform_location.shader_program_id, command.get_uniform_location.name));
+                glGetUniformLocation(*command.get_uniform_location.shader_program_id,
+                                     command.get_uniform_location.name));
             break;
         case CommandType::UPDATE_UNIFORM_MATRIX_4F:
             KW_ASSERT(command.update_uniform_matrix_4f.id != nullptr, "You forgot to attach a uniform handle!");
@@ -216,9 +199,7 @@ BackendOpenGL::BackendOpenGL(IGame* game) noexcept(false) {
 
     m_context = SDL_GL_CreateContext(m_window);
     if (m_context == nullptr) {
-        throw RuntimeError(fmt::format("Failed to create OpenGL context!\n"
-                                       "The error message: {}",
-                                       SDL_GetError()));
+        throw RuntimeError(fmt::format("Failed to create OpenGL context!\nThe error message: {}", SDL_GetError()));
     }
 
     SDL_GL_SetSwapInterval(1);
@@ -226,9 +207,7 @@ BackendOpenGL::BackendOpenGL(IGame* game) noexcept(false) {
     glewExperimental = GL_TRUE;
     GLenum err = glewInit();
     if (err != GLEW_OK) {
-        throw RuntimeError(fmt::format("Failed to initialize GLEW!\n"
-                                       "The error message: {}",
-                                       glewGetErrorString(err)));
+        throw RuntimeError(fmt::format("Failed to initialize GLEW!\nThe error message: {}", glewGetErrorString(err)));
     }
 }
 

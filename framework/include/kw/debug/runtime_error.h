@@ -34,7 +34,7 @@ public:
     RuntimeError() = default;
 
     /**
-     * Construct runtime error with the given message.
+     * Construct runtime error with the given `message`.
      */
     explicit RuntimeError(const char* message) noexcept;
     explicit RuntimeError(const String& message) noexcept;
@@ -42,6 +42,7 @@ public:
 
     /**
      * Construct runtime error with the given formatted message.
+     *
      * \code
      * throw RuntimeError("Failed to load file '{}'!", filename);
      * \endcode

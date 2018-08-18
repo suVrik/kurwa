@@ -28,6 +28,8 @@ public:
         OPENGL,
     };
 
+    virtual ~Backend() = default;
+
     /**
      * Execute the given `command_buffers` and present the resulting image on the screen.
      */

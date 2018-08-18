@@ -26,7 +26,7 @@ class IGame;
 /**
  * Window module creates a window, stores its state and allows to tune it.
  */
-class WindowModule : public SignalListener {
+class WindowModule final : public SignalListener {
 public:
     /**
      * Create a window and subscribe to event messages from 'game'.

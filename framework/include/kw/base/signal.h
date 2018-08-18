@@ -23,12 +23,12 @@
 namespace kw {
 /**
  * Template-free base class for Signal.
- * Used in SignalListener.
+ * Used in `SignalListener`.
  */
 class ISignal {
 public:
     /**
-     * Disconnect all the callbacks tied with the given 'object'.
+     * Disconnect all the callbacks tied with the given `object`.
      */
     virtual void disconnect(const void* object) noexcept = 0;
 
@@ -61,7 +61,7 @@ private:
 
 /**
  * Signal is a list of functions (called callbacks) with the same signature:
- * they don't return anything and their parameters are 'Arguments'.
+ * they don't return anything and their parameters are `Arguments`.
  *
  * You can add functions to this list, you can remove them and you can call
  * all of them in the same order you added them (this is called emitting).
@@ -81,7 +81,7 @@ public:
 
     /**
      * Connect a callback to the signal and return an unique token, which can be used to disconnect a callback.
-     * The 'object', just like a token, can be used to disconnect the callback.
+     * The `object`, just like a token, can be used to disconnect the callback.
      *
      * \code
      * struct MyStruct {
@@ -96,7 +96,7 @@ public:
 
     /**
      * Connect a callback to the signal and return an unique token, which can be used to disconnect a callback.
-     * The 'object', just like a token, can be used to disconnect the callback.
+     * The `object`, just like a token, can be used to disconnect the callback.
      *
      * \code
      * struct MyStruct {
@@ -111,7 +111,7 @@ public:
 
     /**
      * Connect a callback to the signal and return an unique token, which can be used to disconnect a callback.
-     * The 'object', just like a token, can be used to disconnect the callback.
+     * The `object`, just like a token, can be used to disconnect the callback.
      *
      * \code
      * struct MyStruct {
@@ -126,7 +126,7 @@ public:
 
     /**
      * Connect a callback to the signal and return an unique token, which can be used to disconnect a callback.
-     * The 'object', just like a token, can be used to disconnect the callback.
+     * The `object`, just like a token, can be used to disconnect the callback.
      *
      * \code
      * struct MyStruct {
@@ -141,7 +141,7 @@ public:
 
     /**
      * Connect a callback to the signal and return an unique token, which can be used to disconnect a callback.
-     * The 'object', just like a token, can be used to disconnect the callback.
+     * The `object`, just like a token, can be used to disconnect the callback.
      *
      * \code
      * update.connect(this, [] {
@@ -151,11 +151,12 @@ public:
      * \endcode
      */
     template <typename Object, typename Callback>
-    eastl::enable_if_t<!eastl::is_member_function_pointer<Callback>::value, uint32> connect(Object* object, const Callback callback) noexcept;
+    eastl::enable_if_t<!eastl::is_member_function_pointer<Callback>::value, uint32>
+    connect(Object* object, const Callback callback) noexcept;
 
     /**
      * Connect a callback to the signal and return an unique token, which can be used to disconnect a callback.
-     * The 'object', just like a token, can be used to disconnect the callback.
+     * The `object`, just like a token, can be used to disconnect the callback.
      *
      * \code
      * update.connect(this, [] {
@@ -165,7 +166,8 @@ public:
      * \endcode
      */
     template <typename Object, typename Callback>
-    eastl::enable_if_t<!eastl::is_member_function_pointer<Callback>::value, uint32> connect(const Object* object, const Callback callback) noexcept;
+    eastl::enable_if_t<!eastl::is_member_function_pointer<Callback>::value, uint32>
+    connect(const Object* object, const Callback callback) noexcept;
 
     /**
      * Connect a callback to the signal and return an unique token, which can be used to disconnect a callback.
@@ -181,25 +183,25 @@ public:
     uint32 connect(const Callback callback) noexcept;
 
     /**
-     * Disconnect all the callbacks tied with the given 'object'.
+     * Disconnect all the callbacks tied with the given `object`.
      */
     void disconnect(const void* object) noexcept override;
 
     /**
-     * Disconnect a callback with the given 'token'.
+     * Disconnect a callback with the given `token`.
      */
     void disconnect(uint32 token) noexcept;
 
     /**
-     * Call all the connected callbacks with the given 'arguments' in order from the first to the last
+     * Call all the connected callbacks with the given `arguments` in order from the first to the last
      * connected callback. The result of each callback, if any exists, is ignored.
      */
     void emit(Arguments... arguments);
 
     /**
-     * Call all the connected callbacks with the given 'arguments' in order from the first to the last
-     * connected callback. Return the result of applying the given 'adder' to every sequential pair of callbacks.
-     * If none listeners are available, 'default_value' is returned.
+     * Call all the connected callbacks with the given `arguments` in order from the first to the last
+     * connected callback. Return the result of applying the given `adder` to every sequential pair of callbacks.
+     * If none listeners are available, `default_value` is returned.
      *
      * The required adder signature: Result(Result, Result) — with optional const-reference qualifiers.
      *
@@ -218,10 +220,11 @@ public:
      * \endcode
      */
     template <typename Adder>
-    Result emit(Arguments... arguments, const Adder adder, eastl::conditional_t<eastl::is_same_v<Result, void>, int32, Result> default_value);
+    Result emit(Arguments... arguments, const Adder adder,
+                eastl::conditional_t<eastl::is_same_v<Result, void>, int32, Result> default_value);
 
 private:
-    struct CallbackData {
+    struct CallbackData final {
         Function<Result(Arguments...)> callback;
         const void* object;
         uint32 token;

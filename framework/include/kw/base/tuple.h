@@ -14,6 +14,7 @@
 #pragma once
 
 #include <EASTL/tuple.h>
+
 #include <utility>
 
 namespace kw {

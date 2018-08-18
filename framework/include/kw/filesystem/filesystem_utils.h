@@ -20,7 +20,7 @@ namespace kw {
 /**
  * FilesystemUtils provides a basic interface to communicate with the filesystem.
  */
-class FilesystemUtils {
+class FilesystemUtils final {
 public:
     /**
      * Return executable path.

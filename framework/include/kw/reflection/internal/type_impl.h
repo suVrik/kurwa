@@ -61,7 +61,7 @@ struct is_virtual_base_of_impl<Base, Derived, eastl::true_type> {
 };
 
 template <typename Base, typename Derived>
-struct is_virtual_base_of {
+struct is_virtual_base_of final {
     static constexpr bool tag_value = eastl::is_base_of<Base, Derived>::value && !eastl::is_same_v<Base, Derived>;
     static constexpr bool value = is_virtual_base_of_impl<Base, Derived, eastl::integral_constant<bool, tag_value>>::value;
 };

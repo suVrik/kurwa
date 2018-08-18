@@ -23,7 +23,7 @@ namespace kw {
  * Use it in places where you need to compare strings very often. Prefer caching FastName instances, as FastName
  * constructor is kind of slow (it uses a hash map).
  */
-class FastName {
+class FastName final {
 public:
     /**
      * Construct FastName instance.
@@ -36,7 +36,7 @@ public:
     FastName& operator=(const FastName&) noexcept = default;
 
     /**
-     * Return a character at specified location 'position'.
+     * Return a character at specified location `position`.
      */
     char at(size_t position) const noexcept;
     char operator[](size_t position) const noexcept;

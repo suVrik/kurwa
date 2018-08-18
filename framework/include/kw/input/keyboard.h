@@ -63,11 +63,13 @@ public:
     const String& get_text() const noexcept;
 
 private:
-    enum class KeyState : uint8 { NONE = 0b000U,
-                                  DOWN = 0b001U,
-                                  REPEAT = 0b011U,
-                                  PRESSED = 0b111U,
-                                  RELEASED = 0b100U };
+    enum class KeyState : uint8 {
+        NONE = 0b000U,
+        DOWN = 0b001U,
+        REPEAT = 0b011U,
+        PRESSED = 0b111U,
+        RELEASED = 0b100U
+    };
 
     void on_event_listener(SDL_Event& event) noexcept;
     void on_update_listener() noexcept;

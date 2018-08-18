@@ -25,7 +25,7 @@ namespace render {
 /**
  * BackendOpenGL is a class that translates rendering API-agnostic `Command` into real OpenGL commands.
  */
-class BackendOpenGL : public Backend, public SignalListener {
+class BackendOpenGL final : public Backend, public SignalListener {
 public:
     explicit BackendOpenGL(IGame* game) noexcept(false);
     BackendOpenGL(const BackendOpenGL& original) = delete;

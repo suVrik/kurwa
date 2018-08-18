@@ -22,13 +22,13 @@ uint32 generate_unique_token();
 template <typename Object, typename Callback, typename Result, typename... Arguments>
 Function<Result(Arguments...)> method(Object object, Callback callback) {
     if constexpr (eastl::is_same_v<Result, void>) {
-        return [ object, callback ](Arguments && ... arguments) noexcept(noexcept((object->*callback)(eastl::forward<Arguments>(arguments)...)))
-            ->void {
+        return [object, callback](Arguments && ... arguments)
+                noexcept(noexcept((object->*callback)(eastl::forward<Arguments>(arguments)...))) -> void {
             (object->*callback)(eastl::forward<Arguments>(arguments)...);
         };
     } else {
-        return [ object, callback ](Arguments && ... arguments) noexcept(noexcept((object->*callback)(eastl::forward<Arguments>(arguments)...)))
-            ->Result {
+        return [object, callback](Arguments && ... arguments)
+                noexcept(noexcept((object->*callback)(eastl::forward<Arguments>(arguments)...))) -> Result {
             return (object->*callback)(eastl::forward<Arguments>(arguments)...);
         };
     }
@@ -55,7 +55,8 @@ template <typename Result, typename... Arguments>
 template <typename Object>
 uint32 Signal<Result(Arguments...)>::connect(Object* object, Result (Object::*const callback)(Arguments...)) noexcept {
     CallbackData data;
-    data.callback = signal_details::method<Object*, Result (Object::*const)(Arguments...), Result, Arguments...>(object, callback);
+    data.callback = signal_details::method<Object*, Result (Object::*const)(Arguments...),
+            Result, Arguments...>(object, callback);
     data.token = signal_details::generate_unique_token();
     handle_signal_listener(data, object);
     m_callbacks.push_back(eastl::move(data));
@@ -64,9 +65,11 @@ uint32 Signal<Result(Arguments...)>::connect(Object* object, Result (Object::*co
 
 template <typename Result, typename... Arguments>
 template <typename Object>
-uint32 Signal<Result(Arguments...)>::connect(Object* object, Result (Object::*const callback)(Arguments...) noexcept) noexcept {
+uint32 Signal<Result(Arguments...)>::connect(Object* object,
+                                             Result (Object::*const callback)(Arguments...) noexcept) noexcept {
     CallbackData data;
-    data.callback = signal_details::method<Object*, Result (Object::*const)(Arguments...) noexcept, Result, Arguments...>(object, callback);
+    data.callback = signal_details::method<Object*, Result (Object::*const)(Arguments...) noexcept,
+            Result, Arguments...>(object, callback);
     data.token = signal_details::generate_unique_token();
     handle_signal_listener(data, object);
     m_callbacks.push_back(eastl::move(data));
@@ -75,14 +78,16 @@ uint32 Signal<Result(Arguments...)>::connect(Object* object, Result (Object::*co
 
 template <typename Result, typename... Arguments>
 template <typename Object>
-uint32 Signal<Result(Arguments...)>::connect(const Object* object, Result (Object::*const callback)(Arguments...) const) noexcept {
-    static_assert(!eastl::is_base_of<SignalListener, Object>::value, "You're trying to connect a callback tied with a "
-                                                                     "const instance of SignalListener, "
-                                                                     "which is not allowed! To connect a "
-                                                                     "SignalListener to a signal, it's required "
-                                                                     "to change the SignalListener.");
+uint32 Signal<Result(Arguments...)>::connect(const Object* object,
+                                             Result (Object::*const callback)(Arguments...) const) noexcept {
+    static_assert(!eastl::is_base_of<SignalListener, Object>::value,
+                  "You're trying to connect a callback tied with a const instance of SignalListener,"
+                  "which is not allowed! To connect a SignalListener to a signal,"
+                  "it's required to change the SignalListener.");
+
     CallbackData data;
-    data.callback = signal_details::method<const Object*, Result (Object::*const)(Arguments...) const, Result, Arguments...>(object, callback);
+    data.callback = signal_details::method<const Object*, Result (Object::*const)(Arguments...) const,
+            Result, Arguments...>(object, callback);
     data.object = object;
     data.token = signal_details::generate_unique_token();
     data.is_signal_listener = false;
@@ -92,14 +97,16 @@ uint32 Signal<Result(Arguments...)>::connect(const Object* object, Result (Objec
 
 template <typename Result, typename... Arguments>
 template <typename Object>
-uint32 Signal<Result(Arguments...)>::connect(const Object* object, Result (Object::*const callback)(Arguments...) const noexcept) noexcept {
-    static_assert(!eastl::is_base_of<SignalListener, Object>::value, "You're trying to connect a callback tied with a "
-                                                                     "const instance of SignalListener, "
-                                                                     "which is not allowed! To connect a "
-                                                                     "SignalListener to a signal, it's required "
-                                                                     "to change the SignalListener.");
+uint32 Signal<Result(Arguments...)>::connect(const Object* object,
+                                             Result (Object::*const callback)(Arguments...) const noexcept) noexcept {
+    static_assert(!eastl::is_base_of<SignalListener, Object>::value,
+                  "You're trying to connect a callback tied with a const instance of SignalListener,"
+                  "which is not allowed! To connect a SignalListener to a signal,"
+                  "it's required to change the SignalListener.");
+
     CallbackData data;
-    data.callback = signal_details::method<const Object*, Result (Object::*const)(Arguments...) const noexcept, Result, Arguments...>(object, callback);
+    data.callback = signal_details::method<const Object*, Result (Object::*const)(Arguments...) const noexcept,
+            Result, Arguments...>(object, callback);
     data.object = object;
     data.token = signal_details::generate_unique_token();
     data.is_signal_listener = false;
@@ -109,7 +116,8 @@ uint32 Signal<Result(Arguments...)>::connect(const Object* object, Result (Objec
 
 template <typename Result, typename... Arguments>
 template <typename Object, typename Callback>
-eastl::enable_if_t<!eastl::is_member_function_pointer<Callback>::value, uint32> Signal<Result(Arguments...)>::connect(Object* object, const Callback callback) noexcept {
+eastl::enable_if_t<!eastl::is_member_function_pointer<Callback>::value, uint32>
+Signal<Result(Arguments...)>::connect(Object* object, const Callback callback) noexcept {
     CallbackData data;
     data.callback = Function<Result(Arguments...)>(callback);
     data.token = signal_details::generate_unique_token();
@@ -120,12 +128,12 @@ eastl::enable_if_t<!eastl::is_member_function_pointer<Callback>::value, uint32> 
 
 template <typename Result, typename... Arguments>
 template <typename Object, typename Callback>
-eastl::enable_if_t<!eastl::is_member_function_pointer<Callback>::value, uint32> Signal<Result(Arguments...)>::connect(const Object* object, const Callback callback) noexcept {
-    static_assert(!eastl::is_base_of<SignalListener, Object>::value, "You're trying to connect a callback tied with a "
-                                                                     "const instance of SignalListener, "
-                                                                     "which is not allowed! To connect a "
-                                                                     "SignalListener to a signal, it's required "
-                                                                     "to change the SignalListener.");
+eastl::enable_if_t<!eastl::is_member_function_pointer<Callback>::value, uint32>
+Signal<Result(Arguments...)>::connect(const Object* object, const Callback callback) noexcept {
+    static_assert(!eastl::is_base_of<SignalListener, Object>::value,
+                  "You're trying to connect a callback tied with a const instance of SignalListener,"
+                  "which is not allowed! To connect a SignalListener to a signal,"
+                  "it's required to change the SignalListener.");
 
     CallbackData data;
     data.callback = Function<Result(Arguments...)>(callback);
@@ -178,7 +186,9 @@ void Signal<Result(Arguments...)>::emit(Arguments... arguments) {
 
 template <typename Result, typename... Arguments>
 template <typename Adder>
-Result Signal<Result(Arguments...)>::emit(Arguments... arguments, const Adder adder, eastl::conditional_t<eastl::is_same_v<Result, void>, int32, Result> default_value) {
+Result
+Signal<Result(Arguments...)>::emit(Arguments... arguments, const Adder adder,
+                                   eastl::conditional_t<eastl::is_same_v<Result, void>, int32, Result> default_value) {
     static_assert(!eastl::is_same_v<Result, void>, "This 'emit' signature is intended for non-void signals!");
 
     if (!m_callbacks.empty()) {

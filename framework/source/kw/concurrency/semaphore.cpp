@@ -17,22 +17,22 @@
 
 namespace kw {
 Semaphore::Semaphore() noexcept
-    : sem(SDL_CreateSemaphore(0)) {
+    : m_semaphore(SDL_CreateSemaphore(0)) {
 }
 
 Semaphore::Semaphore(uint32 counter) noexcept
-    : sem(SDL_CreateSemaphore(counter)) {
+    : m_semaphore(SDL_CreateSemaphore(counter)) {
 }
 
 Semaphore::~Semaphore() noexcept {
-    SDL_DestroySemaphore(sem);
+    SDL_DestroySemaphore(m_semaphore);
 }
 
 void Semaphore::wait() const noexcept {
-    SDL_SemWait(sem);
+    SDL_SemWait(m_semaphore);
 }
 
 void Semaphore::post() const noexcept {
-    SDL_SemPost(sem);
+    SDL_SemPost(m_semaphore);
 }
 } // namespace kw

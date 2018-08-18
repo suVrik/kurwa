@@ -38,7 +38,7 @@ public:
     /**
      * The following structure contains information about a base class relative to a child class.
      */
-    struct Parent {
+    struct Parent final {
         const Type* type; /// Type of the base class.
         uintptr_t offset; /// Offset of the base class relatively to the child (for multiple inheritance).
     };

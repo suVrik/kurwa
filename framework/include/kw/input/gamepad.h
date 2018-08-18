@@ -59,12 +59,13 @@ public:
     Pair<float, float> get_axis(Control control) const noexcept;
 
 private:
-    enum class ControlState : uint8 { NONE = 0b00U,
-                                      DOWN = 0b01U,
-                                      PRESSED = 0b11U,
-                                      RELEASED = 0b10U };
+    enum class ControlState : uint8 {
+        NONE = 0b00U,
+        DOWN = 0b01U,
+        PRESSED = 0b11U,
+        RELEASED = 0b10U
+    };
 
-    // TODO: This should be an option.
     static constexpr float TRIGGER_SENSITIVITY = 0.5f;
 
     void on_event_listener(SDL_Event& event) noexcept;
@@ -76,6 +77,6 @@ private:
     Pair<float, float> m_axes[2]{};
     int32 m_instance_id = 0;
 
-    friend class InputModule; // To access constructor and instance id.
+    friend class InputModule; // To access instance id.
 };
 } // namespace kw

@@ -23,7 +23,8 @@ Any::Any(const Type* type) noexcept
     : m_type(type) {
     Type::default_constructor_t constructor = m_type->get_default_constructor();
 
-    KW_ASSERT(constructor != nullptr, "Type '{}' must have default constructor for such Any initialization!", type->get_name());
+    KW_ASSERT(constructor != nullptr, "Type '{}' must have default constructor for such Any initialization!",
+              type->get_name());
 
     constructor(&m_data);
 }

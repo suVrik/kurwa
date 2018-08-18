@@ -135,7 +135,8 @@ Reflection::Reflection(const Type* type) noexcept
             } else {
                 for (const Reflection::Field* field : parent_fields) {
                     const uintptr_t field_offset = offset + field->get_offset();
-                    m_fields.push_back(reflection_details::add_field(field->get_type(), field->get_name(), field_offset));
+                    m_fields.push_back(reflection_details::add_field(field->get_type(), field->get_name(),
+                                                                     field_offset));
                 }
             }
 
@@ -160,21 +161,24 @@ Reflection::Reflection(const Type* type) noexcept
 #if defined(KW_DEBUG)
     for (uint32 i = 0; i < m_fields.size(); i++) {
         for (uint32 j = i + 1; j < m_fields.size(); j++) {
-            KW_ASSERT(m_fields[i]->get_name() != m_fields[j]->get_name(), "Fields with the same name '{}' in reflection of type '{}'!",
+            KW_ASSERT(m_fields[i]->get_name() != m_fields[j]->get_name(),
+                      "Fields with the same name '{}' in reflection of type '{}'!",
                       m_fields[i]->get_name().c_str(), m_type->get_name());
         }
     }
 
     for (uint32 i = 0; i < m_methods.size(); i++) {
         for (uint32 j = i + 1; j < m_methods.size(); j++) {
-            KW_ASSERT(m_methods[i]->get_name() != m_methods[j]->get_name(), "Methods with the same name '{}' in reflection of type '{}'!",
+            KW_ASSERT(m_methods[i]->get_name() != m_methods[j]->get_name(),
+                      "Methods with the same name '{}' in reflection of type '{}'!",
                       m_methods[i]->get_name().c_str(), m_type->get_name());
         }
     }
 
     for (uint32 i = 0; i < m_meta.size(); i++) {
         for (uint32 j = i + 1; j < m_meta.size(); j++) {
-            KW_ASSERT(m_meta[i]->get_name() != m_meta[j]->get_name(), "Meta with the same name '{}' in reflection of type '{}'!",
+            KW_ASSERT(m_meta[i]->get_name() != m_meta[j]->get_name(),
+                      "Meta with the same name '{}' in reflection of type '{}'!",
                       m_meta[i]->get_name().c_str(), m_type->get_name());
         }
     }
