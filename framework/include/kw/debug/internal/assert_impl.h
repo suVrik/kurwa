@@ -16,9 +16,9 @@
 #include <kw/debug/assert.h>
 
 #if defined(KW_WINDOWS)
-#    define KW_RAISE_SIGTRAP() __debugbreak()
+#define KW_RAISE_SIGTRAP() __debugbreak()
 #else
-#    define KW_RAISE_SIGTRAP() raise(SIGTRAP)
+#define KW_RAISE_SIGTRAP() raise(SIGTRAP)
 #endif
 
 namespace kw {

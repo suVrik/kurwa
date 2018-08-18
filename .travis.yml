@@ -22,11 +22,8 @@ jobs:
               key_url: 'http://apt.llvm.org/llvm-snapshot.gpg.key'
       before_script:
         - sudo apt-get install clang-format-6.0
-      script:
-        - ls /bin
-        - ls /usr/bin
-        - ls ~/bin
         - sudo ln -sf /usr/bin/clang-format-6.0 /usr/bin/clang-format
+      script:
         - python script/codeformat/check_style.py
     - name: 'Linux: Build & unittest'
       os: linux

@@ -30,10 +30,10 @@ using hash_t = decltype(eastl::hash<T>());
 // https://github.com/S2E/s2e-old/blob/master/stp/src/boost/type_traits/is_virtual_base_of.hpp
 
 #if defined(_MSC_VER)
-#    pragma warning(push)
-#    pragma warning(disable : 4584)
+#pragma warning(push)
+#pragma warning(disable : 4584)
 #elif defined(__GNUC__)
-#    pragma GCC system_header
+#pragma GCC system_header
 #endif
 
 template <typename Base, typename Derived, typename tag>
@@ -67,7 +67,7 @@ struct is_virtual_base_of final {
 };
 
 #if defined(_MSC_VER)
-#    pragma warning(pop)
+#pragma warning(pop)
 #endif
 
 template <typename T>

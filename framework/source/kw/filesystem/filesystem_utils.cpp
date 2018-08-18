@@ -17,16 +17,16 @@
 #include <SDL2/SDL_filesystem.h>
 
 #if defined(KW_WINDOWS)
-#    include <shlwapi.h>
+#include <shlwapi.h>
 #elif defined(KW_OSX)
-#    include <dirent.h>
-#    include <mach-o/dyld.h>
-#    include <sys/stat.h>
-#    include <unistd.h>
+#include <dirent.h>
+#include <mach-o/dyld.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #elif defined(KW_LINUX)
-#    include <dirent.h>
-#    include <sys/stat.h>
-#    include <unistd.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #endif
 
 namespace kw {
