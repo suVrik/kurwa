@@ -28,7 +28,6 @@ DerivePointerAlignment: false
 FixNamespaceComments: true
 IncludeBlocks: Preserve
 IndentCaseLabels: true
-IndentPPDirectives: AfterHash
 IndentWidth: 4
 KeepEmptyLinesAtTheStartOfBlocks: false
 Language: Cpp
