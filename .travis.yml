@@ -11,26 +11,11 @@ jobs:
   include:
     - stage: 'codeformat'
       os: linux
+      compiler: clang
       script:
         - python script/codeformat/check_style.py
     - stage: 'build & unittest'
-      script:
-        - git lfs pull
-        - mkdir build
-        - cd build
-        - cmake .. -DCMAKE_BUILD_TYPE=Release
-        - cmake --build . -- -j 2
-        - cd bin
-        - if [ `uname` = 'Darwin' ]; then
-          ./unittest.app/Contents/MacOS/unittest;
-          else
-          ./unittest;
-          fi
-
-matrix:
-  fast_finish: true
-  include:
-    - os: linux
+      os: linux
       compiler: clang
       addons:
         apt:
@@ -43,8 +28,24 @@ matrix:
       before_script:
         - export CC=clang-6.0
         - export CXX=clang++-6.0
+      script:
+        - git lfs pull
+        - mkdir build
+        - cd build
+        - cmake .. -DCMAKE_BUILD_TYPE=Release
+        - cmake --build . -- -j 2
+        - cd bin
+        - ./unittest
     - os: osx
       osx_image: xcode9.4
       before_script:
         - brew install git-lfs
         - git lfs install
+      script:
+        - git lfs pull
+        - mkdir build
+        - cd build
+        - cmake .. -DCMAKE_BUILD_TYPE=Release
+        - cmake --build . -- -j 2
+        - cd bin
+        - ./unittest.app/Contents/MacOS/unittest
