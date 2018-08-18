@@ -9,23 +9,7 @@ branches:
 
 jobs:
   include:
-    - name: 'Linux: Codeformat'
-      os: linux
-      compiler: clang
-      addons:
-        apt:
-          packages:
-            - clang-6.0
-          sources:
-            - sourceline: 'deb http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu trusty main'
-            - sourceline: 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-6.0 main'
-              key_url: 'http://apt.llvm.org/llvm-snapshot.gpg.key'
-      before_script:
-        - sudo apt-get install clang-format-6.0
-        - sudo ln -sf /usr/bin/clang-format-6.0 /usr/bin/clang-format
-      script:
-        - python script/codeformat/check_style.py
-    - name: 'Linux: Build & unittest'
+    - name: 'Linux: Code Format & Build & Unittest'
       os: linux
       compiler: clang
       addons:
@@ -39,7 +23,10 @@ jobs:
       before_script:
         - export CC=clang-6.0
         - export CXX=clang++-6.0
+        - sudo apt-get install clang-format-6.0
+        - sudo ln -sf /usr/bin/clang-format-6.0 /usr/bin/clang-format
       script:
+        - python script/codeformat/check_style.py
         - git lfs pull
         - mkdir build
         - cd build
