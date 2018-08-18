@@ -9,12 +9,23 @@ branches:
 
 jobs:
   include:
-    - stage: 'codeformat'
+    - name: 'codeformat'
       os: linux
       compiler: clang
+      addons:
+        apt:
+          packages:
+          - clang-6.0
+          sources:
+          - sourceline: 'deb http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu trusty main'
+          - sourceline: 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-6.0 main'
+            key_url: 'http://apt.llvm.org/llvm-snapshot.gpg.key'
       script:
+        - which clang-format-6.0
+        - which clang-format
+        - ln -sf /usr/bin/clang-format /usr/bin/clang-format-6.0
         - python script/codeformat/check_style.py
-    - stage: 'build & unittest'
+    - name: 'Linux: Build & unittest'
       os: linux
       compiler: clang
       addons:
@@ -36,7 +47,8 @@ jobs:
         - cmake --build . -- -j 2
         - cd bin
         - ./unittest
-    - os: osx
+    - name: 'MacOS: Build & unittest'
+      os: osx
       osx_image: xcode9.4
       before_script:
         - brew install git-lfs
