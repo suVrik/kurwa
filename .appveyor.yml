@@ -1,7 +1,7 @@
 image: Visual Studio 2017
 
 platform: x64
-AGL
+
 configuration: Release
 
 branches:
@@ -27,7 +27,5 @@ build:
   verbosity: normal
 
 test_script:
-  # Temporary Workaround, as DLLs are in the wrong directory, must be done via CMake.
-  - ps: copy bin/*.dll bin/Release
   - cmd: cd bin/Release
   - cmd: unittest.exe
