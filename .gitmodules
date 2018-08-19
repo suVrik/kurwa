@@ -1,0 +1,3 @@
+[submodule "library/eastl"]
+	path = library/eastl
+	url = https://github.com/suVrik/EASTL.git
