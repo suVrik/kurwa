@@ -48,16 +48,16 @@ target_link_libraries(framework PUBLIC fmt)
 target_link_libraries(framework PRIVATE glew)
 target_link_libraries(framework PRIVATE glm)
 target_link_libraries(framework PUBLIC imgui)
-target_link_libraries(framework PRIVATE lz4) # TODO
+target_link_libraries(framework PRIVATE lz4)
 target_link_libraries(framework PRIVATE ogg) # TODO
 target_link_libraries(framework PRIVATE openal) # TODO
-target_link_libraries(framework PRIVATE png) # TODO
+target_link_libraries(framework PRIVATE png)
 target_link_libraries(framework PUBLIC sdl2)
 target_link_libraries(framework PRIVATE theora) # TODO
 target_link_libraries(framework PUBLIC tinyxml2)
 target_link_libraries(framework PRIVATE utf8)
 target_link_libraries(framework PRIVATE vorbis) # TODO
-target_link_libraries(framework PRIVATE zlib) # TODO
+target_link_libraries(framework PRIVATE zlib)
 
 if(LINUX)
     set(THREADS_PREFER_PTHREAD_FLAG ON)
