@@ -25,3 +25,6 @@
 [submodule "library/glew"]
 	path = library/glew
 	url = https://github.com/suVrik/glew.git
+[submodule "library/sdl2"]
+	path = library/sdl2
+	url = https://github.com/suVrik/sdl2.git
