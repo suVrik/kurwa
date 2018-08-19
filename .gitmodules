@@ -1,3 +1,6 @@
 [submodule "library/eastl"]
 	path = library/eastl
 	url = https://github.com/suVrik/EASTL.git
+[submodule "library/enet"]
+	path = library/enet
+	url = https://github.com/suVrik/enet.git
