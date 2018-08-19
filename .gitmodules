@@ -7,3 +7,18 @@
 [submodule "library/fmt"]
 	path = library/fmt
 	url = https://github.com/suVrik/fmt.git
+[submodule "library/glm"]
+	path = library/glm
+	url = https://github.com/suVrik/glm.git
+[submodule "library/gmock"]
+	path = library/gmock
+	url = https://github.com/suVrik/gmock.git
+[submodule "library/imgui"]
+	path = library/imgui
+	url = https://github.com/suVrik/imgui.git
+[submodule "library/tinyxml2"]
+	path = library/tinyxml2
+	url = https://github.com/suVrik/tinyxml2.git
+[submodule "library/utf8"]
+	path = library/utf8
+	url = https://github.com/suVrik/utf8.git
