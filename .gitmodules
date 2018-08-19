@@ -28,3 +28,15 @@
 [submodule "library/sdl2"]
 	path = library/sdl2
 	url = https://github.com/suVrik/sdl2.git
+[submodule "library/lz4"]
+	path = library/lz4
+	url = https://github.com/suVrik/lz4.git
+[submodule "library/zlib"]
+	path = library/zlib
+	url = https://github.com/suVrik/zlib.git
+[submodule "library/png"]
+	path = library/png
+	url = https://github.com/suVrik/png.git
+[submodule "library/openal"]
+	path = library/openal
+	url = https://github.com/suVrik/openal.git
