@@ -13,6 +13,9 @@ clone_folder: c:\work\kurwa
 matrix:
   fast_finish: true
 
+install:
+  - git submodule update --init --recursive
+
 before_build:
   - cmd: mkdir build
   - cmd: cd build

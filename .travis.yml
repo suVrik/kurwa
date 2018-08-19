@@ -25,6 +25,7 @@ jobs:
         - export CXX=clang++-6.0
         - sudo apt-get install clang-format-6.0
         - sudo ln -sf /usr/bin/clang-format-6.0 /usr/bin/clang-format
+        - git submodule update --init --recursive
       script:
         - python script/codeformat/check_style.py
         - git lfs pull
@@ -40,6 +41,7 @@ jobs:
       before_script:
         - brew install git-lfs
         - git lfs install
+        - git submodule update --init --recursive
       script:
         - git lfs pull
         - mkdir build
