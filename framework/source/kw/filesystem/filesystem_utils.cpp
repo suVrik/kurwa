@@ -18,7 +18,7 @@
 
 #if defined(KW_WINDOWS)
 #include <shlwapi.h>
-#elif defined(KW_OSX)
+#elif defined(KW_MACOS)
 #include <dirent.h>
 #include <mach-o/dyld.h>
 #include <sys/stat.h>
@@ -50,7 +50,7 @@ String FilesystemUtils::get_executable_path() noexcept {
         length = GetModuleFileNameA(nullptr, &result[0], MAX_PATH + 1);
     } while (length >= result.size());
     return result.c_str(); // Normalize string that may contain many `\0`
-#elif defined(KW_OSX)
+#elif defined(KW_MACOS)
     String buf;
     buf.resize(PATH_MAX);
     while (true) {

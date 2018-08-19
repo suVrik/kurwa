@@ -22,3 +22,6 @@
 [submodule "library/utf8"]
 	path = library/utf8
 	url = https://github.com/suVrik/utf8.git
+[submodule "library/glew"]
+	path = library/glew
+	url = https://github.com/suVrik/glew.git
