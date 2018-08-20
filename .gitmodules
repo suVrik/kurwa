@@ -40,3 +40,9 @@
 [submodule "library/openal"]
 	path = library/openal
 	url = https://github.com/suVrik/openal.git
+[submodule "library/ogg"]
+	path = library/ogg
+	url = https://github.com/suVrik/ogg.git
+[submodule "library/vorbis"]
+	path = library/vorbis
+	url = https://github.com/suVrik/vorbis.git
