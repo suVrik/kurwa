@@ -11,33 +11,53 @@
 
 cmake_minimum_required(VERSION 3.9)
 
-project(all)
+project(kurwa)
 
-# Includes
+# TODO: Remove includes
 include("script/cmake/kurwa.cmake")
 
+# Force /MT for static VC runtimes.
+if(MSVC)
+    set(compiler_flags
+            CMAKE_C_FLAGS
+            CMAKE_C_FLAGS_DEBUG
+            CMAKE_C_FLAGS_RELEASE
+            CMAKE_C_FLAGS_MINSIZEREL
+            CMAKE_C_FLAGS_RELWITHDEBINFO
+            CMAKE_CXX_FLAGS
+            CMAKE_CXX_FLAGS_DEBUG
+            CMAKE_CXX_FLAGS_RELEASE
+            CMAKE_CXX_FLAGS_MINSIZEREL
+            CMAKE_CXX_FLAGS_RELWITHDEBINFO
+    )
+
+    foreach(compiler_flag ${compiler_flags})
+        string(REPLACE "/MD" "/MT" ${compiler_flag} "${${compiler_flag}}")
+    endforeach()
+endif()
+
 # Libraries
-add_subdirectory("library/eastl")
-add_subdirectory("library/enet")
-add_subdirectory("library/fmt")
-add_subdirectory("library/glew")
-add_subdirectory("library/glm")
-add_subdirectory("library/gmock")
-add_subdirectory("library/imgui")
-add_subdirectory("library/lz4")
-add_subdirectory("library/ogg")
-add_subdirectory("library/openal")
-add_subdirectory("library/png")
-add_subdirectory("library/sdl2")
-add_subdirectory("library/theora")
-add_subdirectory("library/tinyxml2")
-add_subdirectory("library/utf8")
-add_subdirectory("library/vorbis")
-add_subdirectory("library/zlib")
+add_subdirectory(library/eastl)
+add_subdirectory(library/enet)
+add_subdirectory(library/fmt)
+add_subdirectory(library/glew)
+add_subdirectory(library/glm)
+add_subdirectory(library/gmock)
+add_subdirectory(library/imgui)
+add_subdirectory(library/lz4)
+add_subdirectory(library/ogg)
+add_subdirectory(library/openal)
+add_subdirectory(library/zlib)
+add_subdirectory(library/png)
+add_subdirectory(library/sdl2)
+add_subdirectory(library/theora)
+add_subdirectory(library/tinyxml2)
+add_subdirectory(library/utf8)
+add_subdirectory(library/vorbis)
 
 # Framework
 add_subdirectory(framework)
 
 # Programs
-add_subdirectory("program/testbed")
-add_subdirectory("program/unittest")
+add_subdirectory(program/testbed)
+add_subdirectory(program/unittest)

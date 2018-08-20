@@ -34,7 +34,7 @@ target_set_bundle_information(unittest
 file(GLOB_RECURSE UNITTEST_RESOURCES "resource/*")
 target_add_resources(unittest "${UNITTEST_RESOURCES}")
 
-target_link_library(unittest framework)
-target_link_library(unittest gmock)
+target_link_libraries(unittest PRIVATE framework)
+target_link_libraries(unittest PRIVATE gmock)
 
 finalize_executable(unittest)
