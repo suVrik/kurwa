@@ -16,9 +16,7 @@ project(unittest)
 file(GLOB_RECURSE UNITTEST_SOURCE "source/*.h" "source/*.cpp")
 add_executable(unittest "${UNITTEST_SOURCE}")
 
-set_target_properties(unittest PROPERTIES
-        CXX_STANDARD "17"
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+set_target_properties(unittest PROPERTIES CXX_STANDARD "17")
 
 set(UNITTEST_VERSION "0.0")
 target_set_bundle_information(unittest
@@ -29,7 +27,8 @@ target_set_bundle_information(unittest
                               ICON_FILE ""
                               INFO_STRING "unittest"
                               LONG_VERSION_STRING "${UNITTEST_VERSION}"
-                              SHORT_VERSION_STRING "${UNITTEST_VERSION}")
+                              SHORT_VERSION_STRING "${UNITTEST_VERSION}"
+)
 
 file(GLOB_RECURSE UNITTEST_RESOURCES "resource/*")
 target_add_resources(unittest "${UNITTEST_RESOURCES}")

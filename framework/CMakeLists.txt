@@ -13,35 +13,23 @@ cmake_minimum_required(VERSION 3.9)
 
 project(framework CXX)
 
-# Framework source files
+# Framework source files.
 file(GLOB_RECURSE FRAMEWORK_SOURCE "*.h" "*.cpp")
 add_library(framework STATIC "${FRAMEWORK_SOURCE}")
 
-# Framework properties
+# Framework properties.
 set_property(TARGET framework PROPERTY CXX_STANDARD "17")
-set_property(TARGET framework PROPERTY LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 
-# Use static version of the run-time library
 if(MSVC)
-    # Required for __cplusplus define to be other than 1997
-    set_target_properties("framework" PROPERTIES
-            COMPILE_FLAGS "/Zc:__cplusplus")
-
-    set(compiler_flags
-            CMAKE_CXX_FLAGS
-            CMAKE_CXX_FLAGS_DEBUG
-            CMAKE_CXX_FLAGS_RELEASE)
-
-    foreach(compiler_flag ${compiler_flags})
-        string(REPLACE "/MD" "/MT" ${compiler_flag} "${${compiler_flag}}")
-    endforeach()
+    # Required for __cplusplus define to be other than 1997.
+    set_target_properties(framework PROPERTIES COMPILE_FLAGS "/Zc:__cplusplus")
 endif()
 
 
-# For programs that include framework
+# For programs that include framework.
 target_include_directories(framework PUBLIC include)
 
-# Framework libraries
+# Framework libraries.
 target_link_libraries(framework PUBLIC eastl)
 target_link_libraries(framework PRIVATE enet)
 target_link_libraries(framework PUBLIC fmt)
@@ -58,17 +46,16 @@ target_link_libraries(framework PRIVATE utf8)
 target_link_libraries(framework PRIVATE vorbis)
 target_link_libraries(framework PRIVATE zlib)
 
-if(LINUX)
-    set(THREADS_PREFER_PTHREAD_FLAG ON)
-    find_package(Threads REQUIRED)
-    target_link_libraries(framework PRIVATE Threads::Threads)
+if(UNIX AND NOT APPLE)
+    # Required for <thread> on Linux.
+    target_link_libraries(framework PRIVATE pthread)
 endif()
 
 if(WIN32)
-    # Required by 'kw/debug/stacktrace'
+    # Required by 'kw/debug/stacktrace'.
     target_link_libraries(framework PRIVATE $<$<CONFIG:Debug>:Dbghelp>)
 
-    # Required by filesystem
+    # Required by filesystem.
     target_link_libraries(framework PRIVATE Shlwapi)
 endif()
 

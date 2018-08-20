@@ -13,10 +13,9 @@ cmake_minimum_required(VERSION 3.9)
 
 project(kurwa)
 
-# TODO: Remove includes
+# TODO: Remove includes, consider pure CMake.
 include("script/cmake/kurwa.cmake")
 
-# Force /MT for static VC runtimes.
 if(MSVC)
     set(compiler_flags
             CMAKE_C_FLAGS
@@ -31,12 +30,21 @@ if(MSVC)
             CMAKE_CXX_FLAGS_RELWITHDEBINFO
     )
 
+    # Use static version of the run-time library.
     foreach(compiler_flag ${compiler_flags})
         string(REPLACE "/MD" "/MT" ${compiler_flag} "${${compiler_flag}}")
     endforeach()
+else()
+    # Allow to use `offsetof` on non-POD types.
+    add_compile_options(-Wno-invalid-offsetof)
 endif()
 
-# Libraries
+# Specify output folders. Shared libraries must override their `LIBRARY_OUTPUT_DIRECTORY` target property
+# on Unix platforms, because their output libraries must be deployed in the binary directory.
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+
+# Libraries.
 add_subdirectory(library/eastl)
 add_subdirectory(library/enet)
 add_subdirectory(library/fmt)
@@ -54,9 +62,9 @@ add_subdirectory(library/tinyxml2)
 add_subdirectory(library/utf8)
 add_subdirectory(library/vorbis)
 
-# Framework
+# Framework.
 add_subdirectory(framework)
 
-# Programs
+# Programs.
 add_subdirectory(program/testbed)
 add_subdirectory(program/unittest)

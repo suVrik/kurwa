@@ -22,7 +22,7 @@ before_build:
   - cmd: cmake -G"Visual Studio 15 2017 Win64" ..
 
 build:
-  project: build\all.sln
+  project: build\kurwa.sln
   parallel: true
   verbosity: normal
 
