@@ -37,6 +37,9 @@ if(MSVC)
 else()
     # Allow to use `offsetof` on non-POD types.
     add_compile_options(-Wno-invalid-offsetof)
+
+    # Use static version of `libstdc++`.
+    add_compile_options(-static-libstdc++)
 endif()
 
 # Specify output folders. Shared libraries must override their `LIBRARY_OUTPUT_DIRECTORY` target property
