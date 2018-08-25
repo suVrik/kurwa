@@ -13,9 +13,6 @@ cmake_minimum_required(VERSION 3.9)
 
 project(kurwa)
 
-# TODO: Remove includes, consider pure CMake.
-include("script/cmake/kurwa.cmake")
-
 if(MSVC)
     set(compiler_flags
             CMAKE_C_FLAGS
@@ -34,12 +31,6 @@ if(MSVC)
     foreach(compiler_flag ${compiler_flags})
         string(REPLACE "/MD" "/MT" ${compiler_flag} "${${compiler_flag}}")
     endforeach()
-else()
-    # Allow to use `offsetof` on non-POD types.
-    add_compile_options(-Wno-invalid-offsetof)
-
-    # Use static version of `libstdc++`.
-    add_compile_options(-static-libstdc++)
 endif()
 
 # Specify output folders. Shared libraries must override their `LIBRARY_OUTPUT_DIRECTORY` target property

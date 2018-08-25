@@ -18,18 +18,15 @@ add_executable(testbed "${TESTBED_SOURCE}")
 
 set_target_properties(testbed PROPERTIES CXX_STANDARD "17")
 
-set(TESTBED_VERSION "0.0")
-target_set_bundle_information(testbed
-        BUNDLE_NAME "testbed"
-        BUNDLE_VERSION "${TESTBED_VERSION}"
-        COPYRIGHT "Copyright (c) 2018, 21DOGZ"
-        GUI_IDENTIFIER "com.21dogz.testbed"
-        ICON_FILE ""
-        INFO_STRING "testbed"
-        LONG_VERSION_STRING "${TESTBED_VERSION}"
-        SHORT_VERSION_STRING "${TESTBED_VERSION}"
-)
-
 target_link_libraries(testbed PRIVATE framework)
 
-finalize_executable(testbed)
+# Set up shared libraries location directory.
+if(UNIX)
+    set_property(TARGET testbed PROPERTY SKIP_BUILD_RPATH "ON")
+
+    if(APPLE)
+        set_property(TARGET testbed APPEND PROPERTY LINK_FLAGS "-Wl,-rpath,\"@executable_path\"")
+    else()
+        set_property(TARGET testbed APPEND PROPERTY LINK_FLAGS "-Wl,-rpath,\"$ORIGIN\"")
+    endif()
+endif()

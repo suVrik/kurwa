@@ -6,7 +6,6 @@ import sys
 import subprocess
 import multiprocessing
 import fnmatch
-import platform
 import logging
 
 
@@ -14,7 +13,6 @@ import logging
 repository_root_dir = os.path.abspath(os.path.dirname(__file__) + "/../..")
 
 
-# TODO: implement for other OS
 clang_format_binary = 'clang-format'
 
 
@@ -59,7 +57,7 @@ def clang_format_file(file_name):
         return (True, file_name)
     except OSError as e:
         logging.error("{}".format(e))
-        logging.error("Check 'clang-format' binaries! HINT: 'git lfs pull && git lfs checkout'")
+        logging.error("Check 'clang-format' binaries!")
         return (False, "clang-format error!")
 
 
@@ -77,7 +75,7 @@ def checkstyle_file(file_name):
         return (success, file_name)
     except OSError as e:
         logging.error("{}".format(e))
-        logging.error("Check 'clang-format' binaries! HINT: 'git lfs pull && git lfs checkout'")
+        logging.error("Check 'clang-format' binaries!")
         return (False, "clang-format error!")
 
 

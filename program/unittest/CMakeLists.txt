@@ -18,22 +18,16 @@ add_executable(unittest "${UNITTEST_SOURCE}")
 
 set_target_properties(unittest PROPERTIES CXX_STANDARD "17")
 
-set(UNITTEST_VERSION "0.0")
-target_set_bundle_information(unittest
-                              BUNDLE_NAME "unittest"
-                              BUNDLE_VERSION "${UNITTEST_VERSION}"
-                              COPYRIGHT "Copyright (c) 2018, 21DOGZ"
-                              GUI_IDENTIFIER "com.21dogz.unittest"
-                              ICON_FILE ""
-                              INFO_STRING "unittest"
-                              LONG_VERSION_STRING "${UNITTEST_VERSION}"
-                              SHORT_VERSION_STRING "${UNITTEST_VERSION}"
-)
-
-file(GLOB_RECURSE UNITTEST_RESOURCES "resource/*")
-target_add_resources(unittest "${UNITTEST_RESOURCES}")
-
 target_link_libraries(unittest PRIVATE framework)
 target_link_libraries(unittest PRIVATE gmock)
 
-finalize_executable(unittest)
+# Set up shared libraries location directory.
+if(UNIX)
+    set_property(TARGET unittest PROPERTY SKIP_BUILD_RPATH "ON")
+
+    if(APPLE)
+        set_property(TARGET unittest APPEND PROPERTY LINK_FLAGS "-Wl,-rpath,\"@executable_path\"")
+    else()
+        set_property(TARGET unittest APPEND PROPERTY LINK_FLAGS "-Wl,-rpath,\"$ORIGIN\"")
+    endif()
+endif()
