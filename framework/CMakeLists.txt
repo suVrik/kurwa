@@ -74,13 +74,13 @@ else()
     target_compile_options(framework PUBLIC -Wno-double-promotion)
     # Allow destructing objects in global scope.
     target_compile_options(framework PUBLIC -Wno-exit-time-destructors)
-    # We allow to comapare floats with == (for templates).
+    # We allow to comapare floats with `==` (for templates).
     target_compile_options(framework PUBLIC -Wno-float-equal)
     # Allow constructing objects in global scope.
     target_compile_options(framework PUBLIC -Wno-global-constructors)
     # Allow anonymous structs.
     target_compile_options(framework PUBLIC -Wno-gnu-anonymous-struct)
-    # Allow empty __VA_ARGS__.
+    # Allow empty `__VA_ARGS__`.
     target_compile_options(framework PUBLIC -Wno-gnu-zero-variadic-macro-arguments)
     # No suggest braces around initialization of subobject.
     target_compile_options(framework PUBLIC -Wno-missing-braces)
@@ -108,6 +108,8 @@ else()
     target_compile_options(framework PUBLIC -Wno-unused-parameter)
     # Allow lack of out-of-line virtual method definitons.
     target_compile_options(framework PUBLIC -Wno-weak-vtables)
+    # Allow `offsetof` on non-POD types.
+    target_compile_options(framework PUBLIC -Wno-invalid-offsetof)
 endif()
 
 # Platform definitions.

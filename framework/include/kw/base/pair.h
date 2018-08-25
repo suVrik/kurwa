@@ -26,13 +26,15 @@ using eastl::make_pair;
 // Required for Structured binding declaration
 namespace std {
 template <typename A, typename B>
-struct tuple_size<eastl::pair<A, B>> : eastl::integral_constant<size_t, 2> {};
+class tuple_size<eastl::pair<A, B>> : public eastl::integral_constant<size_t, 2> {};
 template <typename A, typename B>
-struct tuple_element<0, eastl::pair<A, B>> {
+class tuple_element<0, eastl::pair<A, B>> {
+public:
     typedef A type;
 };
 template <typename A, typename B>
-struct tuple_element<1, eastl::pair<A, B>> {
+class tuple_element<1, eastl::pair<A, B>> {
+public:
     typedef B type;
 };
 } // namespace std
