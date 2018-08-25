@@ -42,7 +42,7 @@ using eastl::get;
 // Required for Structured binding declaration
 namespace std {
 template <typename... Ts>
-class tuple_size<eastl::tuple<Ts...>> : eastl::integral_constant<size_t, sizeof...(Ts)> {};
+struct tuple_size<eastl::tuple<Ts...>> : eastl::integral_constant<size_t, sizeof...(Ts)> {};
 template <size_t Index, typename... Ts>
 struct tuple_element<Index, eastl::tuple<Ts...>> {
     typedef eastl::tuple_element_t<Index, eastl::TupleTypes<Ts...>> type;

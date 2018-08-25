@@ -14,7 +14,8 @@ cmake_minimum_required(VERSION 3.9)
 project(kurwa)
 
 if(MSVC)
-    set(compiler_flags
+    # Use static version of the run-time library.
+    foreach(compiler_flag
             CMAKE_C_FLAGS
             CMAKE_C_FLAGS_DEBUG
             CMAKE_C_FLAGS_RELEASE
@@ -24,12 +25,9 @@ if(MSVC)
             CMAKE_CXX_FLAGS_DEBUG
             CMAKE_CXX_FLAGS_RELEASE
             CMAKE_CXX_FLAGS_MINSIZEREL
-            CMAKE_CXX_FLAGS_RELWITHDEBINFO
-    )
-
-    # Use static version of the run-time library.
-    foreach(compiler_flag ${compiler_flags})
+            CMAKE_CXX_FLAGS_RELWITHDEBINFO)
         string(REPLACE "/MD" "/MT" ${compiler_flag} "${${compiler_flag}}")
+        string(REGEX REPLACE "/RTC(su|[1su])" "" ${compiler_flag} "${${compiler_flag}}")
     endforeach()
 endif()
 
