@@ -11,26 +11,22 @@
 
 cmake_minimum_required(VERSION 3.9)
 
-project(testbed)
+project(testbed CXX)
 
 file(GLOB_RECURSE TESTBED_SOURCE "source/*.h" "source/*.cpp")
 add_executable(testbed "${TESTBED_SOURCE}")
 
-set_target_properties(testbed PROPERTIES
-        CXX_STANDARD "17"
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+set_target_properties(testbed PROPERTIES CXX_STANDARD "17")
 
-set(TESTBED_VERSION "0.0")
-target_set_bundle_information(testbed
-        BUNDLE_NAME "testbed"
-        BUNDLE_VERSION "${TESTBED_VERSION}"
-        COPYRIGHT "Copyright (c) 2018, 21DOGZ"
-        GUI_IDENTIFIER "com.21dogz.testbed"
-        ICON_FILE ""
-        INFO_STRING "testbed"
-        LONG_VERSION_STRING "${TESTBED_VERSION}"
-        SHORT_VERSION_STRING "${TESTBED_VERSION}")
+target_link_libraries(testbed PRIVATE framework)
 
-target_link_library(testbed framework)
+# Set up shared libraries location directory.
+if(UNIX)
+    set_property(TARGET testbed PROPERTY SKIP_BUILD_RPATH "ON")
 
-finalize_executable(testbed)
+    if(APPLE)
+        set_property(TARGET testbed APPEND PROPERTY LINK_FLAGS "-Wl,-rpath,\"@executable_path\"")
+    else()
+        set_property(TARGET testbed APPEND PROPERTY LINK_FLAGS "-Wl,-rpath,\"$ORIGIN\"")
+    endif()
+endif()

@@ -50,7 +50,7 @@ public:
     /**
      * Return a rendering backend type, that current RenderModule is running on.
      */
-    const render::Backend::Type get_rendering_backend_type() noexcept;
+    render::Backend::Type get_rendering_backend_type() noexcept;
 
 private:
     void on_init_listener(IGame* game) noexcept(false);

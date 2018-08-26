@@ -93,7 +93,7 @@ void RenderModule::push_command_buffer(render::CommandBuffer&& command_buffer) n
     m_command_buffers.push_back(eastl::move(command_buffer));
 }
 
-const render::Backend::Type RenderModule::get_rendering_backend_type() noexcept {
+render::Backend::Type RenderModule::get_rendering_backend_type() noexcept {
     return m_backend_type;
 }
 } // namespace kw

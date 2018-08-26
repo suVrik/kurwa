@@ -1,0 +1,48 @@
+[submodule "library/eastl"]
+	path = library/eastl
+	url = https://github.com/suVrik/EASTL.git
+[submodule "library/enet"]
+	path = library/enet
+	url = https://github.com/suVrik/enet.git
+[submodule "library/fmt"]
+	path = library/fmt
+	url = https://github.com/suVrik/fmt.git
+[submodule "library/glm"]
+	path = library/glm
+	url = https://github.com/suVrik/glm.git
+[submodule "library/gmock"]
+	path = library/gmock
+	url = https://github.com/suVrik/gmock.git
+[submodule "library/imgui"]
+	path = library/imgui
+	url = https://github.com/suVrik/imgui.git
+[submodule "library/tinyxml2"]
+	path = library/tinyxml2
+	url = https://github.com/suVrik/tinyxml2.git
+[submodule "library/utf8"]
+	path = library/utf8
+	url = https://github.com/suVrik/utf8.git
+[submodule "library/glew"]
+	path = library/glew
+	url = https://github.com/suVrik/glew.git
+[submodule "library/sdl2"]
+	path = library/sdl2
+	url = https://github.com/suVrik/sdl2.git
+[submodule "library/lz4"]
+	path = library/lz4
+	url = https://github.com/suVrik/lz4.git
+[submodule "library/zlib"]
+	path = library/zlib
+	url = https://github.com/suVrik/zlib.git
+[submodule "library/png"]
+	path = library/png
+	url = https://github.com/suVrik/png.git
+[submodule "library/openal"]
+	path = library/openal
+	url = https://github.com/suVrik/openal.git
+[submodule "library/ogg"]
+	path = library/ogg
+	url = https://github.com/suVrik/ogg.git
+[submodule "library/vorbis"]
+	path = library/vorbis
+	url = https://github.com/suVrik/vorbis.git

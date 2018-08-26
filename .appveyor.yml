@@ -13,18 +13,19 @@ clone_folder: c:\work\kurwa
 matrix:
   fast_finish: true
 
+install:
+  - git submodule update --init --recursive
+
 before_build:
   - cmd: mkdir build
   - cmd: cd build
   - cmd: cmake -G"Visual Studio 15 2017 Win64" ..
 
 build:
-  project: build\all.sln
+  project: build\kurwa.sln
   parallel: true
   verbosity: normal
 
 test_script:
-  # Temporary Workaround, as DLLs are in the wrong directory, must be done via CMake.
-  - ps: copy bin/*.dll bin/Release
   - cmd: cd bin/Release
   - cmd: unittest.exe

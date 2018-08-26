@@ -107,6 +107,8 @@ struct MoveStruct {
 };
 
 struct MyStruct {
+    virtual ~MyStruct() = default;
+
     GENERATE_NUMERIC_METHOD(1, int8, int16, int32, int64);
     GENERATE_NUMERIC_METHOD(2, int16, int32, int64, int8);
     GENERATE_NUMERIC_METHOD(3, int32, int64, int8, int16);

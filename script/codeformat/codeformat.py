@@ -6,7 +6,6 @@ import sys
 import subprocess
 import multiprocessing
 import fnmatch
-import platform
 import logging
 
 
@@ -14,7 +13,6 @@ import logging
 repository_root_dir = os.path.abspath(os.path.dirname(__file__) + "/../..")
 
 
-# TODO: implement for other OS
 clang_format_binary = 'clang-format'
 
 
@@ -59,7 +57,7 @@ def clang_format_file(file_name):
         return (True, file_name)
     except OSError as e:
         logging.error("{}".format(e))
-        logging.error("Check 'clang-format' binaries! HINT: 'git lfs pull && git lfs checkout'")
+        logging.error("Check 'clang-format' binaries!")
         return (False, "clang-format error!")
 
 
@@ -77,7 +75,7 @@ def checkstyle_file(file_name):
         return (success, file_name)
     except OSError as e:
         logging.error("{}".format(e))
-        logging.error("Check 'clang-format' binaries! HINT: 'git lfs pull && git lfs checkout'")
+        logging.error("Check 'clang-format' binaries!")
         return (False, "clang-format error!")
 
 
@@ -85,7 +83,6 @@ def execute_in_path(new_dir, callback):
     # Save current directory
     previous_dir = os.getcwd()
     try:
-        logging.debug("chdir: {}".format(new_dir))
         # Go to script directory
         os.chdir(new_dir)
         callback()
@@ -145,10 +142,11 @@ def checkstyle_all(parsed_args):
     logging.debug("Checking {} files...".format(len(filenames)))
     results = multiprocess_map(checkstyle_file, filenames)
     # Show report
-    logging.debug("Problem files: ")
     has_errors = False
     for success, file_name in results:
         if not success:
+            if not has_errors:
+                logging.debug("Problem files: ")
             has_errors = True
             logging.warning("     {}".format(file_name))
     logging.debug("checkstyle all - completed")
@@ -212,11 +210,6 @@ def codeformat_main(argv):
 
     if not parsed_args.verbose:
         logging.disable(logging.INFO)
-
-    logging.debug("Args: {}".format(parsed_args))
-    logging.debug("Paths:")
-    logging.debug("* repository_root_dir: {}".format(repository_root_dir))
-    logging.debug("* clang-format: {}".format(clang_format_binary))
 
     def body():
         if parsed_args.checkstyle_all:

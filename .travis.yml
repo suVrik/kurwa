@@ -16,6 +16,15 @@ jobs:
         apt:
           packages:
             - clang-6.0
+            - clang-format-6.0
+            - libdbus-1-dev
+            - libibus-1.0-dev
+            - fcitx-libs-dev
+            - libxcursor-dev
+            - libxinerama-dev
+            - libxi-dev
+            - libxrandr-dev
+            - libxss-dev
           sources:
             - sourceline: 'deb http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu trusty main'
             - sourceline: 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-6.0 main'
@@ -23,11 +32,10 @@ jobs:
       before_script:
         - export CC=clang-6.0
         - export CXX=clang++-6.0
-        - sudo apt-get install clang-format-6.0
         - sudo ln -sf /usr/bin/clang-format-6.0 /usr/bin/clang-format
+        - git submodule update --init --recursive
       script:
         - python script/codeformat/check_style.py
-        - git lfs pull
         - mkdir build
         - cd build
         - cmake .. -DCMAKE_BUILD_TYPE=Release
@@ -38,13 +46,11 @@ jobs:
       os: osx
       osx_image: xcode9.4
       before_script:
-        - brew install git-lfs
-        - git lfs install
+        - git submodule update --init --recursive
       script:
-        - git lfs pull
         - mkdir build
         - cd build
         - cmake .. -DCMAKE_BUILD_TYPE=Release
         - cmake --build . -- -j 2
         - cd bin
-        - ./unittest.app/Contents/MacOS/unittest
+        - ./unittest

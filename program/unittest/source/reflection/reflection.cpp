@@ -320,6 +320,8 @@ TEST(reflection, fields_meta) {
 
     // Must use SOO
     struct MyClass {
+        virtual ~MyClass() = default;
+
         int32 a = 10;
         int32 b = 20;
 
@@ -330,6 +332,8 @@ TEST(reflection, fields_meta) {
 
     // Must use separate pointer
     struct MyBigClass {
+        virtual ~MyBigClass() = default;
+
         int32 a = 10;
         int32 b = 20;
         int32 c = 30;
@@ -341,6 +345,8 @@ TEST(reflection, fields_meta) {
     };
 
     struct MyFatherClass {
+        virtual ~MyFatherClass() = default;
+
         int32 c;
         int32 d;
     };
@@ -357,6 +363,8 @@ TEST(reflection, fields_meta) {
     Type::register_parents<MyInheritanceClass, MyFatherClass>();
 
     struct MyMotherClass {
+        virtual ~MyMotherClass() = default;
+
         int32 e;
         int32 f;
     };

@@ -16,39 +16,18 @@ project(unittest)
 file(GLOB_RECURSE UNITTEST_SOURCE "source/*.h" "source/*.cpp")
 add_executable(unittest "${UNITTEST_SOURCE}")
 
-set_target_properties(unittest PROPERTIES
-        CXX_STANDARD "17"
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+set_target_properties(unittest PROPERTIES CXX_STANDARD "17")
 
-set(UNITTEST_VERSION "0.0")
-target_set_bundle_information(unittest
-                              BUNDLE_NAME "unittest"
-                              BUNDLE_VERSION "${UNITTEST_VERSION}"
-                              COPYRIGHT "Copyright (c) 2018, 21DOGZ"
-                              GUI_IDENTIFIER "com.21dogz.unittest"
-                              ICON_FILE ""
-                              INFO_STRING "unittest"
-                              LONG_VERSION_STRING "${UNITTEST_VERSION}"
-                              SHORT_VERSION_STRING "${UNITTEST_VERSION}")
+target_link_libraries(unittest PRIVATE framework)
+target_link_libraries(unittest PRIVATE gmock)
 
-file(GLOB_RECURSE UNITTEST_RESOURCES "resource/*")
-target_add_resources(unittest "${UNITTEST_RESOURCES}")
+# Set up shared libraries location directory.
+if(UNIX)
+    set_property(TARGET unittest PROPERTY SKIP_BUILD_RPATH "ON")
 
-target_link_library(unittest framework)
-target_link_library(unittest eastl)
-target_link_library(unittest enet)
-target_link_library(unittest fmt)
-target_link_library(unittest glew)
-target_link_library(unittest gmock)
-target_link_library(unittest imgui)
-target_link_library(unittest lz4)
-target_link_library(unittest ogg)
-target_link_library(unittest openal)
-target_link_library(unittest png)
-target_link_library(unittest sdl2)
-target_link_library(unittest theora)
-target_link_library(unittest tinyxml2)
-target_link_library(unittest vorbis)
-target_link_library(unittest zlib)
-
-finalize_executable(unittest)
+    if(APPLE)
+        set_property(TARGET unittest APPEND PROPERTY LINK_FLAGS "-Wl,-rpath,\"@executable_path\"")
+    else()
+        set_property(TARGET unittest APPEND PROPERTY LINK_FLAGS "-Wl,-rpath,\"$ORIGIN\"")
+    endif()
+endif()
