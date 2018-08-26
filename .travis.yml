@@ -20,6 +20,9 @@ jobs:
             - libdbus-1-dev
             - libibus-1.0-dev
             - fcitx-libs-dev
+            - libxcursor-dev
+            - libxinerama-dev
+            - libxi-dev
             - libxss-dev
           sources:
             - sourceline: 'deb http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu trusty main'
