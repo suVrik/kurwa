@@ -23,6 +23,7 @@ jobs:
             - libxcursor-dev
             - libxinerama-dev
             - libxi-dev
+            - libxrandr-dev
             - libxss-dev
           sources:
             - sourceline: 'deb http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu trusty main'
