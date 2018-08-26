@@ -23,18 +23,25 @@ using Pair = eastl::pair<T1, T2>;
 using eastl::make_pair;
 } // namespace kw
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmismatched-tags"
+#endif // __clang__
+
 // Required for Structured binding declaration
 namespace std {
 template <typename A, typename B>
-class tuple_size<eastl::pair<A, B>> : public eastl::integral_constant<size_t, 2> {};
+struct tuple_size<eastl::pair<A, B>> : eastl::integral_constant<size_t, 2> {};
 template <typename A, typename B>
-class tuple_element<0, eastl::pair<A, B>> {
-public:
+struct tuple_element<0, eastl::pair<A, B>> {
     typedef A type;
 };
 template <typename A, typename B>
-class tuple_element<1, eastl::pair<A, B>> {
-public:
+struct tuple_element<1, eastl::pair<A, B>> {
     typedef B type;
 };
 } // namespace std
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif // __clang__

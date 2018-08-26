@@ -110,6 +110,8 @@ else()
     target_compile_options(framework PUBLIC -Wno-weak-vtables)
     # Allow `offsetof` on non-POD types.
     target_compile_options(framework PUBLIC -Wno-invalid-offsetof)
+    # Allow unused const variables for interface purposes.
+    target_compile_options(framework PUBLIC -Wno-unused-const-variable)
 endif()
 
 # Platform definitions.
